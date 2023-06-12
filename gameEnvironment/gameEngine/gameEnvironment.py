@@ -2,7 +2,6 @@ class player:
     def __init__(self, name):
         self.name = name
         self.matchScore  = 0
-        self.gameScore   = 0
         self.bidStatus = False
         self.card = []
     def dropCard():
@@ -14,7 +13,7 @@ class player:
     def getMatchScore():
         pass
     def setGameScore():
-        pass
+        self.gameScore = 0
     def getGameScore():
         pass
     def addCard():
@@ -61,6 +60,11 @@ class Game:
         self.player4 = p4
     
     def setGameScore():
+        player1.setGameScore(0)
+        player2.setGameScore(0)
+        player3.setGameScore(0)
+        player4.setGameScore(0)
+
         pass
 
 
