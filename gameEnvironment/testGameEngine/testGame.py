@@ -27,15 +27,17 @@ class testCard(unittest.TestCase):
         self.assertEqual(game.getPlayer2().getGameScore(),0 )
         self.assertEqual(game.getPlayer3().getGameScore(),0 )
         self.assertEqual(game.getPlayer4().getGameScore(),0)
-    def test_getPlayer1(self):
-        pass
-    def test_getPlayer2(self):
-        pass
-    def test_getPlayer3(self):
-        pass
-    def test_getPlayer4(self):
-        pass
-    
+    def test_getPlayer(self,index):
+        p1 = player("p1")
+        p2 = player("p2")
+        p3 = player("p3")
+        p4 = player("p4")
+        game = Game(p1,p2,p3,p4)
+        self.assertIs(game.getPlayer(0),p1)
+        self.assertIs(game.getPlayer(3),p4)
+        self.assertRaises(NegativeIntegerError, game.getPlayer, -42)
+        self.assertRaises(ValueError, game.getPlayer, 4)
+        
 
        
 
