@@ -51,10 +51,14 @@ class team:
     def updateScore():
         pass
 class Game:
-    def __init__(self):
+    def __init__(self,p1,p2,p3,p4):
         self.trumpCard
         self.frienCard
         self.team
+        self.player1 = p1
+        self.player2 = p2
+        self.player3 = p3
+        self.player4 = p4
     
     def setGameScore():
         pass
