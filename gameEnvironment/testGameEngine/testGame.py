@@ -9,26 +9,33 @@ from gameEnvironment import *
 
 # Test class
 class testCard(unittest.TestCase):
-    # def testProvideCard(self):
+    # def test_provideCard(self):
     #     p1 = player()
     #     p2 = player()
     #     p3 = player()
     #     p4 = player()
     #     game = Game(p1,p2,p3,p4)
     #     pass
-    def testSetGameScore(self):
+    def test_setGameScore(self):
         p1 = player("p1")
         p2 = player("p2")
         p3 = player("p3")
         p4 = player("p4")
         game = Game(p1,p2,p3,p4)
         game.setGameScore()
-        
-        self.assertEqual(game.player1.getGameScore(),0 )
-        self.assertEqual(game.player2.getGameScore(),0 )
-        self.assertEqual(game.player3.getGameScore(),0 )
-        self.assertEqual(game.player4.getGameScore(),0)
-
+        self.assertEqual(game.getPlayer1().getGameScore(),0 )
+        self.assertEqual(game.getPlayer2().getGameScore(),0 )
+        self.assertEqual(game.getPlayer3().getGameScore(),0 )
+        self.assertEqual(game.getPlayer4().getGameScore(),0)
+    def test_getPlayer1(self):
+        pass
+    def test_getPlayer2(self):
+        pass
+    def test_getPlayer3(self):
+        pass
+    def test_getPlayer4(self):
+        pass
+    
 
        
 
