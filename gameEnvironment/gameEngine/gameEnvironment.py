@@ -40,6 +40,8 @@ class deck:
         pass
     def drop():
         pass
+    def add():
+        pass
 
 class team:
     def __init__(self,mate1,mate2,gameScore):
