@@ -1,10 +1,11 @@
+import random
 class player:
     def __init__(self, name):
         self.__name = name
         self.__matchScore  = 0
         self.__gameScore = 0
         self.__bidStatus = False
-        self.__card = []
+        self.__cards = []
     def dropCard():
         pass
     def bid(point):
@@ -21,31 +22,42 @@ class player:
         self.__gameScore = score
     def getGameScore(self):
         return self.__gameScore
-    def addCard():
-        pass
-    def getCard():
-        pass
+    def addCard(self,card):
+        self.__cards.append(card)
+    def getAllCard(self):
+        return set(self.__cards)
 
 
 class card:
     def __init__(self,suite,point):
         self.suite = suite
         self.point = point
-    def getPoint():
+    def getPoint(self):
         pass
-    def getSuite():
+    def getSuite(self):
         pass
 class deck:
     def __init__(self):
-        self.card = []
-    def initialCard():
-        pass
-    def shuffle():
-        pass
-    def drop():
-        pass
-    def add():
-        pass
+        self.__cards = []
+        self.initialCard()
+    def initialCard(self):
+        suites = ['Hearts','Diamonds','Clubs','Spades']
+        number = [2,3,4,5,6,7,8,9,10,'J','Q','K','A']
+        for i in range(len(suites)):
+            for j in range(len(number)):
+                Card = card(suites[i],number[j])
+                self.__cards.append(Card)
+    def shuffle(self):
+        for i in range(100):
+            random.shuffle(self.__cards)
+    def drop(self):
+        return self.__cards.pop()
+    def getAllcard(self):
+        return self.__cards
+
+   
+       
+        
 
 class team:
     def __init__(self,mate1,mate2,gameScore):
@@ -64,6 +76,7 @@ class Game:
         self.__players[1] = p2
         self.__players[2] = p3
         self.__players[3] = p4
+        self.__deck = deck()
     
     def setGameScore(self):
         self.getPlayer(0).setGameScore(0)
@@ -77,6 +90,10 @@ class Game:
         elif index > 3:
             raise ValueError("Player indexs greater than 3 are not allowed")
         return self.__players[index]
+    def provideCard(self):
+        self.__deck.shuffle()
+        for i in range(52):
+            self.getPlayer(i%4).addCard(self.__deck.drop())
    
     
 
