@@ -70,7 +70,7 @@ class Game:
     def __init__(self,p1,p2,p3,p4):
         self.__bidWinner = None
         self.__bidedScore = None
-        self.trumpCard = None
+        self.__trumpCard = None
         self.frienCard = None
         self.team = None
         self.__players = [None,None,None,None]
@@ -104,6 +104,10 @@ class Game:
         self.__bidedScore = BidedPoint[BidedPointIndex]
     def getBidedScore(self):
         return self.__bidedScore
+    def setTrumpCard(self):
+         suites = ['Hearts','Diamonds','Clubs','Spades']
+         suiteIndex = random.randint(0, 3)
+         self.__trumpCard = suites[suiteIndex]
     
 
 
