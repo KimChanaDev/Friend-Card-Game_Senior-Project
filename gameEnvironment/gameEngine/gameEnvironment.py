@@ -68,6 +68,8 @@ class team:
         pass
 class Game:
     def __init__(self,p1,p2,p3,p4):
+        self.__bidWinner = None
+        self.__bidedScore = None
         self.trumpCard = None
         self.frienCard = None
         self.team = None
@@ -94,7 +96,14 @@ class Game:
         self.__deck.shuffle()
         for i in range(52):
             self.getPlayer(i%4).addCard(self.__deck.drop())
-   
+    def determineBidWinner(self):
+        BidedPoint = [55,60,65,70,75,80,85,90,95,100]
+        winnerIndex = random.randint(0, 3)
+        BidedPointIndex = random.randint(0,len(BidedPoint)-1)
+        self.__bidWinner = self.__players[winnerIndex]
+        self.__bidedScore = BidedPoint[BidedPointIndex]
+    def getBidedScore(self):
+        return self.__bidedScore
     
 
 
@@ -102,6 +111,7 @@ def main():
     game = Game()
     game.setGameScore()
     game.provideCard()
+    game.determineBidWinner()
     game.setTrumpCard()
     game.setFriendCard()
     game.identifyTeam()
