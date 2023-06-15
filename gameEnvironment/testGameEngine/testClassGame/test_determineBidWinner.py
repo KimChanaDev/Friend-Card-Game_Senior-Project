@@ -17,6 +17,7 @@ class test_determineBidWinner(unittest.TestCase):
         self.assertGreater(mostScore,50)
         self.assertLessEqual(mostScore,100)
         self.assertEqual(mostScore%5,0)
+        self.assertIn(game.getBidWinnerPosition(),[0,1,2,3])
 
 # Run the tests
 if __name__ == '__main__':

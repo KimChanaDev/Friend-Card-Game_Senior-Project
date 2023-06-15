@@ -52,7 +52,7 @@ class deck:
             random.shuffle(self.__cards)
     def drop(self):
         return self.__cards.pop()
-    def getAllcard(self):
+    def getAllCard(self):
         return self.__cards
 
    
@@ -68,18 +68,17 @@ class team:
         pass
 class Game:
     def __init__(self,p1,p2,p3,p4):
-        self.__bidWinner = None
+        self.__bidWinnerPosition = None
         self.__bidedScore = None
         self.__trumpCard = None
-        self.frienCard = None
-        self.team = None
+        self.__frienCard = None
         self.__players = [None,None,None,None]
         self.__players[0] = p1
         self.__players[1] = p2
         self.__players[2] = p3
         self.__players[3] = p4
         self.__deck = deck()
-    
+        self.__team = [None,None]
     def setGameScore(self):
         self.getPlayer(0).setGameScore(0)
         self.getPlayer(1).setGameScore(0)
@@ -100,7 +99,7 @@ class Game:
         BidedPoint = [55,60,65,70,75,80,85,90,95,100]
         winnerIndex = random.randint(0, 3)
         BidedPointIndex = random.randint(0,len(BidedPoint)-1)
-        self.__bidWinner = self.__players[winnerIndex]
+        self.__bidWinnerPosition = winnerIndex
         self.__bidedScore = BidedPoint[BidedPointIndex]
     def getBidedScore(self):
         return self.__bidedScore
@@ -108,7 +107,28 @@ class Game:
          suites = ['Hearts','Diamonds','Clubs','Spades']
          suiteIndex = random.randint(0, 3)
          self.__trumpCard = suites[suiteIndex]
-    
+    def getBidWinnerPosition(self):
+        return self.__bidWinnerPosition
+    def setFriendCard(self):
+        Deck = deck()
+        allCard = set(self.getPlayer(0).getAllCard()).union(self.getPlayer(1).getAllCard(),self.getPlayer(2).getAllCard(),self.getPlayer(3).getAllCard())
+        setOfPossibleFriendCard = set(allCard ) - set(self.getPlayer(self.getBidWinnerPosition()).getAllCard())
+        rand = random.randint(0,len(setOfPossibleFriendCard))
+        self.__frienCard = list(setOfPossibleFriendCard)[rand]
+    def getFriendCard(self):
+        return self.__frienCard
+    def getTeam(self,index):
+        return self.__team[index]
+    def identifyTeam(self):
+        index = [0,1,2,3]
+        index.remove(self.getBidWinnerPosition())
+       # print(self.getPlayer(0).getAllCard())
+        print(self.getFriendCard())
+        for i in range(4):
+            if self.__frienCard in set(self.getPlayer(i).getAllCard()):
+                self.__team[0] = team(self.getPlayer(i),self.getPlayer(self.getBidWinnerPosition()),self.getBidedScore)
+                index.remove(i)
+                self.__team[1] = team(self.getPlayer(index[0]),self.getPlayer(index[1]),100-self.getBidedScore()+5)
 
 
 def main():
