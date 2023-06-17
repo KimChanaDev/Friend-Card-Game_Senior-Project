@@ -39,6 +39,8 @@ class player:
         if card in self.getAllCard():
             return True
         return False
+    def isVoidCard(self,card):
+        pass
    
 
 class card:
@@ -175,6 +177,8 @@ class Game:
         while True:
                 player = self.getPlayer(playerIndex)
                 playedCard = self.getCard()
+                if player.isVoidCard(self.__playedCardsEachRound[0]):
+                    return playedCard
                 if player.canPlayCard(playedCard) and self.isViolateGameLaw(playedCard):
                     return playedCard
     def updatePlayedCardEachRound(self,card): 
@@ -188,6 +192,8 @@ class Game:
             return True
         if card.getSuite() == self.__playedCardsEachRound[0].getSuite():
             return True
+        return False
+        
     def getTrumpCard(self):
         return self.__trumpCard
 
