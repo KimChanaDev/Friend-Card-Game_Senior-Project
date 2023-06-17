@@ -186,6 +186,8 @@ class Game:
             return True
         if card.getSuite() == self.getTrumpCard():
             return True
+        if card.getSuite() == self.__playedCardsEachRound[0].getSuite():
+            return True
     def getTrumpCard(self):
         return self.__trumpCard
 
