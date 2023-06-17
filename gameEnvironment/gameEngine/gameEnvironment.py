@@ -111,6 +111,7 @@ class Game:
         self.__firstCardEachRound = None
         self.__playedCardsEachRound = []
         self.__playedCardsEachMatch = []
+        self.__playedCard = None
     def setGameScore(self):
         self.getPlayer(0).setGameScore(0)
         self.getPlayer(1).setGameScore(0)
@@ -146,7 +147,7 @@ class Game:
         allCard = Deck.getAllCard()
         cardInBidWinnerHand = self.getPlayer(self.getBidWinnerPosition()).getAllCard()
         setOfPossibleFriendCard = set(allCard ) - set(cardInBidWinnerHand) 
-        rand = random.randint(0,len(setOfPossibleFriendCard))
+        rand = random.randint(0,len(setOfPossibleFriendCard)-1)
         self.__frienCard = list(setOfPossibleFriendCard)[rand]
     def getFriendCard(self):
         return self.__frienCard
@@ -174,13 +175,20 @@ class Game:
   
     def getPlayedCard(self,playerIndex):
         while True:
-                player = self.getPlayer(playerIndex)
-                playedCard = self.getCard()
-               
-                if player.canPlayCard(playedCard) and self.isViolateGameLaw(playedCard):
-                    return playedCard
-                if self.isVoidCard(player.getAllCard(),self.__playedCardsEachRound[0]):
-                    return playedCard
+                if processPlayerAction(playerIndex):
+                    break
+    def processPlayerAction(self,playerIndex):
+        player = self.getPlayer(playerIndex)
+        playedCard = self.getPlayedCard()
+        if player.canPlayCard(playedCard) and self.isViolateGameLaw(playedCard):
+            return playedCard
+        if self.isVoidCard(player.getAllCard(),self.__playedCardsEachRound[0]):
+            return playedCard
+        return False
+    def setPlayedCard(self,card):
+        self.__playedCard = card
+    def getPlayedCard(self):
+        return self.__playedCard
     def updatePlayedCardEachRound(self,card): 
         self.__playedCardsEachRound.append(card)
     def updateCardInPlayerHand(self,playerIndex,card):
@@ -201,7 +209,7 @@ class Game:
             if not cards[i].getSuite() == card.getSuite():
                 return True
         return False
-        pass
+        
 
                         
  
