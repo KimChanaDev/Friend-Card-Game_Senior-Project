@@ -1,8 +1,8 @@
 import unittest
-import sys
-sys.path.append('C:\\Users\\User\\Desktop\\gameEnvironment\\gameEnvironment\\gameEngine')
 
-from gameEnvironment import *
+
+
+from GameEnvironment.gameEngine.gameEnvironment import *
 
 
 class test_provideCard(unittest.TestCase):
@@ -14,10 +14,10 @@ class test_provideCard(unittest.TestCase):
         p4 = player("p4")
         game = Game(p1,p2,p3,p4)
         game.provideCard()
-        sets.append(game.getPlayer(0).getAllCard())
-        sets.append(game.getPlayer(1).getAllCard())
-        sets.append(game.getPlayer(2).getAllCard())
-        sets.append(game.getPlayer(3).getAllCard())
+        sets.append(set(game.getPlayer(0).getAllCard()))
+        sets.append(set(game.getPlayer(1).getAllCard()))
+        sets.append(set(game.getPlayer(2).getAllCard()))
+        sets.append(set(game.getPlayer(3).getAllCard()))
         self.assertTrue(all(set1.isdisjoint(set2) for set1 in sets for set2 in sets if set1 != set2))
         self.assertEqual(len(game.getPlayer(0).getAllCard()),13)
         self.assertEqual(len(game.getPlayer(1).getAllCard()),13)

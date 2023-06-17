@@ -1,4 +1,6 @@
 import random
+
+
 class player:
     def __init__(self, name):
         self.__name = name
@@ -6,8 +8,8 @@ class player:
         self.__gameScore = 0
         self.__bidStatus = False
         self.__cards = []
-    def dropCard():
-        pass
+    def dropCard(self,card):
+        self.__cards.remove(card)
     def bid(point):
         pass
     def setMatchScore():
@@ -25,17 +27,41 @@ class player:
     def addCard(self,card):
         self.__cards.append(card)
     def getAllCard(self):
-        return set(self.__cards)
+        return self.__cards
+    def canPlayCard(self,card):
+        if not card.isValid():
+            return False
+        if not self.isCardInhand(card):
+            return False
+        return True
 
+    def isCardInhand(self,card):
+        if card in self.getAllCard():
+            return True
+        return False
+   
 
 class card:
-    def __init__(self,suite,point):
-        self.suite = suite
-        self.point = point
+    def __init__(self,suite,point,id):
+        self.__suite = suite
+        self.__point = point
+        self.__id = id
     def getPoint(self):
-        pass
+        return self.__point
     def getSuite(self):
-        pass
+        return self.__suite
+    def __eq__(self, other):
+        if isinstance(other, card):
+            return (self.__point == other.__point) and (self.__suite == other.__suite)
+        return False
+    def __hash__(self):
+        return self.__id
+    def isValid(self):
+        if self.getSuite() not in ['Hearts','Diamonds','Clubs','Spades']:
+            return False
+        if self.getPoint() not in [2,3,4,5,6,7,8,9,10,'J','Q','K','A']:
+            return False
+        return True
 class deck:
     def __init__(self):
         self.__cards = []
@@ -43,10 +69,12 @@ class deck:
     def initialCard(self):
         suites = ['Hearts','Diamonds','Clubs','Spades']
         number = [2,3,4,5,6,7,8,9,10,'J','Q','K','A']
+        id = 0
         for i in range(len(suites)):
             for j in range(len(number)):
-                Card = card(suites[i],number[j])
+                Card = card(suites[i],number[j],id)
                 self.__cards.append(Card)
+                id+=1
     def shuffle(self):
         for i in range(100):
             random.shuffle(self.__cards)
@@ -54,16 +82,16 @@ class deck:
         return self.__cards.pop()
     def getAllCard(self):
         return self.__cards
-
+    
    
        
         
 
 class team:
-    def __init__(self,mate1,mate2,gameScore):
+    def __init__(self,mate1,mate2,goalScore):
         self.mate1 = mate1
         self.mate2 = mate2
-        self.gameScore = gameScore
+        self.goalScore = goalScore
     def updateScore():
         pass
 class Game:
@@ -79,6 +107,9 @@ class Game:
         self.__players[3] = p4
         self.__deck = deck()
         self.__team = [None,None]
+        self.__firstCardEachRound = None
+        self.__playedCardsEachRound = []
+        self.__playedCardsEachMatch = []
     def setGameScore(self):
         self.getPlayer(0).setGameScore(0)
         self.getPlayer(1).setGameScore(0)
@@ -111,8 +142,9 @@ class Game:
         return self.__bidWinnerPosition
     def setFriendCard(self):
         Deck = deck()
-        allCard = set(self.getPlayer(0).getAllCard()).union(self.getPlayer(1).getAllCard(),self.getPlayer(2).getAllCard(),self.getPlayer(3).getAllCard())
-        setOfPossibleFriendCard = set(allCard ) - set(self.getPlayer(self.getBidWinnerPosition()).getAllCard())
+        allCard = Deck.getAllCard()
+        cardInBidWinnerHand = self.getPlayer(self.getBidWinnerPosition()).getAllCard()
+        setOfPossibleFriendCard = set(allCard ) - set(cardInBidWinnerHand) 
         rand = random.randint(0,len(setOfPossibleFriendCard))
         self.__frienCard = list(setOfPossibleFriendCard)[rand]
     def getFriendCard(self):
@@ -122,16 +154,46 @@ class Game:
     def identifyTeam(self):
         index = [0,1,2,3]
         index.remove(self.getBidWinnerPosition())
-       # print(self.getPlayer(0).getAllCard())
-        print(self.getFriendCard())
         for i in range(4):
             if self.__frienCard in set(self.getPlayer(i).getAllCard()):
-                self.__team[0] = team(self.getPlayer(i),self.getPlayer(self.getBidWinnerPosition()),self.getBidedScore)
+                friendPlayer = self.getPlayer(i)
+                BidWinnerPlayer = self.getPlayer(self.getBidWinnerPosition())
+                self.__team[0] = team(friendPlayer,BidWinnerPlayer,self.getBidedScore())
                 index.remove(i)
-                self.__team[1] = team(self.getPlayer(index[0]),self.getPlayer(index[1]),100-self.getBidedScore()+5)
+                player3 = self.getPlayer(index[0])
+                player4 = self.getPlayer(index[1])
+                team2_scoreToWin = 100-self.getBidedScore()+5
+                self.__team[1] = team(player3,player4,team2_scoreToWin)
+    def playRound(self):
+        for i in range (4):
+            playerIndex = (self.getBidWinnerPosition()+i ) %4
+            card = self.getPlayedCard(playerIndex)
+            self.updatePlayedCardEachRound(card)
+            self.updateCardInPlayerHand(playerIndex,card)
+  
+    def getPlayedCard(self,playerIndex):
+        while True:
+                player = self.getPlayer(playerIndex)
+                playedCard = self.getCard()
+                if player.canPlayCard(playedCard) and self.isViolateGameLaw(playedCard):
+                    return playedCard
+    def updatePlayedCardEachRound(self,card): 
+        self.__playedCardsEachRound.append(card)
+    def updateCardInPlayerHand(self,playerIndex,card):
+        self.getPlayer(playerIndex).dropCard(card)
+    def isViolateGameLaw(self,card):
+        if len(self.__playedCardsEachRound)==0:
+            return True
+        if card.getSuite() == self.getTrumpCard():
+            return True
+    def getTrumpCard(self):
+        return self.__trumpCard
 
 
+                        
+ 
 def main():
+    # bidding phase
     game = Game()
     game.setGameScore()
     game.provideCard()
@@ -139,8 +201,13 @@ def main():
     game.setTrumpCard()
     game.setFriendCard()
     game.identifyTeam()
-
-    pass
+    # gameplay phase
+    #player can play the card
+    # 1 round is complete if 4 player have alerady play card
+    game.playRound()
+    # determine what card is the highest tier
+    #calculate point go to the right person
+    #determine who is the first to play next round
 
 if __name__ == "__main__":
     main()
