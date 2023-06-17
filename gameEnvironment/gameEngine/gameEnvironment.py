@@ -223,9 +223,8 @@ def main():
     game.setFriendCard()
     game.identifyTeam()
     # gameplay phase
-    #player can play the card
-    # 1 round is complete if 4 player have alerady play card
-    game.playRound()
+
+    game.playRound()  # dont for get to invoke getPlayed Card method in this function
     # determine what card is the highest tier
     #calculate point go to the right person
     #determine who is the first to play next round
