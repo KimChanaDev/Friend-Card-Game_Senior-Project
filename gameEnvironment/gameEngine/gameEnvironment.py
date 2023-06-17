@@ -39,8 +39,7 @@ class player:
         if card in self.getAllCard():
             return True
         return False
-    def isVoidCard(self,card):
-        pass
+
    
 
 class card:
@@ -177,9 +176,10 @@ class Game:
         while True:
                 player = self.getPlayer(playerIndex)
                 playedCard = self.getCard()
-                if player.isVoidCard(self.__playedCardsEachRound[0]):
-                    return playedCard
+               
                 if player.canPlayCard(playedCard) and self.isViolateGameLaw(playedCard):
+                    return playedCard
+                if self.isVoidCard(player.getAllCard(),self.__playedCardsEachRound[0]):
                     return playedCard
     def updatePlayedCardEachRound(self,card): 
         self.__playedCardsEachRound.append(card)
@@ -196,7 +196,12 @@ class Game:
         
     def getTrumpCard(self):
         return self.__trumpCard
-
+    def isVoidCard(self,cards,card):
+        for i in range (len(cards)):
+            if not cards[i].getSuite() == card.getSuite():
+                return True
+        return False
+        pass
 
                         
  
