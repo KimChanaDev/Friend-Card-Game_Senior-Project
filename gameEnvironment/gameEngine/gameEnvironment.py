@@ -22,6 +22,12 @@ class player:
         elif score > 100:
             raise ValueError("Scores greater than 100 are not allowed")
         self.__gameScore = score
+    def addGameScore(self,score):
+        if score < 0:
+            raise ValueError("Negative scores are not allowed.")
+        elif score > 40:
+            raise ValueError("Scores greater than 40 are not allowed")
+        self.__gameScore += score
     def getGameScore(self):
         return self.__gameScore
     def addCard(self,card):
@@ -46,10 +52,12 @@ class card:
     def __init__(self,suite,point,id):
         logicPointList = [2,3,4,5,6,7,8,9,10,11,12,13,14]
         actualPointList = [2,3,4,5,6,7,8,9,10,'J','Q','K','A']
+        scoreList = [0,0,0,5,0,0,0,0,10,0,0,10,0]
+        listIndex = actualPointList.index(point)
         self.__suite = suite
-        logicPointIndex = actualPointList.index(point)
-        self.__point = logicPointList[logicPointIndex]
+        self.__point = logicPointList[listIndex]
         self.__id = id
+        self.__score = scoreList[listIndex]
     def __eq__(self, other):
         if isinstance(other, card):
             return (self.__point == other.__point) and (self.__suite == other.__suite)
@@ -65,6 +73,8 @@ class card:
         return self.__point
     def getSuite(self):
         return self.__suite
+    def getScore(self):
+        return self.__score
    
     def isValid(self):
         if self.getSuite() not in ['Hearts','Diamonds','Clubs','Spades']:
@@ -121,6 +131,7 @@ class Game:
         self.__playedCardsEachRound = []
         self.__playedCardsEachMatch = []
         self.__playedCard = None
+        self.__leadingPlayerIndex = None
     def setGameScore(self):
         self.getPlayer(0).setGameScore(0)
         self.getPlayer(1).setGameScore(0)
@@ -143,6 +154,7 @@ class Game:
         BidedPointIndex = random.randint(0,len(BidedPoint)-1)
         self.__bidWinnerPosition = winnerIndex
         self.__bidedScore = BidedPoint[BidedPointIndex]
+        self.setLeadingPlayerIndex(winnerIndex)
     def getBidedScore(self):
         return self.__bidedScore
     def randomTrumpCard(self):
@@ -179,7 +191,7 @@ class Game:
                 self.__team[1] = team(player3,player4,team2_scoreToWin)
     def playRound(self):
         for i in range (4):
-            playerIndex = (self.getBidWinnerPosition()+i ) %4
+            playerIndex = (self.getLeadingPlaeyrIndex()+i ) %4
             card = self.getPlayedCard(playerIndex)
             self.updatePlayedCardEachRound(card)
             self.updateCardInPlayerHand(playerIndex,card)
@@ -223,6 +235,11 @@ class Game:
     def playMatch(self):
         for i in range(13):
             self.playRound()
+            playerIndex = self.determineHighestCard()
+            score = self.calculateGameScore()
+            player = self.getPlayer(playerIndex)
+            player.addGameScore(score)
+            self.setLeadingPlayerIndex(playerIndex)
         
     def determineHighestCard(self,cards):
         returnCardIndex = None
@@ -241,6 +258,13 @@ class Game:
             if cards[indices_candidate_cards[i]] > cards[returnCardIndex]:
                 returnCardIndex = indices_candidate_cards[i]
         return returnCardIndex
+    def setLeadingPlayerIndex(self,index):
+        self.__leadingPlayerIndex = index
+    def getLeadingPlaeyrIndex(self):
+        return self.__leadingPlayerIndex
+    def calculateGameScore(self,cards):
+        score = sum( card.getScore() for card in cards)
+        return score
  
 def main():
     # bidding phase
@@ -253,10 +277,6 @@ def main():
     game.identifyTeam()
     # gameplay phase
     game.playMatch()  # dont forget to invoke getPlayedCard method in playRound
-     
-    # determine what card is the highest tier
-    #calculate point go to the right person
-    #determine who is the first to play next round
 
 if __name__ == "__main__":
     main()
