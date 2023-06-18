@@ -40,7 +40,7 @@ class player:
         if not self.isCardInhand(card):
             return False
         return True
-    def getRanDomCard(self):
+    def _getRanDomCard(self):
         rand = random.randint(0,len(self.getAllCard())-1)
         return self.getAllCard()[rand]
 
@@ -50,6 +50,9 @@ class player:
         return False
     def getName(self):
         return self.__name
+    def getInputPlayedCard(self):
+        card = self._getRanDomCard()
+        return card
 
    
 
@@ -221,7 +224,7 @@ class Game:
                     return card
     def processPlayerAction(self,playerIndex):
         player = self.getPlayer(playerIndex)
-        playedCard = player.getRanDomCard()
+        playedCard = player.getInputPlayedCard()
         if player.canPlayCard(playedCard) and self.isViolateGameLaw(playedCard):
             return playedCard
         if self.isVoidCard(player.getAllCard(),self.__playedCardsEachRound[0]):
@@ -229,8 +232,7 @@ class Game:
         return False
     def setPlayedCard(self,card):
         self.__playedCard = card
-    def getInputPlayedCard(self):
-        return self.__playedCard
+   
     def updatePlayedCardEachRound(self,card): 
         self.__playedCardsEachRound.append(card)
     def updateCardInPlayerHand(self,playerIndex,card):
