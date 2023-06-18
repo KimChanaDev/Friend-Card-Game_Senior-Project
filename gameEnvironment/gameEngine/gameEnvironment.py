@@ -144,7 +144,7 @@ class Game:
         self.__firstCardEachRound = None
         self.__playedCardsEachRound = []
         self.__playedCardsEachMatch = []
-        self.__playedCard = None
+        
         self.__leadingPlayerIndex = None
         self.__friendPlayer = None
     def setGameScore(self):
@@ -230,8 +230,7 @@ class Game:
         if self.isVoidCard(player.getAllCard(),self.__playedCardsEachRound[0]):
             return playedCard
         return False
-    def setPlayedCard(self,card):
-        self.__playedCard = card
+    
    
     def updatePlayedCardEachRound(self,card): 
         self.__playedCardsEachRound.append(card)

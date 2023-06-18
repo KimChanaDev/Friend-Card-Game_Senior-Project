@@ -18,7 +18,7 @@ class test_processPlayerAction(unittest.TestCase):
         game.setFriendCard()
         game.identifyTeam()
         Card1 = game.getPlayer(0).getAllCard()[0]
-        game.setPlayedCard(Card1)
+    
         error = 1
         game.processPlayerAction(0)
         error = 0
@@ -36,13 +36,13 @@ class test_processPlayerAction(unittest.TestCase):
         game.identifyTeam()
         #------------------------------------
         Card1 = game.getPlayer(0).getAllCard()[0]
-        game.setPlayedCard(Card1)
+       
         game.processPlayerAction(0)
         game.updatePlayedCardEachRound(Card1)
         game.updateCardInPlayerHand(0,Card1)
         #----------------------------------------
         Card2 = game.getPlayer(1).getAllCard()[0]
-        game.setPlayedCard(Card2)
+    
         game.processPlayerAction(1)
         game.updatePlayedCardEachRound(Card2)  
         game.updateCardInPlayerHand(1,Card2)  
