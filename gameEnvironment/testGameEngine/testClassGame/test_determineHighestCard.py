@@ -20,6 +20,20 @@ class test_determineHighestCard(unittest.TestCase):
         Cards = [Card1,Card2,Card3,Card4]
         index = game.determineHighestCard(Cards)
         self.assertEqual(index,2)
+    def test_determineHighestCard_should_return_the_correct_index_if_trump_is_not_leading_suite(self):
+        p1 = player("p1")
+        p2 = player("p2")
+        p3 = player("p3")
+        p4 = player("p4")
+        game = Game(p1,p2,p3,p4)
+        game.setTrumpCard("Clubs")
+        Card1 = card("Queens",5,10)
+        Card2 = card("Clubs",10,10)
+        Card3 = card("Queens",'A',10)
+        Card4 = card("Clubs",5,10)
+        Cards = [Card1,Card2,Card3,Card4]
+        index = game.determineHighestCard(Cards)
+        self.assertEqual(index,1)
 
    
 

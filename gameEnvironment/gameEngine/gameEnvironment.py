@@ -225,15 +225,22 @@ class Game:
             self.playRound()
         
     def determineHighestCard(self,cards):
+        returnCardIndex = None
         leadSuiteCard = cards[0].getSuite()
-        indices_candidate_cards = [i for i, card in enumerate(cards) if card.getSuite() ==leadSuiteCard ]
+        indices_trump_cards = [i for i, card in enumerate(cards) if card.getSuite() ==self.getTrumpCard() ]
+        if len(indices_trump_cards)==0:
+            returnCardIndex = self.processHighestCard(cards,leadSuiteCard)
+        else:
+            returnCardIndex = self.processHighestCard(cards,self.getTrumpCard())
+        return returnCardIndex
+        
+    def processHighestCard(self,cards,suite):
+        indices_candidate_cards = [i for i, card in enumerate(cards) if card.getSuite() ==suite ]
         returnCardIndex = indices_candidate_cards[0]
         for i in range (1,len(indices_candidate_cards)):
             if cards[indices_candidate_cards[i]] > cards[returnCardIndex]:
                 returnCardIndex = indices_candidate_cards[i]
         return returnCardIndex
-        
-                        
  
 def main():
     # bidding phase
