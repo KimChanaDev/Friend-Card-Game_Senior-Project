@@ -40,11 +40,16 @@ class player:
         if not self.isCardInhand(card):
             return False
         return True
+    def getRanDomCard(self):
+        rand = random.randint(0,len(self.getAllCard())-1)
+        return self.getAllCard()[rand]
 
     def isCardInhand(self,card):
         if card in self.getAllCard():
             return True
         return False
+    def getName(self):
+        return self.__name
 
    
 
@@ -55,31 +60,37 @@ class card:
         scoreList = [0,0,0,5,0,0,0,0,10,0,0,10,0]
         listIndex = actualPointList.index(point)
         self.__suite = suite
-        self.__point = logicPointList[listIndex]
+        self.__logicPoint = logicPointList[listIndex]
         self.__id = id
         self.__score = scoreList[listIndex]
+        self.__actualPoint = point
     def __eq__(self, other):
         if isinstance(other, card):
-            return (self.__point == other.__point) and (self.__suite == other.__suite)
+            return (self.__logicPoint == other.__logicPoint) and (self.__suite == other.__suite)
         return False
     def __hash__(self):
         return self.__id
     def __lt__(self, other):
-        return self.__point < other.__point
+        return self.__logicPoint < other.__logicPoint
     
     def __gt__(self, other):
-        return self.__point > other.__point
-    def getPoint(self):
-        return self.__point
+        return self.__logicPoint > other.__logicPoint
+    def getLogicPoint(self):
+        return self.__logicPoint
     def getSuite(self):
         return self.__suite
     def getScore(self):
         return self.__score
-   
+    def getActualPoint(self):
+        return self.__actualPoint
+    
+    
+    
+
     def isValid(self):
         if self.getSuite() not in ['Hearts','Diamonds','Clubs','Spades']:
             return False
-        if self.getPoint() not in [2,3,4,5,6,7,8,9,10,'J','Q','K','A']:
+        if self.getActualPoint() not in [2,3,4,5,6,7,8,9,10,'J','Q','K','A']:
             return False
         return True
 class deck:
@@ -112,8 +123,8 @@ class team:
         self.mate1 = mate1
         self.mate2 = mate2
         self.goalScore = goalScore
-    def updateScore():
-        pass
+    def getScore(self):
+        return self.mate1.getGameScore() + self.mate2.getGameScore()
 class Game:
     def __init__(self,p1,p2,p3,p4):
         self.__bidWinnerPosition = None
@@ -132,6 +143,7 @@ class Game:
         self.__playedCardsEachMatch = []
         self.__playedCard = None
         self.__leadingPlayerIndex = None
+        self.__friendPlayer = None
     def setGameScore(self):
         self.getPlayer(0).setGameScore(0)
         self.getPlayer(1).setGameScore(0)
@@ -182,6 +194,7 @@ class Game:
         for i in range(4):
             if self.__frienCard in set(self.getPlayer(i).getAllCard()):
                 friendPlayer = self.getPlayer(i)
+                self.setFriendPlayer(friendPlayer)
                 BidWinnerPlayer = self.getPlayer(self.getBidWinnerPosition())
                 self.__team[0] = team(friendPlayer,BidWinnerPlayer,self.getBidedScore())
                 index.remove(i)
@@ -189,6 +202,10 @@ class Game:
                 player4 = self.getPlayer(index[1])
                 team2_scoreToWin = 100-self.getBidedScore()+5
                 self.__team[1] = team(player3,player4,team2_scoreToWin)
+    def setFriendPlayer(self,player):
+        self.__friendPlayer = player
+    def getFriendPlayer(self):
+        return self.__friendPlayer
     def playRound(self):
         for i in range (4):
             playerIndex = (self.getLeadingPlaeyrIndex()+i ) %4
@@ -198,11 +215,13 @@ class Game:
   
     def getPlayedCard(self,playerIndex):
         while True:
-                if processPlayerAction(playerIndex):
-                    break
+                card = self.processPlayerAction(playerIndex)
+                if card:
+                    print('player',playerIndex+1,'plays',card.getActualPoint(),card.getSuite())
+                    return card
     def processPlayerAction(self,playerIndex):
         player = self.getPlayer(playerIndex)
-        playedCard = self.getPlayedCard()
+        playedCard = player.getRanDomCard()
         if player.canPlayCard(playedCard) and self.isViolateGameLaw(playedCard):
             return playedCard
         if self.isVoidCard(player.getAllCard(),self.__playedCardsEachRound[0]):
@@ -210,7 +229,7 @@ class Game:
         return False
     def setPlayedCard(self,card):
         self.__playedCard = card
-    def getPlayedCard(self):
+    def getInputPlayedCard(self):
         return self.__playedCard
     def updatePlayedCardEachRound(self,card): 
         self.__playedCardsEachRound.append(card)
@@ -229,18 +248,33 @@ class Game:
         return self.__trumpCard
     def isVoidCard(self,cards,card):
         for i in range (len(cards)):
-            if not cards[i].getSuite() == card.getSuite():
-                return True
-        return False
+            if cards[i].getSuite() == card.getSuite():
+                return False
+        return True
     def playMatch(self):
+        print("bid winner is player",self.getBidWinnerPosition()+1)
+        print("trump card is",self.getTrumpCard())
+        print("friend card is",self.getFriendCard().getActualPoint(),self.getFriendCard().getSuite())
+        print ("friend is ",self.getFriendPlayer().getName())
+       
         for i in range(13):
+            print('round',i+1)
+            self.__playedCardsEachRound = []
+            print('Player',self.getLeadingPlaeyrIndex()+1,'is leading player')
             self.playRound()
-            playerIndex = self.determineHighestCard()
-            score = self.calculateGameScore()
+            playerIndex = (self.determineHighestCard(self.__playedCardsEachRound) + self.getLeadingPlaeyrIndex())%4
+            score = self.calculateGameScore(self.__playedCardsEachRound)
             player = self.getPlayer(playerIndex)
+            oldScore = player.getGameScore()
             player.addGameScore(score)
+            print("Player ",playerIndex+1,"accumulate score",oldScore,'+',score,'=',player.getGameScore())
             self.setLeadingPlayerIndex(playerIndex)
-        
+            print('-----------------------------------------------')
+        print('summary score')
+        for i in range (4):
+            print('player',i+1,'get',self.getPlayer(i).getGameScore(),'scores')
+        print("team bid winner & friend get ",self.getTeam(0).getScore())
+        print("other team get get ",self.getTeam(1).getScore())
     def determineHighestCard(self,cards):
         returnCardIndex = None
         leadSuiteCard = cards[0].getSuite()
@@ -268,7 +302,11 @@ class Game:
  
 def main():
     # bidding phase
-    game = Game()
+    p1 = player("p1")
+    p2 = player("p2")
+    p3 = player("p3")
+    p4 = player("p4")
+    game = Game(p1,p2,p3,p4)
     game.setGameScore()
     game.provideCard()
     game.determineBidWinner()

@@ -33,7 +33,7 @@ class test_isViolateGameLaw(unittest.TestCase):
         game.identifyTeam()
         Card1 = card("Queens",5,10)
         cardList = [card("Queens",5,10),card("Clubs",5,10)]
-        self.assertTrue(game.isVoidCard(cardList,Card1))
+        self.assertFalse(game.isVoidCard(cardList,Card1))
    
 
    
