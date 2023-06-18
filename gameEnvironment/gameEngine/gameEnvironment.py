@@ -44,19 +44,28 @@ class player:
 
 class card:
     def __init__(self,suite,point,id):
+        logicPointList = [2,3,4,5,6,7,8,9,10,11,12,13,14]
+        actualPointList = [2,3,4,5,6,7,8,9,10,'J','Q','K','A']
         self.__suite = suite
-        self.__point = point
+        logicPointIndex = actualPointList.index(point)
+        self.__point = logicPointList[logicPointIndex]
         self.__id = id
-    def getPoint(self):
-        return self.__point
-    def getSuite(self):
-        return self.__suite
     def __eq__(self, other):
         if isinstance(other, card):
             return (self.__point == other.__point) and (self.__suite == other.__suite)
         return False
     def __hash__(self):
         return self.__id
+    def __lt__(self, other):
+        return self.__point < other.__point
+    
+    def __gt__(self, other):
+        return self.__point > other.__point
+    def getPoint(self):
+        return self.__point
+    def getSuite(self):
+        return self.__suite
+   
     def isValid(self):
         if self.getSuite() not in ['Hearts','Diamonds','Clubs','Spades']:
             return False
@@ -136,10 +145,12 @@ class Game:
         self.__bidedScore = BidedPoint[BidedPointIndex]
     def getBidedScore(self):
         return self.__bidedScore
-    def setTrumpCard(self):
+    def randomTrumpCard(self):
          suites = ['Hearts','Diamonds','Clubs','Spades']
          suiteIndex = random.randint(0, 3)
-         self.__trumpCard = suites[suiteIndex]
+         self.setTrumpCard(suites[suiteIndex])
+    def setTrumpCard(self,suite):
+        self.__trumpCard = suite
     def getBidWinnerPosition(self):
         return self.__bidWinnerPosition
     def setFriendCard(self):
@@ -209,8 +220,19 @@ class Game:
             if not cards[i].getSuite() == card.getSuite():
                 return True
         return False
+    def playMatch(self):
+        for i in range(13):
+            self.playRound()
         
-
+    def determineHighestCard(self,cards):
+        leadSuiteCard = cards[0].getSuite()
+        indices_candidate_cards = [i for i, card in enumerate(cards) if card.getSuite() ==leadSuiteCard ]
+        returnCardIndex = indices_candidate_cards[0]
+        for i in range (1,len(indices_candidate_cards)):
+            if cards[indices_candidate_cards[i]] > cards[returnCardIndex]:
+                returnCardIndex = indices_candidate_cards[i]
+        return returnCardIndex
+        
                         
  
 def main():
@@ -219,12 +241,12 @@ def main():
     game.setGameScore()
     game.provideCard()
     game.determineBidWinner()
-    game.setTrumpCard()
+    game.randomTrumpCard()
     game.setFriendCard()
     game.identifyTeam()
     # gameplay phase
-
-    game.playRound()  # dont for get to invoke getPlayed Card method in this function
+    game.playMatch()  # dont forget to invoke getPlayedCard method in playRound
+     
     # determine what card is the highest tier
     #calculate point go to the right person
     #determine who is the first to play next round
