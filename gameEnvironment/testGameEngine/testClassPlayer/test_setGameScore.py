@@ -1,8 +1,5 @@
 import unittest
-import sys
-sys.path.append('C:\\Users\\User\\Desktop\\gameEnvironment\\gameEnvironment\\gameEngine')
-
-from gameEnvironment import *
+from GameEnvironment.gameEngine.gameEnvironment import *
 
 class test_SetGameScore(unittest.TestCase):
     def test_setGameScore_should_make_player_get_same_score_if_score_is_in_0_and_100(self):

@@ -1,10 +1,5 @@
 import unittest
-import sys
-sys.path.append('C:\\Users\\User\\Desktop\\gameEnvironment\\gameEnvironment\\gameEngine')
-
-from gameEnvironment import *
-
-# Example function to test
+from GameEnvironment.gameEngine.gameEnvironment import *
 
 
 # Test class

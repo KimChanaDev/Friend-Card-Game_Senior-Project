@@ -1,8 +1,5 @@
 import unittest
-import sys
-sys.path.append('C:\\Users\\User\\Desktop\\gameEnvironment\\gameEnvironment\\gameEngine')
-
-from gameEnvironment import *
+from GameEnvironment.gameEngine.gameEnvironment import *
 
 
 class test_getPlayer(unittest.TestCase):
