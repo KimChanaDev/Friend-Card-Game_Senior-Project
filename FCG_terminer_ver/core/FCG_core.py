@@ -1,5 +1,5 @@
 import random
-
+import time
 
 class player:
     def __init__(self, name,index):
@@ -82,9 +82,9 @@ class card:
     def __hash__(self):
         return self.__id
     def __lt__(self, other):
-        return self.__logicPoint < other.__logicPoint
+        return self.__id < other.__id
     def __gt__(self, other):
-        return self.__logicPoint > other.__logicPoint
+        return self.__id > other.__id
     def __str__(self):
         return f"{self.getSuite()} {self.getActualPoint()} "
     def getLogicPoint(self):
@@ -95,9 +95,6 @@ class card:
         return self.__score
     def getActualPoint(self):
         return self.__actualPoint
-    
-    
-    
 
     def isValid(self):
         if self.getSuite() not in ['Hearts','Diamonds','Clubs','Spades']:
@@ -223,13 +220,26 @@ class Game:
         self.__trumpCard = suite
     def getBidWinnerIndex(self):
         return self.__bidWinnerIndex
-    def setFriendCard(self):
+    def selectFriendCard(self):
         Deck = deck()
         allCard = Deck.getAllCard()
+        print("your card now")
+        cardInPlayerHand  = sorted(self.getPlayer(self.getBidWinnerIndex()).getAllCard())
+        for card in cardInPlayerHand:
+            print(card)
         cardInBidWinnerHand = self.getPlayer(self.getBidWinnerIndex()).getAllCard()
-        setOfPossibleFriendCard = set(allCard ) - set(cardInBidWinnerHand) 
-        rand = random.randint(0,len(setOfPossibleFriendCard)-1)
-        self.__frienCard = list(setOfPossibleFriendCard)[rand]
+        setOfPossibleFriendCards = set(allCard ) - set(cardInBidWinnerHand)
+        sortedPossibleFriendCards =  sorted(list(setOfPossibleFriendCards))
+    
+        print("all cards that can choose as friend card")
+        for i,card in enumerate(sortedPossibleFriendCards) :
+            print(i+1,card)
+            # print(i+1)
+            time.sleep(0.5)
+            
+        indexFriend =  int(input("select number (1-39) : ")) -1
+        print("friend card is",sortedPossibleFriendCards[indexFriend])
+        self.__frienCard =  sortedPossibleFriendCards[indexFriend]
     def getFriendCard(self):
         return self.__frienCard
     def getTeam(self,index):
@@ -333,7 +343,7 @@ class Game:
         indices_candidate_cards = [i for i, card in enumerate(cards) if card.getSuite() ==suite ]
         returnCardIndex = indices_candidate_cards[0]
         for i in range (1,len(indices_candidate_cards)):
-            if cards[indices_candidate_cards[i]] > cards[returnCardIndex]:
+            if cards[indices_candidate_cards[i]].getLogicPoint() > cards[returnCardIndex].getLogicPoint():
                 returnCardIndex = indices_candidate_cards[i]
         return returnCardIndex
     def setLeadingPlayerIndex(self,index):
@@ -356,7 +366,7 @@ def main():
     game.provideCard()
     game.BiddingPhase()
     game.selectTrumpCard()
-    game.setFriendCard()
+    game.selectFriendCard()
     game.identifyTeam()
     # gameplay phase
     game.playMatch()  # dont forget to invoke getPlayedCard method in playRound
