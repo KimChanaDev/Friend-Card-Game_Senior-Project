@@ -225,7 +225,7 @@ class Game:
     def processPlayerAction(self,playerIndex):
         player = self.getPlayer(playerIndex)
         playedCard = player.getInputPlayedCard()
-        if player.canPlayCard(playedCard) and self.isViolateGameLaw(playedCard):
+        if player.canPlayCard(playedCard) and self.isNotViolateGameLaw(playedCard):
             return playedCard
         if self.isVoidCard(player.getAllCard(),self.__playedCardsEachRound[0]):
             return playedCard
@@ -236,7 +236,7 @@ class Game:
         self.__playedCardsEachRound.append(card)
     def updateCardInPlayerHand(self,playerIndex,card):
         self.getPlayer(playerIndex).dropCard(card)
-    def isViolateGameLaw(self,card):
+    def isNotViolateGameLaw(self,card):
         if len(self.__playedCardsEachRound)==0:
             return True
         if card.getSuite() == self.getTrumpCard():

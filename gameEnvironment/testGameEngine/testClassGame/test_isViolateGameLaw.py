@@ -19,7 +19,7 @@ class test_isViolateGameLaw(unittest.TestCase):
         game.identifyTeam()
         Player = game.getPlayer(game.getBidWinnerPosition())
         card = Player.getAllCard()[0]
-        self.assertTrue(game.isViolateGameLaw(card))
+        self.assertTrue(game.isNotViolateGameLaw(card))
     def test_isViolateGameLaw_should_return_True_if_drop_card_is_trump_card(self):
         p1 = player("p1")
         p2 = player("p2")
@@ -33,7 +33,7 @@ class test_isViolateGameLaw(unittest.TestCase):
         game.identifyTeam()
         Player = game.getPlayer(game.getBidWinnerPosition())
         Card = card(game.getTrumpCard,5,4)
-        self.assertTrue(game.isViolateGameLaw(Card))
+        self.assertTrue(game.isNotViolateGameLaw(Card))
 
     def test_isViolateGameLaw_should_return_True_if_suite_card_is_the_same_as_first_card_played(self):
         p1 = player("p1")
@@ -50,7 +50,7 @@ class test_isViolateGameLaw(unittest.TestCase):
         Card1 = card("Hearts",5,4)
         game.updatePlayedCardEachRound(Card1)
         Card2 = card("Hearts",6,7)
-        self.assertTrue(game.isViolateGameLaw(Card2))
+        self.assertTrue(game.isNotViolateGameLaw(Card2))
     def test_isViolateGameLaw_should_return_false_if_suite_card_is_not_the_same_as_first_card_played(self):
         p1 = player("p1")
         p2 = player("p2")
@@ -66,7 +66,7 @@ class test_isViolateGameLaw(unittest.TestCase):
         Card1 = card("Hearts",5,4)
         game.updatePlayedCardEachRound(Card1)
         Card2 = card("Spades",6,7)
-        self.assertFalse(game.isViolateGameLaw(Card2))
+        self.assertFalse(game.isNotViolateGameLaw(Card2))
 
 # Run the tests
 if __name__ == '__main__':
