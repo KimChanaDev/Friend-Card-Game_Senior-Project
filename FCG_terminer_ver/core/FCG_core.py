@@ -83,9 +83,10 @@ class card:
         return self.__id
     def __lt__(self, other):
         return self.__logicPoint < other.__logicPoint
-    
     def __gt__(self, other):
         return self.__logicPoint > other.__logicPoint
+    def __str__(self):
+        return f"{self.getSuite()} {self.getActualPoint()} "
     def getLogicPoint(self):
         return self.__logicPoint
     def getSuite(self):
@@ -167,6 +168,7 @@ class Game:
         elif index > 3:
             raise ValueError("Player indexs greater than 3 are not allowed")
         return self.__players[index]
+
     def provideCard(self):
         self.__deck.shuffle()
         for i in range(52):
@@ -207,10 +209,16 @@ class Game:
         self.__bidScore = score
     def getBidScore(self):
         return self.__bidScore
-    def randomTrumpCard(self):
-         suites = ['Hearts','Diamonds','Clubs','Spades']
-         suiteIndex = random.randint(0, 3)
-         self.setTrumpCard(suites[suiteIndex])
+    def selectTrumpCard(self):
+        bidWinnerCards = self.getPlayer(self.getBidWinnerIndex()).getAllCard()
+        for card in bidWinnerCards:
+            print(card) 
+        print("select your trump card")
+        print(" 1. Hearts, 2. Diamonds,3. Clubs,4.Spades")
+        suiteIndex = int(input("enter number (1-4): ")) - 1
+        suites = ['Hearts','Diamonds','Clubs','Spades']
+        self.setTrumpCard(suites[suiteIndex])
+        print("trump card is",self.getTrumpCard())
     def setTrumpCard(self,suite):
         self.__trumpCard = suite
     def getBidWinnerIndex(self):
@@ -346,8 +354,8 @@ def main():
     game = Game(p1,p2,p3,p4)
     game.setGameScore()
     game.provideCard()
-    game.processBiddingPhase()
-    game.randomTrumpCard()
+    game.BiddingPhase()
+    game.selectTrumpCard()
     game.setFriendCard()
     game.identifyTeam()
     # gameplay phase
