@@ -443,7 +443,7 @@ class Game:
         print('match score')
         for i in range(4):
             print("player",i,"matchScore",self.getPlayer(i).getMatchScore())
-          print('-------------------------------------------')
+        print('-------------------------------------------')
 def main():
     # bidding phase
     p1 = player("p1",0)
