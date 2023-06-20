@@ -12,7 +12,7 @@ class player:
         self.__cards.remove(card)
     def bid(point):
         pass
-    def setMatchScore():
+    def addMatchScore():
         pass
     def getMatchScore():
         pass
