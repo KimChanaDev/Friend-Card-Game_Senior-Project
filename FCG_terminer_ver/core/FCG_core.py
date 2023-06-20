@@ -430,9 +430,20 @@ class Game:
         otherTeam = self.getOtherTeam()
         if bidwinnerTeam.getGoalScore() < bidwinnerTeam.getScore():
             otherTeam.setWinner()
+            print('------------------------------------')
+            print('the winner is bidWinner team')
+            print('------------------------------------')
         else:
             bidwinnerTeam.setWinner()
-        
+            print('------------------------------------')
+            print('the winner is bidLoser team')
+            print('------------------------------------')
+    def summaryMatchScore(self):
+        print('-------------------------------------------')
+        print('match score')
+        for i in range(4):
+            print("player",i,"matchScore",self.getPlayer(i).getMatchScore())
+          print('-------------------------------------------')
 def main():
     # bidding phase
     p1 = player("p1",0)
@@ -450,6 +461,7 @@ def main():
     game.playMatch()  # dont forget to invoke getPlayedCard method in playRound
     game.determineMatchWinner()
     game.calculateMatchScore()
+    game.summaryMatchScore()
 
 
 if __name__ == "__main__":
