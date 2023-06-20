@@ -62,7 +62,16 @@ class player:
     def getName(self):
         return self.__name
     def getInputPlayedCard(self):
-        card = self._getRanDomCard()
+        print('----------------------------------------')
+        print('player',self.getIndex()+1,'card now')
+        cardInHand = sorted(self.getAllCard())
+        for i,card in enumerate(cardInHand):
+            print(i+1,card)
+        print("player",self.getIndex()+1,"type card number to play 1-",len(cardInHand))
+        index = int(input("select your card: "))-1
+        print('---------------------------------------------')
+        print()
+        card = cardInHand[index]
         return card
 
    
@@ -146,6 +155,8 @@ class team:
         if index == 0:
             return self.__mate1
         return self.__mate2
+    def getGoalScore(self):
+        return self.__goalScore
 class Game:
     def __init__(self,p1,p2,p3,p4):
         self.__bidWinnerIndex = None
@@ -196,12 +207,19 @@ class Game:
                 self.setBidScore(currentBidScore)
                 playerList.append(BiddingPlayer)
         biddingWinner = playerList.pop()
+        
+        if currentBidScore==0:
+            currentBidScore = 55
         self.setBidScore(currentBidScore)
         self.setBidWinnerIndex(biddingWinner.getIndex())
+        self.setLeadingPlayerIndex(biddingWinner.getIndex())
+        print('Player',biddingWinner.getIndex()+1,'is bid winner')
+        print('bid score is',self.getBidScore())
+        print('-------------------------------------------')
     def takeBidFromPlayer(self,player):
         while True:
             previousBid = self.getBidScore()
-            print(player.getName(),"should bid more than ",previousBid)
+            print(player.getName(),"should bid more than ",previousBid,"type 0 for pass")
             bidScore = int(input("bid : "))
             if self.isValidBid(previousBid,bidScore):
                 return bidScore
@@ -219,15 +237,18 @@ class Game:
     def getBidScore(self):
         return self.__bidScore
     def selectTrumpCard(self):
-        bidWinnerCards = self.getPlayer(self.getBidWinnerIndex()).getAllCard()
+        bidWinnerCards =  sorted(self.getBidWinnerPlayer().getAllCard())
+        print('card in player',self.getBidWinnerIndex()+1,'hand')
         for card in bidWinnerCards:
             print(card) 
+        print('-------------------------------------------------')
         print("select your trump card")
         print(" 1. Hearts, 2. Diamonds,3. Clubs,4.Spades")
         suiteIndex = int(input("enter number (1-4): ")) - 1
         suites = ['Hearts','Diamonds','Clubs','Spades']
         self.setTrumpCard(suites[suiteIndex])
         print("trump card is",self.getTrumpCard())
+        print('-----------------------------------------------')
     def setTrumpCard(self,suite):
         self.__trumpCard = suite
     def getBidWinnerIndex(self):
@@ -235,10 +256,12 @@ class Game:
     def selectFriendCard(self):
         Deck = deck()
         allCard = Deck.getAllCard()
+        print("---------------------------------------------------------------------")
         print("your card now")
         cardInPlayerHand  = sorted(self.getPlayer(self.getBidWinnerIndex()).getAllCard())
         for card in cardInPlayerHand:
             print(card)
+        print("---------------------------------------------------------------------")
         cardInBidWinnerHand = self.getPlayer(self.getBidWinnerIndex()).getAllCard()
         setOfPossibleFriendCards = set(allCard ) - set(cardInBidWinnerHand)
         sortedPossibleFriendCards =  sorted(list(setOfPossibleFriendCards))
@@ -248,10 +271,11 @@ class Game:
             print(i+1,card)
             # print(i+1)
             time.sleep(0.5)
-            
+        print('---------------------------------------------------')    
         indexFriend =  int(input("select number (1-39) : ")) -1
         print("friend card is",sortedPossibleFriendCards[indexFriend])
         self.setFriendCard(sortedPossibleFriendCards[indexFriend])
+        print('---------------------------------------------------')  
     def setWinnerTeam(self,index):
         self.getTeam(index).setWinner()
      
@@ -286,15 +310,12 @@ class Game:
         return self.__friendPlayer
     def playRound(self):
         for i in range (4):
-            playerIndex = (self.getLeadingPlaeyrIndex()+i ) %4
+            playerIndex = (self.getLeadingPlayerIndex()+i ) %4
             card = self.getPlayedCard(playerIndex)
             self.updatePlayedCardEachRound(card)
             self.updateCardInPlayerHand(playerIndex,card)
   
     def getPlayedCard(self,playerIndex):
-        print('your card now')
-        cardInHand = self.getPlayer(self.getBidWinnerIndex()).getAllCard()
-
         while True:
                 card = self.processPlayerAction(playerIndex)
                 if card:
@@ -332,17 +353,18 @@ class Game:
                 return False
         return True
     def playMatch(self):
+        print('---------------------------------------------------')
         print("bid winner is player",self.getBidWinnerIndex()+1)
         print("trump card is",self.getTrumpCard())
         print("friend card is",self.getFriendCard().getActualPoint(),self.getFriendCard().getSuite())
         print ("friend is ",self.getFriendPlayer().getName())
-       
+        print('---------------------------------------------------')
         for i in range(13):
             print('round',i+1)
             self.__playedCardsEachRound = []
-            print('Player',self.getLeadingPlaeyrIndex()+1,'is leading player')
+            print('player',self.getLeadingPlayerIndex()+1,"is leading player")
             self.playRound()
-            playerIndex = (self.determineHighestCard(self.__playedCardsEachRound) + self.getLeadingPlaeyrIndex())%4
+            playerIndex = (self.determineHighestCard(self.__playedCardsEachRound) + self.getLeadingPlayerIndex())%4
             score = self.calculateGameScore(self.__playedCardsEachRound)
             player = self.getPlayer(playerIndex)
             oldScore = player.getGameScore()
@@ -374,7 +396,7 @@ class Game:
         return returnCardIndex
     def setLeadingPlayerIndex(self,index):
         self.__leadingPlayerIndex = index
-    def getLeadingPlaeyrIndex(self):
+    def getLeadingPlayerIndex(self):
         return self.__leadingPlayerIndex
     def calculateGameScore(self,cards):
         score = sum( card.getScore() for card in cards)
@@ -393,7 +415,7 @@ class Game:
             friendPlayer.addMatchScore((bidScore/2)+friendPlayer.getGameScore())
             otherPlayer1.subMatchScore(100-bidScore)
             otherPlayer2.subMatchScore(100-bidScore)
-            return 
+            return
         otherPlayerMatchScore  = (otherPlayer1.getGameScore()+otherPlayer2.getGameScore())/2
         otherPlayer1.addMatchScore(otherPlayerMatchScore)
         otherPlayer2.addMatchScore(otherPlayerMatchScore)
@@ -401,13 +423,22 @@ class Game:
         friendPlayer.subMatchScore((bidScore/2)-friendPlayer.getGameScore())
     def getBidWinnerPlayer(self):
         return self.getPlayer(self.getBidWinnerIndex())
- 
+    def getOtherTeam(self):
+        return self.getTeam(1)
+    def determineMatchWinner(self):
+        bidwinnerTeam = self.getBidWinnerTeam()
+        otherTeam = self.getOtherTeam()
+        if bidwinnerTeam.getGoalScore() < bidwinnerTeam.getScore():
+            otherTeam.setWinner()
+        else:
+            bidwinnerTeam.setWinner()
+        
 def main():
     # bidding phase
-    p1 = player("p1")
-    p2 = player("p2")
-    p3 = player("p3")
-    p4 = player("p4")
+    p1 = player("p1",0)
+    p2 = player("p2",1)
+    p3 = player("p3",2)
+    p4 = player("p4",3)
     game = Game(p1,p2,p3,p4)
     game.setGameScore()
     game.provideCard()
@@ -417,7 +448,8 @@ def main():
     game.identifyTeam()
     # gameplay phase
     game.playMatch()  # dont forget to invoke getPlayedCard method in playRound
-
+    game.determineMatchWinner()
+    game.calculateMatchScore()
 
 
 if __name__ == "__main__":
