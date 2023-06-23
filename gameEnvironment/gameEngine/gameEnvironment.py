@@ -2,14 +2,17 @@ import random
 
 
 class player:
-    def __init__(self, name):
+    def __init__(self, name,index):
         self.__name = name
         self.__matchScore  = 0
         self.__gameScore = 0
         self.__bidStatus = False
         self.__cards = []
+        self.__index = index
     def dropCard(self,card):
         self.__cards.remove(card)
+    def getIndex(self):
+        return self.__index
     def bid(point):
         pass
     def addMatchScore():
@@ -86,7 +89,8 @@ class card:
         return self.__score
     def getActualPoint(self):
         return self.__actualPoint
-    
+    def getId(self):
+        return self.__id
     
     
 
@@ -144,9 +148,22 @@ class Game:
         self.__firstCardEachRound = None
         self.__playedCardsEachRound = []
         self.__playedCardsEachMatch = []
-        
+        self.__heartsVoidCard  = []
+        self.__clubsVoidCard  = []
+        self.__spadesVoidCard  = []
+        self.__diamondsVoidCard  = []
         self.__leadingPlayerIndex = None
         self.__friendPlayer = None
+        self.__trumpPlayedCard = []
+    def getAllPlayerScore(self):
+        result = [self.getPlayer(i).getGameScore() for i in range(4)]
+        return result
+    def getPlayedCardEachRound(self):
+        result = [card.getId() for card in self.__playedCardsEachRound]
+        desired_length = 4
+        while len(result) < desired_length:
+            result.append(-1)
+        return result
     def setGameScore(self):
         self.getPlayer(0).setGameScore(0)
         self.getPlayer(1).setGameScore(0)
@@ -211,11 +228,21 @@ class Game:
         return self.__friendPlayer
     def playRound(self):
         for i in range (4):
+            # print("cardPlayed",self.getPlayedCardEachRound())
+            print("all score",self.getAllPlayerScore())
             playerIndex = (self.getLeadingPlaeyrIndex()+i ) %4
             card = self.getPlayedCard(playerIndex)
+            if card.getSuite() == self.getTrumpCard():
+                self.setTrumpPlayedCard(card.getLogicPoint())
             self.updatePlayedCardEachRound(card)
             self.updateCardInPlayerHand(playerIndex,card)
-  
+    def setTrumpPlayedCard(self,value):
+        self.__trumpPlayedCard.append(value)
+    def getTrumpPlayedCard(self):
+        result = sorted(self.__trumpPlayedCard)
+        if len(result) < 13:
+            result.append(-1)
+        return result
     def getPlayedCard(self,playerIndex):
         while True:
                 card = self.processPlayerAction(playerIndex)
@@ -227,7 +254,7 @@ class Game:
         playedCard = player.getInputPlayedCard()
         if player.canPlayCard(playedCard) and self.isNotViolateGameLaw(playedCard):
             return playedCard
-        if self.isVoidCard(player.getAllCard(),self.__playedCardsEachRound[0]):
+        if self.isVoidCard(player.getAllCard(),self.__playedCardsEachRound[0],playerIndex):
             return playedCard
         return False
     
@@ -247,11 +274,60 @@ class Game:
         
     def getTrumpCard(self):
         return self.__trumpCard
-    def isVoidCard(self,cards,card):
+    def isVoidCard(self,cards,card,playerIndex):
         for i in range (len(cards)):
             if cards[i].getSuite() == card.getSuite():
                 return False
+        self.setGeneralVoidCard(playerIndex,card.getSuite())
         return True
+    def setGeneralVoidCard(self,playerIndex,suite):
+        suites = ['Hearts','Diamonds','Clubs','Spades']
+        if suites.index(suite) ==0:
+            self.setHeartsVoid(playerIndex,suite)
+        elif suites.index(suite) ==1:
+            self.setDiamondsVoid(playerIndex,suite)
+        elif suites.index(suite) ==2:
+            self.setClubsVoid(playerIndex,suite)
+        else:
+            self.setSpadesVoid(playerIndex,suite)
+        
+    def setHeartsVoidCard(self,playerIndex,suite):
+        self.__heartsVoidCard.append(playerIndex)
+    def setDiamondsVoidCard(self,playerIndex,suite):
+        self.__diamondsVoidCard.append(playerIndex)
+    def setClubsVoidCard(self,playerIndex,suite):
+        self.__clubsVoidCard.append(playerIndex)
+    def setSpadesVoidCard(self,playerIndex,suite):
+        self.__spadesVoidCard.append(playerIndex)
+
+    def getHeartsVoidCard(self):
+        result = sorted(self.__heartsVoidCard)
+        if len(result)<4:
+            result.append(-1)
+        return result
+    def getDiamondsVoidCard(self):
+        result = sorted(self.__diamondsVoidCard)
+        if len(result)<4:
+            result.append(-1)
+        return result
+    def getClubsVoidCard(self):
+        result = sorted(self.__clubsVoidCard)
+        if len(result)<4:
+            result.append(-1)
+        return result
+    def getSpadesVoidCard(self):
+        result = sorted(self.__spadesVoidCard)
+        if len(result)<4:
+            result.append(-1)
+        return result
+    
+    def cleanUpGame(self):
+        self.__clubsVoidCard = []
+        self.__diamondsVoidCard = []
+        self.__spadesVoidCard = []
+        self.__heartsVoidCard = []
+        self.__playedCardsEachRound = []
+
     def playMatch(self):
         print("bid winner is player",self.getBidWinnerPosition()+1)
         print("trump card is",self.getTrumpCard())
@@ -260,7 +336,7 @@ class Game:
        
         for i in range(13):
             print('round',i+1)
-            self.__playedCardsEachRound = []
+            self.cleanUpGame()
             print('Player',self.getLeadingPlaeyrIndex()+1,'is leading player')
             self.playRound()
             playerIndex = (self.determineHighestCard(self.__playedCardsEachRound) + self.getLeadingPlaeyrIndex())%4
