@@ -22,6 +22,7 @@ class Agent:
 
 
     def get_state(self, game,playerIndex):
+        leadingIndex = game.getLeadingPlaeyrIndex()
         suites = ['Hearts','Diamonds','Clubs','Spades']
         cardInhand = [card.getId() for card in sorted(game.getPlayer(playerIndex).getAllcard())]
         while len(cardInhand) < 13:
@@ -35,10 +36,9 @@ class Agent:
         spadesVoid = game.getSpadesVoidCard()
         trumpPlayedCard = game.getTrumpPlayedCard()
         friendTeam = [game.getTeam(0).mate1.getIndex(),game.getTeam(0).mate2.getIndex()]
-        # mate
-
-        
-
+        state = [playerIndex,leadingIndex,trumpCard]+cardInhand+cardPlayedEachRound+playersGameScore\
+                +clubsVoid+heartsVoid+diamondsVoid+spadesVoid\
+                +trumpPlayedCard+friendTeam
         return np.array(state, dtype=int)
 
     def remember(self, state, action, reward, next_state, done):
