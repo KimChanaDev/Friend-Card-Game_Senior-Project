@@ -60,18 +60,22 @@ class Agent:
 
     def get_action(self, state):
         # random moves: tradeoff exploration / exploitation
-        self.epsilon = 80 - self.n_games
-        final_move = [0,0,0]
+        club_to_play = [0,0,0,0,0,0,0]
+        spade_to_play = [0,0,0,0,0,0,0] 
+        diamon_to_play = [0,0,0,0,0,0,0] 
+        heart_to_play = [0,0,0,0,0,0,0]
+        card_to_play = club_to_play+spade_to_play+diamon_to_play+heart_to_play  
+        self.epsilon = 300 - self.n_games
         if random.randint(0, 200) < self.epsilon:
-            move = random.randint(0, 2)
-            final_move[move] = 1
+            action = random.randint(0, 27)
+            card_to_play[action] = 1
         else:
             state0 = torch.tensor(state, dtype=torch.float)
             prediction = self.model(state0)
-            move = torch.argmax(prediction).item()
-            final_move[move] = 1
+            action = torch.argmax(prediction).item()
+            card_to_play[action] = 1
 
-        return final_move
+        return card_to_play
 
 
 def train():
@@ -116,6 +120,47 @@ def train():
             plot_mean_scores.append(mean_score)
             plot(plot_scores, plot_mean_scores)
 
+def playMatch(game):
+    print("bid winner is player",game.getBidWinnerPosition()+1)
+    print("trump card is",game.getTrumpCard())
+    print("friend card is",game.getFriendCard().getActualPoint(),game.getFriendCard().getSuite())
+    print ("friend is ",game.getFriendPlayer().getName())
+    
+    for i in range(13):
+        print('round',i+1)
+        game.cleanUpGame()
+        print('Player',game.getLeadingPlaeyrIndex()+1,'is leading player')
+        playRound(game)
+        playerIndex = (game.determineHighestCard(game.__playedCardsEachRound) + game.getLeadingPlaeyrIndex())%4
+        score = game.calculateGameScore(game.__playedCardsEachRound)
+        player = game.getPlayer(playerIndex)
+        oldScore = player.getGameScore()
+        player.addGameScore(score)
+        print("Player ",playerIndex+1,"accumulate score",oldScore,'+',score,'=',player.getGameScore())
+        game.setLeadingPlayerIndex(playerIndex)
+        print('-----------------------------------------------')
+    print('summary score')
+    for i in range (4):
+        print('player',i+1,'get',game.getPlayer(i).getGameScore(),'scores')
+    print("team bid winner & friend get ",game.getTeam(0).getScore())
+    print("other team get get ",game.getTeam(1).getScore())
 
+def playRound(game):
+    for i in range (4):
+        # print("cardPlayed",game.getPlayedCardEachRound())
+        print("all score",game.getAllPlayerScore())
+        playerIndex = (game.getLeadingPlaeyrIndex()+i ) %4
+        card = getPlayedCard(game,playerIndex)
+        if card.getSuite() == game.getTrumpCard():
+            game.setTrumpPlayedCard(card.getLogicPoint())
+        game.updatePlayedCardEachRound(card)
+        game.updateCardInPlayerHand(playerIndex,card)
+
+def getPlayedCard(game,playerIndex):
+    while True:
+            card = game.processPlayerAction(playerIndex)
+            if card:
+                print('player',playerIndex+1,'plays',card.getActualPoint(),card.getSuite())
+                return card
 if __name__ == '__main__':
     train()
