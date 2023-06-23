@@ -162,5 +162,14 @@ def getPlayedCard(game,playerIndex):
             if card:
                 print('player',playerIndex+1,'plays',card.getActualPoint(),card.getSuite())
                 return card
+
+def processPlayerAction(game,playerIndex):
+    player = game.getPlayer(playerIndex)
+    playedCard = player.getInputPlayedCard()
+    if player.canPlayCard(playedCard) and game.isNotViolateGameLaw(playedCard):
+        return playedCard
+    if game.isVoidCard(player.getAllCard(),game.__playedCardsEachRound[0],playerIndex):
+        return playedCard
+    return False
 if __name__ == '__main__':
     train()
