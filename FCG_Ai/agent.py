@@ -17,14 +17,15 @@ class Agent:
         self.epsilon = 0 # randomness
         self.gamma = 0.9 # discount rate
         self.memory = deque(maxlen=MAX_MEMORY) # popleft()
-        self.model = Linear_QNet(11, 256, 3)
+        self.model = Linear_QNet(55, 256, 28)
         self.trainer = QTrainer(self.model, lr=LR, gamma=self.gamma)
 
 
-    def get_state(self, game,playerIndex):
-        leadingIndex = game.getLeadingPlaeyrIndex()
+    def get_state(self, game):
+        playerIndex = game.getTurnPlayerIndex()
+        leadingIndex = game.getLeadingPlayerIndex()
         suites = ['Hearts','Diamonds','Clubs','Spades']
-        cardInhand = [card.getId() for card in sorted(game.getPlayer(playerIndex).getAllcard())]
+        cardInhand = [card.getId() for card in sorted(game.getPlayer(playerIndex).getAllCard())]
         while len(cardInhand) < 13:
             cardInhand.append(-1)
         cardPlayedEachRound = game.getPlayedCardEachRound()
@@ -35,10 +36,13 @@ class Agent:
         diamondsVoid = game.getDiamondsVoidCard()
         spadesVoid = game.getSpadesVoidCard()
         trumpPlayedCard = game.getTrumpPlayedCard()
+        # print('all trump',trumpPlayedCard)
         friendTeam = [game.getTeam(0).mate1.getIndex(),game.getTeam(0).mate2.getIndex()]
-        state = [playerIndex,leadingIndex,trumpCard]+cardInhand+cardPlayedEachRound+playersGameScore\
+        state = [playerIndex,leadingIndex,trumpCard]+cardInhand+cardPlayedEachRound\
+                +playersGameScore\
                 +clubsVoid+heartsVoid+diamondsVoid+spadesVoid\
                 +trumpPlayedCard+friendTeam
+        # print(len(state))
         done = game.isEndGame()
         return np.array(state, dtype=int),done
 
@@ -79,7 +83,7 @@ class Agent:
 
         return card_to_play
     def get_reward(self,game):
-        game.get_reward()
+        return game.getReward()
 
 def train():
     plot_scores = []
@@ -102,13 +106,14 @@ def train():
     state_old = [None,None,None,None]
     output = [None,None,None,None]
     
-    while True:
+    while not game.isEndGame():
         for i in range(4):
-            state_old[i] = agent.get_state(game,game.getTurnPlayerIndex())
+            state_old[i],done = agent.get_state(game)
             output[i] = agent.get_action(state_old)
-            while not playCard(output[i]):
+            while not playCard(game,output[i]):
                 reward = -1000
                 state_new,done = agent.get_state(game)
+                
                 agent.train_short_memory(state_old[i],output[i], reward, state_new, done)
                 agent.remember(state_old[i],output[i], reward, state_new, done)
                 output[i] = agent.get_action(state_old)
@@ -124,18 +129,15 @@ def train():
             agent.n_games += 1
             agent.train_long_memory()
 
-            if score > record:
-                record = score
-                agent.model.save()
-
-            print('Game', agent.n_games, 'Score', score, 'Record:', record)
-
-            plot_scores.append(score)
-            total_score += score
-            mean_score = total_score / agent.n_games
-            plot_mean_scores.append(mean_score)
-            plot(plot_scores, plot_mean_scores)
     game.summaryScore()
+    # winnerTeam = None
+    # if game.getBidWinnerTeam().isWinner():
+    #     winnerTeam = game.getBidWinnerTeam
+    # else:
+    #     winnerTeam = game.getOtherTeam()
+    # indexWinner1 = winnerTeam.mate1.getIndex()
+    # indexWinner2 = winnerTeam.mate1.getIndex()
+
 
 def mapOutPutToCard(output):
     arr = np.array(output)
@@ -157,7 +159,7 @@ def mapOutPutToCard(output):
 def playCard(game,output):
     card_to_play = mapOutPutToCard(output)
     for i in range(len(card_to_play)) :
-        if game.play_step(card_to_play[i]):
+        if game.play_turn(card_to_play[i]):
             return True
         return False
 if __name__ == '__main__':

@@ -325,6 +325,8 @@ class Game:
     def processPlayerAction(self,playerIndex):
         player = self.getPlayer(playerIndex)
         playedCard = player.getInputPlayedCard()
+        if not player.canPlayCard():
+            return False
         if player.canPlayCard(playedCard) and self.isNotViolateGameLaw(playedCard):
             return playedCard
         if self.isVoidCard(player.getAllCard(),self.__playedCardsEachRound[0]):
