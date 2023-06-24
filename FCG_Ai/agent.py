@@ -39,7 +39,8 @@ class Agent:
         state = [playerIndex,leadingIndex,trumpCard]+cardInhand+cardPlayedEachRound+playersGameScore\
                 +clubsVoid+heartsVoid+diamondsVoid+spadesVoid\
                 +trumpPlayedCard+friendTeam
-        return np.array(state, dtype=int)
+        done = game.isEndGame()
+        return np.array(state, dtype=int),done
 
     def remember(self, state, action, reward, next_state, done):
         self.memory.append((state, action, reward, next_state, done)) # popleft if MAX_MEMORY is reached
@@ -60,11 +61,12 @@ class Agent:
 
     def get_action(self, state):
         # random moves: tradeoff exploration / exploitation
+        # 'Hearts','Diamonds','Clubs','Spades'
         club_to_play = [0,0,0,0,0,0,0]
         spade_to_play = [0,0,0,0,0,0,0] 
         diamon_to_play = [0,0,0,0,0,0,0] 
         heart_to_play = [0,0,0,0,0,0,0]
-        card_to_play = club_to_play+spade_to_play+diamon_to_play+heart_to_play  
+        card_to_play = heart_to_play+diamon_to_play+club_to_play+spade_to_play 
         self.epsilon = 300 - self.n_games
         if random.randint(0, 200) < self.epsilon:
             action = random.randint(0, 27)
@@ -76,7 +78,8 @@ class Agent:
             card_to_play[action] = 1
 
         return card_to_play
-
+    def get_reward(self,game):
+        game.get_reward()
 
 def train():
     plot_scores = []
@@ -84,24 +87,37 @@ def train():
     total_score = 0
     record = 0
     agent = Agent()
-    game = SnakeGameAI()
+    p1 = player("p1",0)
+    p2 = player("p2",1)
+    p3 = player("p3",2)
+    p4 = player("p4",3)
+    game = Game(p1,p2,p3,p4)
+    game.setGameScore()
+    game.provideCard()
+    game.determineBidWinner()
+    game.randomTrumpCard()
+    game.setFriendCard()
+    game.identifyTeam()
+    game.reset()
+    state_old = [None,None,None,None]
+    output = [None,None,None,None]
+    
     while True:
-        # get old state
-        state_old = agent.get_state(game)
-
-        # get move
-        final_move = agent.get_action(state_old)
-
-        # perform move and get new state
-        reward, done, score = game.play_step(final_move)
-        state_new = agent.get_state(game)
-
-        # train short memory
-        agent.train_short_memory(state_old, final_move, reward, state_new, done)
-
-        # remember
-        agent.remember(state_old, final_move, reward, state_new, done)
-
+        for i in range(4):
+            state_old[i] = agent.get_state(game,game.getTurnPlayerIndex())
+            output[i] = agent.get_action(state_old)
+            while not playCard(output[i]):
+                reward = -1000
+                state_new,done = agent.get_state(game)
+                agent.train_short_memory(state_old[i],output[i], reward, state_new, done)
+                agent.remember(state_old[i],output[i], reward, state_new, done)
+                output[i] = agent.get_action(state_old)
+        state_new,done =  agent.get_state(game)
+        reward = agent.get_reward(game)
+        for i in range(4):
+            agent.train_short_memory(state_old[i],output[i], reward[i], state_new, done)
+            agent.remember(state_old[i],output[i], reward[i], state_new, done)
+    
         if done:
             # train long memory, plot result
             game.reset()
@@ -119,57 +135,35 @@ def train():
             mean_score = total_score / agent.n_games
             plot_mean_scores.append(mean_score)
             plot(plot_scores, plot_mean_scores)
+    game.summaryScore()
 
-def playMatch(game):
-    print("bid winner is player",game.getBidWinnerPosition()+1)
-    print("trump card is",game.getTrumpCard())
-    print("friend card is",game.getFriendCard().getActualPoint(),game.getFriendCard().getSuite())
-    print ("friend is ",game.getFriendPlayer().getName())
-    
-    for i in range(13):
-        print('round',i+1)
-        game.cleanUpGame()
-        print('Player',game.getLeadingPlaeyrIndex()+1,'is leading player')
-        playRound(game)
-        playerIndex = (game.determineHighestCard(game.__playedCardsEachRound) + game.getLeadingPlaeyrIndex())%4
-        score = game.calculateGameScore(game.__playedCardsEachRound)
-        player = game.getPlayer(playerIndex)
-        oldScore = player.getGameScore()
-        player.addGameScore(score)
-        print("Player ",playerIndex+1,"accumulate score",oldScore,'+',score,'=',player.getGameScore())
-        game.setLeadingPlayerIndex(playerIndex)
-        print('-----------------------------------------------')
-    print('summary score')
-    for i in range (4):
-        print('player',i+1,'get',game.getPlayer(i).getGameScore(),'scores')
-    print("team bid winner & friend get ",game.getTeam(0).getScore())
-    print("other team get get ",game.getTeam(1).getScore())
-
-def playRound(game):
-    for i in range (4):
-        # print("cardPlayed",game.getPlayedCardEachRound())
-        print("all score",game.getAllPlayerScore())
-        playerIndex = (game.getLeadingPlaeyrIndex()+i ) %4
-        card = getPlayedCard(game,playerIndex)
-        if card.getSuite() == game.getTrumpCard():
-            game.setTrumpPlayedCard(card.getLogicPoint())
-        game.updatePlayedCardEachRound(card)
-        game.updateCardInPlayerHand(playerIndex,card)
-
-def getPlayedCard(game,playerIndex):
-    while True:
-            card = game.processPlayerAction(playerIndex)
-            if card:
-                print('player',playerIndex+1,'plays',card.getActualPoint(),card.getSuite())
-                return card
-
-def processPlayerAction(game,playerIndex):
-    player = game.getPlayer(playerIndex)
-    playedCard = player.getInputPlayedCard()
-    if player.canPlayCard(playedCard) and game.isNotViolateGameLaw(playedCard):
-        return playedCard
-    if game.isVoidCard(player.getAllCard(),game.__playedCardsEachRound[0],playerIndex):
-        return playedCard
-    return False
+def mapOutPutToCard(output):
+    arr = np.array(output)
+    arr = arr.reshape(4,7)
+    indices = np.where(arr == 1)
+    suites = ['Hearts','Diamonds','Clubs','Spades']
+    suiteIndex = indices[0][0]
+    pointIndex = indices[1][0]
+    points = [0,5,10,'J','Q','K','A']
+    smallPoints = [2,3,4,6,7,8,9]
+    suiteOutput = suites[suiteIndex]
+    pointOutput = points[pointIndex]
+    fakeID = 0
+    if(pointOutput ==0):
+        cardOutput = [card(suiteOutput,point,fakeID) for point in smallPoints]
+    else:
+        cardOutput = [card(suiteOutput,pointOutput,fakeID)]
+    return cardOutput
+def playCard(game,output):
+    card_to_play = mapOutPutToCard(output)
+    for i in range(len(card_to_play)) :
+        if game.play_step(card_to_play[i]):
+            return True
+        return False
 if __name__ == '__main__':
     train()
+
+
+# to do 
+
+# implement determine score 

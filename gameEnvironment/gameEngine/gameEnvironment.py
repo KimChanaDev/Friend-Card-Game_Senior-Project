@@ -75,12 +75,11 @@ class card:
             return (self.__logicPoint == other.__logicPoint) and (self.__suite == other.__suite)
         return False
     def __hash__(self):
-        return self.__id
+       return self.__id
     def __lt__(self, other):
-        return self.__logicPoint < other.__logicPoint
-    
+        return self.__id < other.__id
     def __gt__(self, other):
-        return self.__logicPoint > other.__logicPoint
+        return self.__id > other.__id
     def getLogicPoint(self):
         return self.__logicPoint
     def getSuite(self):
@@ -390,7 +389,7 @@ class Game:
         self.__isRun = False
         self.setEndGameStatus(False)
         self.__round = 1
-    def isEndGane(self):
+    def isEndGame(self):
         return self.__isEndGame
     def showDataWhenGameStart(self):
         print("bid winner is player",self.getBidWinnerPosition()+1)
@@ -433,7 +432,7 @@ def main():
     game.setFriendCard()
     game.identifyTeam()
     game.reset()
-    while not game.isEndGane():
+    while not game.isEndGame():
         current_player = game.getPlayer(game.getTurnPlayerIndex())
         action = current_player.getInputPlayedCard()
         game.play_turn(action)
