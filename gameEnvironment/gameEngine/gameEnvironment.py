@@ -42,7 +42,7 @@ class player:
             print(3)
             return False
         if not self.isCardInhand(card):
-            print(4)
+           # print(4)
             return False
         return True
     def _getRanDomCard(self):
@@ -255,7 +255,11 @@ class Game:
     def processPlayerAction(self,playerIndex,action):
         player = self.getPlayer(playerIndex)
         if not player.canPlayCard(action):
-            print(1)
+           
+            # print( ', '.join(map(str, player.getAllCard())))
+            # print(action)
+            # print()
+            #print(len(player.getAllCard()))
             return False
         if player.canPlayCard(action) and self.isNotViolateGameLaw(action):
             print(2)

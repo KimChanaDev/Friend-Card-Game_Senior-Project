@@ -74,6 +74,7 @@ class Agent:
         self.epsilon = 300 - self.n_games
         if random.randint(0, 200) < self.epsilon:
             action = random.randint(0, 27)
+            #print(action)
             card_to_play[action] = 1
         else:
             state0 = torch.tensor(state, dtype=torch.float)
@@ -125,7 +126,7 @@ def train():
     
         if done:
             # train long memory, plot result
-            game.reset()
+            # game.reset()
             agent.n_games += 1
             agent.train_long_memory()
 
@@ -161,7 +162,7 @@ def playCard(game,output):
     for i in range(len(card_to_play)) :
         if game.play_turn(card_to_play[i]):
             return True
-        return False
+    return False
 if __name__ == '__main__':
     train()
 
