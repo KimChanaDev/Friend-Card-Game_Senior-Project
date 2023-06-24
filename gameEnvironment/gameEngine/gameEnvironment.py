@@ -152,9 +152,13 @@ class Game:
         self.__clubsVoidCard  = []
         self.__spadesVoidCard  = []
         self.__diamondsVoidCard  = []
-        self.__leadingPlayerIndex = None
+        self.__turnPlayerIndex = None
         self.__friendPlayer = None
         self.__trumpPlayedCard = []
+        self.__turn = 1
+        self.__round = 1
+        self.__isRun = False
+        self.__isEndGame = False
     def getAllPlayerScore(self):
         result = [self.getPlayer(i).getGameScore() for i in range(4)]
         return result
@@ -186,7 +190,7 @@ class Game:
         BidedPointIndex = random.randint(0,len(BidedPoint)-1)
         self.__bidWinnerPosition = winnerIndex
         self.__bidedScore = BidedPoint[BidedPointIndex]
-        self.setLeadingPlayerIndex(winnerIndex)
+        self.setTurnPlayerIndex(winnerIndex)
     def getBidedScore(self):
         return self.__bidedScore
     def randomTrumpCard(self):
@@ -226,16 +230,7 @@ class Game:
         self.__friendPlayer = player
     def getFriendPlayer(self):
         return self.__friendPlayer
-    def playRound(self):
-        for i in range (4):
-            # print("cardPlayed",self.getPlayedCardEachRound())
-            print("all score",self.getAllPlayerScore())
-            playerIndex = (self.getLeadingPlaeyrIndex()+i ) %4
-            card = self.getPlayedCard(playerIndex)
-            if card.getSuite() == self.getTrumpCard():
-                self.setTrumpPlayedCard(card.getLogicPoint())
-            self.updatePlayedCardEachRound(card)
-            self.updateCardInPlayerHand(playerIndex,card)
+ 
     def setTrumpPlayedCard(self,value):
         self.__trumpPlayedCard.append(value)
     def getTrumpPlayedCard(self):
@@ -243,19 +238,13 @@ class Game:
         if len(result) < 13:
             result.append(-1)
         return result
-    def getPlayedCard(self,playerIndex):
-        while True:
-                card = self.processPlayerAction(playerIndex)
-                if card:
-                    print('player',playerIndex+1,'plays',card.getActualPoint(),card.getSuite())
-                    return card
-    def processPlayerAction(self,playerIndex):
+
+    def processPlayerAction(self,playerIndex,action):
         player = self.getPlayer(playerIndex)
-        playedCard = player.getInputPlayedCard()
-        if player.canPlayCard(playedCard) and self.isNotViolateGameLaw(playedCard):
-            return playedCard
+        if player.canPlayCard(action) and self.isNotViolateGameLaw(action):
+            return action
         if self.isVoidCard(player.getAllCard(),self.__playedCardsEachRound[0],playerIndex):
-            return playedCard
+            return action
         return False
     
    
@@ -283,13 +272,13 @@ class Game:
     def setGeneralVoidCard(self,playerIndex,suite):
         suites = ['Hearts','Diamonds','Clubs','Spades']
         if suites.index(suite) ==0:
-            self.setHeartsVoid(playerIndex,suite)
+            self.setHeartsVoidCard(playerIndex,suite)
         elif suites.index(suite) ==1:
-            self.setDiamondsVoid(playerIndex,suite)
+            self.setDiamondsVoidCard(playerIndex,suite)
         elif suites.index(suite) ==2:
-            self.setClubsVoid(playerIndex,suite)
+            self.setClubsVoidCard(playerIndex,suite)
         else:
-            self.setSpadesVoid(playerIndex,suite)
+            self.setSpadesVoidCard(playerIndex,suite)
         
     def setHeartsVoidCard(self,playerIndex,suite):
         self.__heartsVoidCard.append(playerIndex)
@@ -328,30 +317,7 @@ class Game:
         self.__heartsVoidCard = []
         self.__playedCardsEachRound = []
 
-    def playMatch(self):
-        print("bid winner is player",self.getBidWinnerPosition()+1)
-        print("trump card is",self.getTrumpCard())
-        print("friend card is",self.getFriendCard().getActualPoint(),self.getFriendCard().getSuite())
-        print ("friend is ",self.getFriendPlayer().getName())
-       
-        for i in range(13):
-            print('round',i+1)
-            self.cleanUpGame()
-            print('Player',self.getLeadingPlaeyrIndex()+1,'is leading player')
-            self.playRound()
-            playerIndex = (self.determineHighestCard(self.__playedCardsEachRound) + self.getLeadingPlaeyrIndex())%4
-            score = self.calculateGameScore(self.__playedCardsEachRound)
-            player = self.getPlayer(playerIndex)
-            oldScore = player.getGameScore()
-            player.addGameScore(score)
-            print("Player ",playerIndex+1,"accumulate score",oldScore,'+',score,'=',player.getGameScore())
-            self.setLeadingPlayerIndex(playerIndex)
-            print('-----------------------------------------------')
-        print('summary score')
-        for i in range (4):
-            print('player',i+1,'get',self.getPlayer(i).getGameScore(),'scores')
-        print("team bid winner & friend get ",self.getTeam(0).getScore())
-        print("other team get get ",self.getTeam(1).getScore())
+   
     def determineHighestCard(self,cards):
         returnCardIndex = None
         leadSuiteCard = cards[0].getSuite()
@@ -369,20 +335,96 @@ class Game:
             if cards[indices_candidate_cards[i]] > cards[returnCardIndex]:
                 returnCardIndex = indices_candidate_cards[i]
         return returnCardIndex
-    def setLeadingPlayerIndex(self,index):
-        self.__leadingPlayerIndex = index
-    def getLeadingPlaeyrIndex(self):
-        return self.__leadingPlayerIndex
+    def setTurnPlayerIndex(self,index):
+        self.__turnPlayerIndex = index
+    def getTurnPlayerIndex(self):
+        return self.__turnPlayerIndex
+    def incTurnPlayerIndex(self):
+        self.__turnPlayerIndex = (self.__turnPlayerIndex+1)%4
     def calculateGameScore(self,cards):
         score = sum( card.getScore() for card in cards)
         return score
+    def play_turn(self,action):
+        if self.isFirstTurnEver():
+            self.showDataWhenRoundGetStart()
+        playerIndex = self.getTurnPlayerIndex()
+        card = self.processPlayerAction(playerIndex,action)
+        if not card:
+            print('player',playerIndex+1,'plays invalid card')
+            return False
+        print('player',playerIndex+1,'plays',card.getActualPoint(),card.getSuite())
+        if card.getSuite() == self.getTrumpCard():
+            self.setTrumpPlayedCard(card.getLogicPoint())
+        self.updatePlayedCardEachRound(card)
+        self.updateCardInPlayerHand(playerIndex,card) 
+        self.incTurn()
+        return True
+    
+    def incTurn(self):
+        if self.__turn+1 > 4:
+            self.__turn = 1
+            self.incRound()
+        else:
+            self.__turn+=1
+            self.incTurnPlayerIndex()
+    def getRound(self):
+        return self.__round
+    def incRound(self):
+        self.processAfterRoundEnd()
+        self.cleanUpGame()
+        if self.__round + 1 > 13:
+            self.setEndGameStatus(True)
+        else:
+            self.__round+=1
+            self.showDataWhenRoundGetStart()
+        
+        
+    def setEndGameStatus(self,endGameStatus):
+        self.__isEndGame = endGameStatus
+    def isFirstTurnEver(self):
+        if (self.__isRun):
+            return False
+        self.__isRun = True
+        return True
+    def reset(self):
+        self.__isRun = False
+        self.setEndGameStatus(False)
+        self.__round = 1
+    def isEndGane(self):
+        return self.__isEndGame
+    def showDataWhenGameStart(self):
+        print("bid winner is player",self.getBidWinnerPosition()+1)
+        print("trump card is",self.getTrumpCard())
+        print("friend card is",self.getFriendCard().getActualPoint(),self.getFriendCard().getSuite())
+        print ("friend is ",self.getFriendPlayer().getName())
  
+    def processAfterRoundEnd(self):
+        playerIndex = (self.determineHighestCard(self.__playedCardsEachRound) + self.getTurnPlayerIndex())%4
+        score = self.calculateGameScore(self.__playedCardsEachRound)
+        player = self.getPlayer(playerIndex)
+        oldScore = player.getGameScore()
+        player.addGameScore(score)
+        print("Player ",playerIndex+1,"accumulate score",oldScore,'+',score,'=',player.getGameScore())
+        self.setTurnPlayerIndex(playerIndex)
+        print('-----------------------------------------------')
+    def showDataWhenRoundGetStart(self):
+        print('round',self.getRound())
+        print('Player',self.getTurnPlayerIndex()+1,'is leading player')
+    
+    def summaryScore(self):
+        print('summary score')
+        for i in range (4):
+            print('player',i+1,'get',self.getPlayer(i).getGameScore(),'scores')
+        print("team bid winner & friend get ",self.getTeam(0).getScore())
+        print("other team get get ",self.getTeam(1).getScore())
+  
+        
 def main():
     # bidding phase
-    p1 = player("p1")
-    p2 = player("p2")
-    p3 = player("p3")
-    p4 = player("p4")
+    p1 = player("p1",0)
+    p2 = player("p2",1)
+    p3 = player("p3",2)
+    p4 = player("p4",3)
     game = Game(p1,p2,p3,p4)
     game.setGameScore()
     game.provideCard()
@@ -390,8 +432,11 @@ def main():
     game.randomTrumpCard()
     game.setFriendCard()
     game.identifyTeam()
-    # gameplay phase
-    game.playMatch()  # dont forget to invoke getPlayedCard method in playRound
-
+    game.reset()
+    while not game.isEndGane():
+        current_player = game.getPlayer(game.getTurnPlayerIndex())
+        action = current_player.getInputPlayedCard()
+        game.play_turn(action)
+    game.summaryScore()
 if __name__ == "__main__":
     main()
