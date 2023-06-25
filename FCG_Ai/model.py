@@ -52,9 +52,10 @@ class QTrainer:
 
         target = pred.clone()
         for idx in range(len(done)):
+            Q_old =  target[idx][torch.argmax(action[idx]).item()]
             Q_new = reward[idx]
             if not done[idx]:
-                Q_new = reward[idx] + self.gamma * torch.max(self.model(next_state[idx]))
+                Q_new = Q_old+ self.lr*(reward[idx] + self.gamma * torch.max(self.model(next_state[idx])) -Q_old)
 
             target[idx][torch.argmax(action[idx]).item()] = Q_new
     

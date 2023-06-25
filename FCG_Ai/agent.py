@@ -9,6 +9,12 @@ from helper import plot
 MAX_MEMORY = 100_000
 BATCH_SIZE = 1000
 LR = 0.001
+CARD_DICT = {'Hearts':{2:0,3:1,4:2,5:3,6:4,7:5,8:6,9:7,10:8,'J':9,'Q':10,'K':11,'A':12},
+            'Diamonds':{2:13,3:14,4:15,5:16,6:17,7:18,8:19,9:20,10:21,'J':22,'Q':23,'K':24,'A':25},
+            'Clubs':{2:26,3:27,4:28,5:29,6:30,7:31,8:32,9:33,10:34,'J':35,'Q':36,'K':37,'A':38},
+            'Spades':{2:39,3:40,4:41,5:42,6:43,7:44,8:45,9:46,10:47,'J':48,'Q':49,'K':50,'A':51},
+
+    }
 
 class Agent:
 
@@ -17,7 +23,7 @@ class Agent:
         self.epsilon = 0 # randomness
         self.gamma = 0.9 # discount rate
         self.memory = deque(maxlen=MAX_MEMORY) # popleft()
-        self.model = Linear_QNet(55, 256, 28)
+        self.model = Linear_QNet(125, 256, 28)
         self.trainer = QTrainer(self.model, lr=LR, gamma=self.gamma)
 
 
@@ -26,23 +32,22 @@ class Agent:
         leadingIndex = game.getLeadingPlayerIndex()
         suites = ['Hearts','Diamonds','Clubs','Spades']
         cardInhand = [card.getId() for card in sorted(game.getPlayer(playerIndex).getAllCard())]
-        while len(cardInhand) < 13:
-            cardInhand.append(-1)
+        cardInhand = [1 if i in cardInhand else 0 for i in range(52)]
         cardPlayedEachRound = game.getPlayedCardEachRound()
-        playersGameScore = game.getAllPlayerScore()
-        trumpCard =  suites.index(game.getTrumpCard())  
-        clubsVoid = game.getClubsVoidCard()
-        heartsVoid  = game.getHeartsVoidCard()
-        diamondsVoid = game.getDiamondsVoidCard()
-        spadesVoid = game.getSpadesVoidCard()
+        IDcardPlayedEachRound  = [ card.getId() for card in cardPlayedEachRound]
+        leadingSuite = None
+        if len(cardPlayedEachRound)==0:
+            leadingSuite = [0,0,0,0]
+        else:
+            leadingSuite = [1 if cardPlayedEachRound[0].getSuite()==suites[i] else 0 for i in range(4)]
+        trumpSuite= [0,0,0,0]
+        trumpSuite[suites.index(game.getTrumpCard()) ]  =  1
         trumpPlayedCard = game.getTrumpPlayedCard()
-        # print('all trump',trumpPlayedCard)
-        friendTeam = [game.getTeam(0).mate1.getIndex(),game.getTeam(0).mate2.getIndex()]
-        state = [playerIndex,leadingIndex,trumpCard]+cardInhand+cardPlayedEachRound\
-                +playersGameScore\
-                +clubsVoid+heartsVoid+diamondsVoid+spadesVoid\
-                +trumpPlayedCard+friendTeam
-        # print(len(state))
+        cardInField = [1 if i in IDcardPlayedEachRound else 0 for i in range(52)]
+        state = cardInhand+leadingSuite+trumpSuite+cardInField+trumpPlayedCard
+     #   print(state)
+        # card in hand , leading suite, trump suite,card in field,trump card
+        # 52,4,4,52,13
         done = game.isEndGame()
         return np.array(state, dtype=int),done
 
@@ -71,27 +76,31 @@ class Agent:
         diamon_to_play = [0,0,0,0,0,0,0] 
         heart_to_play = [0,0,0,0,0,0,0]
         card_to_play = heart_to_play+diamon_to_play+club_to_play+spade_to_play 
-        self.epsilon = 300 - self.n_games
-        if random.randint(0, 200) < self.epsilon:
+        self.epsilon = 8000 - self.n_games
+        rand = random.randint(0, 200)
+        # print(rand)
+        if  rand< self.epsilon:
             action = random.randint(0, 27)
             #print(action)
             card_to_play[action] = 1
         else:
             state0 = torch.tensor(state, dtype=torch.float)
             prediction = self.model(state0)
+            # print(prediction,"(predict)")
             action = torch.argmax(prediction).item()
+            # print(action,'action')
             card_to_play[action] = 1
+            
 
         return card_to_play
     def get_reward(self,game):
         return game.getReward()
 
-def train():
+def train(agent):
     plot_scores = []
     plot_mean_scores = []
     total_score = 0
     record = 0
-    agent = Agent()
     p1 = player("p1",0)
     p2 = player("p2",1)
     p3 = player("p3",2)
@@ -110,14 +119,14 @@ def train():
     while not game.isEndGame():
         for i in range(4):
             state_old[i],done = agent.get_state(game)
-            output[i] = agent.get_action(state_old)
+            output[i] = agent.get_action(state_old[i])
             while not playCard(game,output[i]):
                 reward = -1000
                 state_new,done = agent.get_state(game)
                 
                 agent.train_short_memory(state_old[i],output[i], reward, state_new, done)
                 agent.remember(state_old[i],output[i], reward, state_new, done)
-                output[i] = agent.get_action(state_old)
+                output[i] = agent.get_action(state_old[i])
         state_new,done =  agent.get_state(game)
         reward = agent.get_reward(game)
         for i in range(4):
@@ -151,11 +160,11 @@ def mapOutPutToCard(output):
     smallPoints = [2,3,4,6,7,8,9]
     suiteOutput = suites[suiteIndex]
     pointOutput = points[pointIndex]
-    fakeID = 0
+    
     if(pointOutput ==0):
-        cardOutput = [card(suiteOutput,point,fakeID) for point in smallPoints]
+        cardOutput = [card(suiteOutput,point,CARD_DICT[suiteOutput][point]) for point in smallPoints]
     else:
-        cardOutput = [card(suiteOutput,pointOutput,fakeID)]
+        cardOutput = [card(suiteOutput,pointOutput,CARD_DICT[suiteOutput][pointOutput])]
     return cardOutput
 def playCard(game,output):
     card_to_play = mapOutPutToCard(output)
@@ -163,8 +172,19 @@ def playCard(game,output):
         if game.play_turn(card_to_play[i]):
             return True
     return False
+
+def main():
+    agent = Agent()
+    epochs = 10
+    batchs = 1000
+    for epoch in range(epochs):
+        for batch in range(batchs):
+            print('epoch',epoch,'batch',batch)
+            train(agent)
+        agent.model.save()
+
 if __name__ == '__main__':
-    train()
+    main()
 
 
 # to do 
