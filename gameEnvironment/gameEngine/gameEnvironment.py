@@ -442,12 +442,15 @@ class Game:
         pass
     
     def summaryScore(self):
+        scores = []
         # print('summary score')
-        # for i in range (4):
-        #     print('player',i+1,'get',self.getPlayer(i).getGameScore(),'scores')
+        for i in range (4):
+            # print('player',i+1,'get',self.getPlayer(i).getGameScore(),'scores')
+            scores.append(self.getPlayer(i).getGameScore())
         # print("team bid winner & friend get ",self.getTeam(0).getScore())
         # print("other team get get ",self.getTeam(1).getScore())
-        pass
+        return scores
+        
     def getReward(self):
         return self.__reward
     def getBidWinnerTeam(self):

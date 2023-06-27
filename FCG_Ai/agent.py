@@ -8,7 +8,7 @@ from helper import plot
 
 MAX_MEMORY = 100_000
 BATCH_SIZE = 1000
-LR = 0.001
+LR = 0.00001
 CARD_DICT = {'Hearts':{2:0,3:1,4:2,5:3,6:4,7:5,8:6,9:7,10:8,'J':9,'Q':10,'K':11,'A':12},
             'Diamonds':{2:13,3:14,4:15,5:16,6:17,7:18,8:19,9:20,10:21,'J':22,'Q':23,'K':24,'A':25},
             'Clubs':{2:26,3:27,4:28,5:29,6:30,7:31,8:32,9:33,10:34,'J':35,'Q':36,'K':37,'A':38},
@@ -21,9 +21,11 @@ class Agent:
     def __init__(self):
         self.n_games = 0
         self.epsilon = 0 # randomness
-        self.gamma = 0.9 # discount rate
+        self.gamma = 0.618 # discount rate
         self.memory = deque(maxlen=MAX_MEMORY) # popleft()
         self.model = Linear_QNet(125, 256, 28)
+        self.model.load_state_dict(torch.load('C:\\Users\\User\\Desktop\\friendCardGame\\model\\model.pth'))
+        self.model.eval()
         self.trainer = QTrainer(self.model, lr=LR, gamma=self.gamma)
 
 
@@ -68,7 +70,7 @@ class Agent:
     def train_short_memory(self, state, action, reward, next_state, done):
         self.trainer.train_step(state, action, reward, next_state, done)
 
-    def get_action(self, state):
+    def get_action(self, state,n_largest):
         # random moves: tradeoff exploration / exploitation
         # 'Hearts','Diamonds','Clubs','Spades'
         club_to_play = [0,0,0,0,0,0,0]
@@ -76,20 +78,23 @@ class Agent:
         diamon_to_play = [0,0,0,0,0,0,0] 
         heart_to_play = [0,0,0,0,0,0,0]
         card_to_play = heart_to_play+diamon_to_play+club_to_play+spade_to_play 
-        self.epsilon = 8000 - self.n_games
+        self.epsilon = 8000-self.n_games
         rand = random.randint(0, 200)
         # print(rand)
-        if  rand< self.epsilon:
-            action = random.randint(0, 27)
-            #print(action)
-            card_to_play[action] = 1
-        else:
-            state0 = torch.tensor(state, dtype=torch.float)
-            prediction = self.model(state0)
-            # print(prediction,"(predict)")
-            action = torch.argmax(prediction).item()
-            # print(action,'action')
-            card_to_play[action] = 1
+        # if  rand< self.epsilon:
+        #     action = random.randint(0, 27)
+        #     #print(action)
+        #     card_to_play[action] = 1
+        # else:
+        state0 = torch.tensor(state, dtype=torch.float)
+        prediction = self.model(state0)
+        values, indices = torch.topk(prediction, k=28)
+        # print(prediction)
+        # print(prediction,"(predict)")
+        # action = (torch.argmax(prediction).item() + offset) % 28
+        action = indices[n_largest].item()
+        # print(action,'action')
+        card_to_play[action] = 1
             
 
         return card_to_play
@@ -117,16 +122,25 @@ def train(agent):
     output = [None,None,None,None]
     
     while not game.isEndGame():
+        print(game.getRound())
         for i in range(4):
             state_old[i],done = agent.get_state(game)
-            output[i] = agent.get_action(state_old[i])
+            output[i] = agent.get_action(state_old[i],0)
+            outputDict = {}
+            offset = 1
             while not playCard(game,output[i]):
+                
                 reward = -1000
                 state_new,done = agent.get_state(game)
                 
                 agent.train_short_memory(state_old[i],output[i], reward, state_new, done)
                 agent.remember(state_old[i],output[i], reward, state_new, done)
-                output[i] = agent.get_action(state_old[i])
+                output[i] = agent.get_action(state_old[i],offset)
+                offset+=1
+                # print(output[i])
+                if output[i].index(max(output[i])) not in outputDict:
+                    outputDict[output[i].index(max(output[i]))] = 1
+                # print(len(outputDict))
         state_new,done =  agent.get_state(game)
         reward = agent.get_reward(game)
         for i in range(4):
