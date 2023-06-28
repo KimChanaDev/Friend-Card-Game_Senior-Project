@@ -6,8 +6,8 @@ from GameEnvironment.gameEngine.gameEnvironment import *
 from model import Linear_QNet, QTrainer
 from helper import plot
 
-MAX_MEMORY = 100_000
-BATCH_SIZE = 1000
+MAX_MEMORY = 2000000
+BATCH_SIZE = 2000000
 LR = 0.00001
 CARD_DICT = {'Hearts':{2:0,3:1,4:2,5:3,6:4,7:5,8:6,9:7,10:8,'J':9,'Q':10,'K':11,'A':12},
             'Diamonds':{2:13,3:14,4:15,5:16,6:17,7:18,8:19,9:20,10:21,'J':22,'Q':23,'K':24,'A':25},
@@ -16,19 +16,24 @@ CARD_DICT = {'Hearts':{2:0,3:1,4:2,5:3,6:4,7:5,8:6,9:7,10:8,'J':9,'Q':10,'K':11,
 
     }
 
+
 class Agent:
 
     def __init__(self):
         self.n_games = 0
         self.epsilon = 0 # randomness
         self.gamma = 0.618 # discount rate
-        self.memory = deque(maxlen=MAX_MEMORY) # popleft()
+        self.memory = deque() # popleft()
         self.model = Linear_QNet(125, 256, 28)
+        self.trainer = QTrainer(self.model, lr=LR, gamma=self.gamma)
+
+    def loadModel(self):
         self.model.load_state_dict(torch.load('C:\\Users\\User\\Desktop\\friendCardGame\\model\\model.pth'))
         self.model.eval()
         self.trainer = QTrainer(self.model, lr=LR, gamma=self.gamma)
 
-
+    
+    
     def get_state(self, game):
         playerIndex = game.getTurnPlayerIndex()
         leadingIndex = game.getLeadingPlayerIndex()
@@ -57,11 +62,11 @@ class Agent:
         self.memory.append((state, action, reward, next_state, done)) # popleft if MAX_MEMORY is reached
 
     def train_long_memory(self):
-        if len(self.memory) > BATCH_SIZE:
-            mini_sample = random.sample(self.memory, BATCH_SIZE) # list of tuples
-        else:
-            mini_sample = self.memory
-
+        # if len(self.memory) > BATCH_SIZE:
+        #     mini_sample = random.sample(self.memory, BATCH_SIZE) # list of tuples
+        # else:
+        #     mini_sample = self.memory
+        mini_sample = self.memory
         states, actions, rewards, next_states, dones = zip(*mini_sample)
         self.trainer.train_step(states, actions, rewards, next_states, dones)
         #for state, action, reward, nexrt_state, done in mini_sample:
@@ -91,7 +96,7 @@ class Agent:
         values, indices = torch.topk(prediction, k=28)
         # print(prediction)
         # print(prediction,"(predict)")
-        # action = (torch.argmax(prediction).item() + offset) % 28
+        # action = (torch.argmax(prediction).item() + n_largest) % 28
         action = indices[n_largest].item()
         # print(action,'action')
         card_to_play[action] = 1
@@ -101,7 +106,7 @@ class Agent:
     def get_reward(self,game):
         return game.getReward()
 
-def train(agent):
+def play(newAgent):
     plot_scores = []
     plot_mean_scores = []
     total_score = 0
@@ -118,51 +123,63 @@ def train(agent):
     game.setFriendCard()
     game.identifyTeam()
     game.reset()
-    state_old = [None,None,None,None]
+    state_old =[None,None,None,None]
+    state_new =[None,None,None,None]
     output = [None,None,None,None]
+    reward = [None,None,None,None]
+    done = [None,None,None,None]
+
+    train_state_old =[None,None,None,None]
+    train_state_new =[None,None,None,None]
+    train_output = [None,None,None,None]
+    train_reward = [None,None,None,None]
+    train_done = [None,None,None,None]
+
+    oldAgent = Agent()
+    oldAgent.loadModel()
     
     while not game.isEndGame():
-        print(game.getRound())
         for i in range(4):
-            state_old[i],done = agent.get_state(game)
-            output[i] = agent.get_action(state_old[i],0)
-            outputDict = {}
-            offset = 1
+            state_old[i],done[i] = newAgent.get_state(game)
+            output[i] = oldAgent.get_action(state_old[i],0)
+            n_largest = 1
             while not playCard(game,output[i]):
-                
-                reward = -1000
-                state_new,done = agent.get_state(game)
-                
-                agent.train_short_memory(state_old[i],output[i], reward, state_new, done)
-                agent.remember(state_old[i],output[i], reward, state_new, done)
-                output[i] = agent.get_action(state_old[i],offset)
-                offset+=1
+                output[i] = oldAgent.get_action(state_old[i],n_largest)
+                n_largest+=1
                 # print(output[i])
-                if output[i].index(max(output[i])) not in outputDict:
-                    outputDict[output[i].index(max(output[i]))] = 1
+                # if output[i].index(max(output[i])) not in outputDict:
+                #     outputDict[output[i].index(max(output[i]))] = 1
                 # print(len(outputDict))
-        state_new,done =  agent.get_state(game)
-        reward = agent.get_reward(game)
+        reward = newAgent.get_reward(game)
+       
+       
+        if  game.isEndGame():
+            train_state_new = state_old
+            for i in range(4):
+                newAgent.remember(train_state_old[i],train_output[i], train_reward[i], train_state_new[i], train_done[i])
+            train_output = output
+            train_state_old = state_old
+            train_state_new,train_done =  newAgent.get_state(game)
+            train_reward = reward
+            for i in range(4):
+                 newAgent.remember(train_state_old[i],train_output[i], train_reward[i], train_state_new[i], train_done[i])
+            newAgent.n_games += 1
+            return
+        
+        if game.getRound()!=1:
+            train_state_new = state_old
+            for i in range(4):
+                newAgent.remember(train_state_old[i],train_output[i], train_reward[i], train_state_new[i], train_done[i])
         for i in range(4):
-            agent.train_short_memory(state_old[i],output[i], reward[i], state_new, done)
-            agent.remember(state_old[i],output[i], reward[i], state_new, done)
+            train_state_old = state_old
+            train_output = output
+            train_reward = reward
+            train_done  = done
+        
+        
     
-        if done:
-            # train long memory, plot result
-            # game.reset()
-            agent.n_games += 1
-            agent.train_long_memory()
-
-    game.summaryScore()
-    # winnerTeam = None
-    # if game.getBidWinnerTeam().isWinner():
-    #     winnerTeam = game.getBidWinnerTeam
-    # else:
-    #     winnerTeam = game.getOtherTeam()
-    # indexWinner1 = winnerTeam.mate1.getIndex()
-    # indexWinner2 = winnerTeam.mate1.getIndex()
-
-
+          
+    # game.summaryScore()
 def mapOutPutToCard(output):
     arr = np.array(output)
     arr = arr.reshape(4,7)
@@ -188,15 +205,14 @@ def playCard(game,output):
     return False
 
 def main():
-    agent = Agent()
-    epochs = 10
-    batchs = 1000
-    for epoch in range(epochs):
-        for batch in range(batchs):
-            print('epoch',epoch,'batch',batch)
-            train(agent)
-        agent.model.save()
-
+    newAgent = Agent()
+    for i in range(20000):
+        play(newAgent)
+    print(len(newAgent.memory))
+    for i in range(3):
+        newAgent.train_long_memory()
+        print("train",i)    
+    newAgent.model.save('model1.pth')
 if __name__ == '__main__':
     main()
 

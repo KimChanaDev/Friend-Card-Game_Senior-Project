@@ -59,8 +59,15 @@ class QTrainer:
             Q_new = reward[idx]
             
             if not done[idx]:
-                Q_new = reward[idx] + self.gamma * torch.max(self.model(next_state[idx]))
-            
+                while True:
+                    k = 1
+                    top_values, top_indices = torch.topk(self.model(next_state[idx]), k=k)
+                    if self.notViolateRule(next_state[idx],top_indices[k-1].item()):
+                         Q_new = reward[idx] + self.gamma * top_values[k-1].item()
+                         break
+                    else:
+                        k+=1
+                        print(k)
             # print(Q_new,'Q_new\n')
             target[idx][torch.argmax(action[idx]).item()] = Q_new
     
@@ -71,5 +78,52 @@ class QTrainer:
         loss = self.criterion(target, pred)
         loss.backward()
         self.optimizer.step()
-
+    def notViolateRule(self,state_tensor,action):
+        state_array = state_tensor.numpy()
+        cardInhand = state_array[0:52]
+        leadingSuite = state_array[52:56]
+        trumpSuite = state_array[56:60]
+        self.checkCardInhand(cardInhand,action)
+        # check if card is in hand
+        if not self.isCardInhand(cardInhand,action):
+            return False
+        # check if it is a leading card otherwise check if card follow leading card
+        if self.isLeadingAction(leadingSuite):
+            return True
+        if self.isFollowLeading(leadingSuite,action):
+            return True
+        # check if card is a trump
+        if self.isTrumpcard(trumpSuite,action):
+            return True
+        # check if void card
+        if self.isVoidCard(cardInhand,leadingSuite):
+            return True
+        return False
+    def isCardInhand(self,cards,action):
+        row_index = action / 4
+        for i in range(13):
+            if (cards[(row_index*13)+i]==1):
+                return True
+        return False
+    def isTrumpcard(self,trump,action):
+        row_index = action / 4
+        if trump[row_index]==1:
+            return True
+        return False
+    def isVoidCard(self,cards,leadingSuite):
+        leadingSuiteIndex = leadingSuite.index(1)
+        for i in range(13):
+            if cards[leadingSuite][i]==1:
+                return False
+        return True
+    
+    def isFollowLeading(self,leadingSuite,action):
+        row_index = action / 4
+        if leadingSuite[row_index]==1:
+            return True
+        return False
+    def isLeadingAction(self,leadingSuite):
+        if all(suite == 0 for suite in leadingSuite):
+            return True
+        return False
 
