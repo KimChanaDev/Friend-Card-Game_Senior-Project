@@ -270,8 +270,8 @@ class Game:
     def isNotViolateGameLaw(self,card):
         if len(self.__playedCardsEachRound)==0:
             return True
-        if card.getSuite() == self.getTrumpCard():
-            return True
+        # if card.getSuite() == self.getTrumpCard():
+        #     return True
         if card.getSuite() == self.__playedCardsEachRound[0].getSuite():
             return True
         return False

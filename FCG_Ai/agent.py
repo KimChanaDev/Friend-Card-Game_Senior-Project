@@ -8,7 +8,7 @@ from helper import plot
 
 MAX_MEMORY = 2000000
 BATCH_SIZE = 2000000
-LR = 0.00001
+LR = 0.001
 CARD_DICT = {'Hearts':{2:0,3:1,4:2,5:3,6:4,7:5,8:6,9:7,10:8,'J':9,'Q':10,'K':11,'A':12},
             'Diamonds':{2:13,3:14,4:15,5:16,6:17,7:18,8:19,9:20,10:21,'J':22,'Q':23,'K':24,'A':25},
             'Clubs':{2:26,3:27,4:28,5:29,6:30,7:31,8:32,9:33,10:34,'J':35,'Q':36,'K':37,'A':38},
@@ -27,8 +27,8 @@ class Agent:
         self.model = Linear_QNet(125, 256, 28)
         self.trainer = QTrainer(self.model, lr=LR, gamma=self.gamma)
 
-    def loadModel(self):
-        self.model.load_state_dict(torch.load('C:\\Users\\User\\Desktop\\friendCardGame\\model\\model.pth'))
+    def loadModel(self,path):
+        self.model.load_state_dict(torch.load(path))
         self.model.eval()
         self.trainer = QTrainer(self.model, lr=LR, gamma=self.gamma)
 
@@ -93,8 +93,9 @@ class Agent:
         # else:
         state0 = torch.tensor(state, dtype=torch.float)
         prediction = self.model(state0)
+        
         values, indices = torch.topk(prediction, k=28)
-        # print(prediction)
+        print(prediction)
         # print(prediction,"(predict)")
         # action = (torch.argmax(prediction).item() + n_largest) % 28
         action = indices[n_largest].item()
@@ -136,13 +137,22 @@ def play(newAgent):
     train_done = [None,None,None,None]
 
     oldAgent = Agent()
-    oldAgent.loadModel()
+    oldAgent.loadModel('C:\\Users\\User\\Desktop\\friendCardGame\\model\\ez_first_gen.pth')
     
     while not game.isEndGame():
         for i in range(4):
             state_old[i],done[i] = newAgent.get_state(game)
             output[i] = oldAgent.get_action(state_old[i],0)
             n_largest = 1
+
+            # while True:
+            #     cardInHand = game.getPlayer(game.getTurnPlayerIndex()).getAllCard()
+            #     rand = random.randint(0,len(cardInHand)-1)
+            #     randomCard = cardInHand[rand]
+            #     output[i] = mapCardToOutPut(randomCard)
+            #     if game.play_turn(randomCard):
+            #         break
+
             while not playCard(game,output[i]):
                 output[i] = oldAgent.get_action(state_old[i],n_largest)
                 n_largest+=1
@@ -162,11 +172,11 @@ def play(newAgent):
             train_state_new,train_done =  newAgent.get_state(game)
             train_reward = reward
             for i in range(4):
-                 newAgent.remember(train_state_old[i],train_output[i], train_reward[i], train_state_new[i], train_done[i])
+                 newAgent.remember(train_state_old[i],train_output[i], train_reward[i], train_state_new, train_done)
             newAgent.n_games += 1
             return
         
-        if game.getRound()!=1:
+        if game.getRound()!=2:
             train_state_new = state_old
             for i in range(4):
                 newAgent.remember(train_state_old[i],train_output[i], train_reward[i], train_state_new[i], train_done[i])
@@ -180,6 +190,21 @@ def play(newAgent):
     
           
     # game.summaryScore()
+def mapCardToOutPut(card):
+    suites = ['Hearts','Diamonds','Clubs','Spades']
+    points = [0,5,10,'J','Q','K','A']
+    smallPoints = [2,3,4,6,7,8,9]
+    rowAction = suites.index(card.getSuite())
+    colAction = None
+    if card.getActualPoint() in smallPoints:
+        colAction = 0
+    else:
+        colAction = points.index(card.getActualPoint())
+    output = [0 for i in range(28)]
+    output[rowAction* 7 + colAction] = 1
+    return output
+    
+
 def mapOutPutToCard(output):
     arr = np.array(output)
     arr = arr.reshape(4,7)
@@ -206,13 +231,14 @@ def playCard(game,output):
 
 def main():
     newAgent = Agent()
+    # newAgent.loadModel('C:\\Users\\User\\Desktop\\friendCardGame\\model\\model1.pth')
     for i in range(20000):
         play(newAgent)
     print(len(newAgent.memory))
-    for i in range(3):
+    for i in range(2):
         newAgent.train_long_memory()
         print("train",i)    
-    newAgent.model.save('model1.pth')
+    newAgent.model.save('ez_second_gen.pth')
 if __name__ == '__main__':
     main()
 

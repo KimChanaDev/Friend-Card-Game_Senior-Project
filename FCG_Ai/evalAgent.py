@@ -27,6 +27,29 @@ def testBot(agent):
     output =None
     error = False
     count = 0
+    # while not game.isEndGame():
+    #     if game.getTurnPlayerIndex()==0 or game.getTurnPlayerIndex()==1:
+    #         state_old,done = agent.get_state(game)
+    #         n_largest = 0
+    #         output = agent.get_action(state_old,n_largest)
+    #         while not playCard(game,output):
+    #             n_largest+=1
+    #             output = agent.get_action(state_old,n_largest)
+    #             error = True
+                
+    #         # if error==True:
+    #         #     count+=1
+    #         #     # print(count)
+    #         #     error = False
+    #     else:
+    #         state_old,done = oldAgent.get_state(game)
+    #         n_largest = 0
+    #         output = oldAgent.get_action(state_old,n_largest)
+    #         while not playCard(game,output):
+    #             n_largest+=1
+    #             output = oldAgent.get_action(state_old,n_largest)
+    #             error = True
+
     while not game.isEndGame():
         if game.getTurnPlayerIndex()==0:
             state_old,done = agent.get_state(game)
@@ -36,10 +59,10 @@ def testBot(agent):
                 n_largest+=1
                 output = agent.get_action(state_old,n_largest)
                 error = True
-                
+            print(n_largest,'n_largest')    
             if error==True:
                 count+=1
-                # print(count)
+                print(count)
                 error = False
         else:
             while True:
@@ -50,12 +73,17 @@ def testBot(agent):
                     break
     scores = game.summaryScore()
     record[scores.index(max(scores))]+=1
+    # scores = game.summaryScore()
+    # record[scores.index(max(scores))]+=1
 
 def main():
+    # oldAgent = Agent()
+    # oldAgent.loadModel('C:\\Users\\User\\Desktop\\friendCardGame\\model\\model.pth')
+
+
     agent = Agent()
-    agent.model.load_state_dict(torch.load('C:\\Users\\User\\Desktop\\friendCardGame\\model\\model.pth'))
-    agent.model.eval()
-    for i in range(20000):
+    agent.loadModel('C:\\Users\\User\\Desktop\\friendCardGame\\model\\ez_first_gen.pth')
+    for i in range(1):
         # print(i)
         testBot(agent)
     print(record)  

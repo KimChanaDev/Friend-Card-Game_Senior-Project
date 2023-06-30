@@ -3,6 +3,7 @@ import torch.nn as nn
 import torch.optim as optim
 import torch.nn.functional as F
 import os
+import numpy as np
 
 class Linear_QNet(nn.Module):
     def __init__(self, input_size, hidden_size, output_size):
@@ -33,9 +34,15 @@ class QTrainer:
         self.criterion = nn.MSELoss()
 
     def train_step(self, state, action, reward, next_state, done):
+        state = np.array(state)
+        next_state = np.array(next_state)
+        action = np.array(action)
+        reward = np.array(reward)
+
+
         state = torch.tensor(state, dtype=torch.float)
         next_state = torch.tensor(next_state, dtype=torch.float)
-        action = torch.tensor(action, dtype=torch.long)
+        action = torch.tensor(action, dtype=torch.float)
         reward = torch.tensor(reward, dtype=torch.float)
         # (n, x)
 
@@ -59,15 +66,16 @@ class QTrainer:
             Q_new = reward[idx]
             
             if not done[idx]:
+                k = 1
                 while True:
-                    k = 1
+                    
                     top_values, top_indices = torch.topk(self.model(next_state[idx]), k=k)
                     if self.notViolateRule(next_state[idx],top_indices[k-1].item()):
                          Q_new = reward[idx] + self.gamma * top_values[k-1].item()
                          break
                     else:
                         k+=1
-                        print(k)
+                        # print(k)
             # print(Q_new,'Q_new\n')
             target[idx][torch.argmax(action[idx]).item()] = Q_new
     
@@ -83,7 +91,7 @@ class QTrainer:
         cardInhand = state_array[0:52]
         leadingSuite = state_array[52:56]
         trumpSuite = state_array[56:60]
-        self.checkCardInhand(cardInhand,action)
+        self.isCardInhand(cardInhand,action)
         # check if card is in hand
         if not self.isCardInhand(cardInhand,action):
             return False
@@ -93,32 +101,37 @@ class QTrainer:
         if self.isFollowLeading(leadingSuite,action):
             return True
         # check if card is a trump
-        if self.isTrumpcard(trumpSuite,action):
-            return True
+        # if self.isTrumpcard(trumpSuite,action):
+        #     return True
         # check if void card
         if self.isVoidCard(cardInhand,leadingSuite):
             return True
         return False
     def isCardInhand(self,cards,action):
-        row_index = action / 4
+        # print(action)
+        row_index = int(action / 7)
+      #  print(row_index)
         for i in range(13):
             if (cards[(row_index*13)+i]==1):
                 return True
         return False
     def isTrumpcard(self,trump,action):
-        row_index = action / 4
+        row_index = int(action / 7)
         if trump[row_index]==1:
             return True
         return False
     def isVoidCard(self,cards,leadingSuite):
-        leadingSuiteIndex = leadingSuite.index(1)
+    
+        leadingSuiteIndex = np.where(leadingSuite == 1)
+        leadingSuiteIndex = leadingSuiteIndex[0][0]
+        # print(leadingSuiteIndex)
         for i in range(13):
-            if cards[leadingSuite][i]==1:
+            if cards[leadingSuiteIndex*13+i]==1:
                 return False
         return True
     
     def isFollowLeading(self,leadingSuite,action):
-        row_index = action / 4
+        row_index = int(action / 7)
         if leadingSuite[row_index]==1:
             return True
         return False
