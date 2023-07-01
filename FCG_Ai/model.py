@@ -108,11 +108,17 @@ class QTrainer:
             return True
         return False
     def isCardInhand(self,cards,action):
-        # print(action)
+         # print(action)
         row_index = int(action / 7)
-      #  print(row_index)
-        for i in range(13):
-            if (cards[(row_index*13)+i]==1):
+        #  print(row_index)
+
+        col_index = int(action%7)
+        # points = [0,5,10,'J','Q','K','A']
+        # smallPoints = [2,3,4,5,6,7,8,9,10,'J','Q','K','A']
+        mapActToOut = {0:[0,1,2,4,5,6,7],1:[3],2:[8],3:[9],4:[10],5:[11],6:[12]}
+        # print(mapActToOut[col_index])
+        for i in range(len(mapActToOut[col_index])):
+            if (cards[(row_index*13)+mapActToOut[col_index][i]]==1):
                 return True
         return False
     def isTrumpcard(self,trump,action):

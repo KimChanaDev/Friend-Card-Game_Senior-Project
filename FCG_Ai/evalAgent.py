@@ -9,7 +9,7 @@ from agent import *
 import random
 
 record = {0:0,1:0,2:0,3:0}
-def testBot(agent):
+def testBot(agent,oldAgent):
     
     p1 = player("p1",0)
     p2 = player("p2",1)
@@ -27,8 +27,31 @@ def testBot(agent):
     output =None
     error = False
     count = 0
+    while not game.isEndGame():
+        if game.getTurnPlayerIndex()==0 :
+            state_old,done = agent.get_state(game)
+            n_largest = 0
+            output = agent.get_best_action(state_old,n_largest)
+            while not playCard(game,output):
+                n_largest+=1
+                output = agent.get_best_action(state_old,n_largest)
+                error = True
+                
+            # if error==True:
+            #     count+=1
+            #     print(count)
+            #     error = False
+        else:
+            state_old,done = oldAgent.get_state(game)
+            n_largest = 0
+            output = oldAgent.get_best_action(state_old,n_largest)
+            while not playCard(game,output):
+                n_largest+=1
+                output = oldAgent.get_best_action(state_old,n_largest)
+                error = True
+
     # while not game.isEndGame():
-    #     if game.getTurnPlayerIndex()==0 or game.getTurnPlayerIndex()==1:
+    #     if game.getTurnPlayerIndex()==0:
     #         state_old,done = agent.get_state(game)
     #         n_largest = 0
     #         output = agent.get_action(state_old,n_largest)
@@ -36,56 +59,33 @@ def testBot(agent):
     #             n_largest+=1
     #             output = agent.get_action(state_old,n_largest)
     #             error = True
-                
-    #         # if error==True:
-    #         #     count+=1
-    #         #     # print(count)
-    #         #     error = False
+    #         # print(n_largest,'n_largest')    
+    #         if error==True:
+    #             count+=1
+    #             # print(count)
+    #             error = False
     #     else:
-    #         state_old,done = oldAgent.get_state(game)
-    #         n_largest = 0
-    #         output = oldAgent.get_action(state_old,n_largest)
-    #         while not playCard(game,output):
-    #             n_largest+=1
-    #             output = oldAgent.get_action(state_old,n_largest)
-    #             error = True
-
-    while not game.isEndGame():
-        if game.getTurnPlayerIndex()==0:
-            state_old,done = agent.get_state(game)
-            n_largest = 0
-            output = agent.get_action(state_old,n_largest)
-            while not playCard(game,output):
-                n_largest+=1
-                output = agent.get_action(state_old,n_largest)
-                error = True
-            print(n_largest,'n_largest')    
-            if error==True:
-                count+=1
-                print(count)
-                error = False
-        else:
-            while True:
-                cardInHand = game.getPlayer(game.getTurnPlayerIndex()).getAllCard()
-                rand = random.randint(0,len(cardInHand)-1)
-                randCard = cardInHand[rand]
-                if game.play_turn(randCard):
-                    break
+    #         while True:
+    #             cardInHand = game.getPlayer(game.getTurnPlayerIndex()).getAllCard()
+    #             rand = random.randint(0,len(cardInHand)-1)
+    #             randCard = cardInHand[rand]
+    #             if game.play_turn(randCard):
+    #                 break
     scores = game.summaryScore()
     record[scores.index(max(scores))]+=1
     # scores = game.summaryScore()
     # record[scores.index(max(scores))]+=1
 
 def main():
-    # oldAgent = Agent()
-    # oldAgent.loadModel('C:\\Users\\User\\Desktop\\friendCardGame\\model\\model.pth')
+    oldAgent = Agent()
+    oldAgent.loadModel('C:\\Users\\User\\Desktop\\friendCardGame\\model\\ez_first_gen.pth')
 
 
     agent = Agent()
-    agent.loadModel('C:\\Users\\User\\Desktop\\friendCardGame\\model\\ez_first_gen.pth')
-    for i in range(1):
+    agent.loadModel('C:\\Users\\User\\Desktop\\friendCardGame\\model\\ez_third_gen.pth')
+    for i in range(1000):
         # print(i)
-        testBot(agent)
+        testBot(agent,oldAgent)
     print(record)  
 if __name__ == '__main__':
     main()
