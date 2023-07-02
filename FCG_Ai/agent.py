@@ -24,7 +24,7 @@ class Agent:
         self.epsilon = 0 # randomness
         self.gamma = 0.9 # discount rate
         self.memory = deque() # popleft()
-        self.model = Linear_QNet(125, 256, 28)
+        self.model = Linear_QNet(141, 256, 28)
         self.trainer = QTrainer(self.model, lr=LR, gamma=self.gamma)
         self.n_largest = 0
     def loadModel(self,path):
@@ -36,7 +36,7 @@ class Agent:
     
     def get_state(self, game):
         playerIndex = game.getTurnPlayerIndex()
-        leadingIndex = game.getLeadingPlayerIndex()
+        turn = [1 if i==game.getTurn()-1 else 0 for i in range(4)]
         suites = ['Hearts','Diamonds','Clubs','Spades']
         cardInhand = [card.getId() for card in sorted(game.getPlayer(playerIndex).getAllCard())]
         cardInhand = [1 if i in cardInhand else 0 for i in range(52)]
@@ -51,10 +51,12 @@ class Agent:
         trumpSuite[suites.index(game.getTrumpCard()) ]  =  1
         trumpPlayedCard = game.getTrumpPlayedCard()
         cardInField = [1 if i in IDcardPlayedEachRound else 0 for i in range(52)]
-        state = cardInhand+leadingSuite+trumpSuite+cardInField+trumpPlayedCard
+        playedScoreCard = game.getPlayedScoreCard()
+        state = cardInhand+leadingSuite+trumpSuite+cardInField+trumpPlayedCard+playedScoreCard+turn
      #   print(state)
-        # card in hand , leading suite, trump suite,card in field,trump card
-        # 52,4,4,52,13
+        # card in hand , leading suite, trump suite,card in field,trump card,playedScorecard,turn
+        # 52,4,4,52,13,12,4
+        # lack order of player 5 10 k that was play each round
         done = game.isEndGame()
         return np.array(state, dtype=int),done
 
@@ -213,8 +215,8 @@ def play(newAgent):
     train_done = None
    
 
-    oldAgent = Agent()
-    oldAgent.loadModel('C:\\Users\\User\\Desktop\\friendCardGame\\model\\ez_second_gen.pth')
+    # oldAgent = Agent()
+    # oldAgent.loadModel('C:\\Users\\User\\Desktop\\friendCardGame\\model\\ez_third_gen.pth')
     
     while not game.isEndGame():
 
@@ -227,13 +229,20 @@ def play(newAgent):
                 while not playCard(game,output):
                     output = newAgent.get_action(state_old,n_largest)
                     n_largest = (n_largest + 1) % 28
+            # else:
+            #     old_state_old,old_done = oldAgent.get_state(game)
+            #     n_largest = 0
+            #     old_output = oldAgent.get_best_action(old_state_old,n_largest)
+            #     while not playCard(game,old_output):
+            #         old_output = oldAgent.get_best_action(old_state_old,n_largest)
+            #         n_largest+=1
             else:
-                old_state_old,old_done = oldAgent.get_state(game)
-                n_largest = 0
-                old_output = oldAgent.get_best_action(old_state_old,n_largest)
-                while not playCard(game,old_output):
-                    old_output = oldAgent.get_best_action(old_state_old,n_largest)
-                    n_largest+=1
+                while True:
+                    cardInHand = game.getPlayer(game.getTurnPlayerIndex()).getAllCard()
+                    rand = random.randint(0,len(cardInHand)-1)
+                    randCard = cardInHand[rand]
+                    if game.play_turn(randCard):
+                        break
         reward = newAgent.get_reward(game)[order]
         if  game.isEndGame():
             train_state_new = state_old
@@ -304,13 +313,13 @@ def playCard(game,output):
 
 def main():
     newAgent = Agent()
-    newAgent.loadModel('C:\\Users\\User\\Desktop\\friendCardGame\\model\\ez_second_gen.pth')
+    # newAgent.loadModel('C:\\Users\\User\\Desktop\\friendCardGame\\model\\ez_third_gen.pth')
     for i in range(10000):
         play(newAgent)
         if i % 1000 ==0:
             newAgent.train_long_memory()
         print('round',i)  
-    newAgent.model.save('ez_third_gen.pth')
+    newAgent.model.save('ez_first_gen.pth')
 if __name__ == '__main__':
     main()
 

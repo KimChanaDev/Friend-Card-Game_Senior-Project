@@ -78,11 +78,11 @@ def testBot(agent,oldAgent):
 
 def main():
     oldAgent = Agent()
-    oldAgent.loadModel('C:\\Users\\User\\Desktop\\friendCardGame\\model\\ez_first_gen.pth')
+    oldAgent.loadModel('C:\\Users\\User\\Desktop\\friendCardGame\\model\\ez_third_gen.pth')
 
 
     agent = Agent()
-    agent.loadModel('C:\\Users\\User\\Desktop\\friendCardGame\\model\\ez_third_gen.pth')
+    agent.loadModel('C:\\Users\\User\\Desktop\\friendCardGame\\model\\ez_fourth_gen.pth')
     for i in range(1000):
         # print(i)
         testBot(agent,oldAgent)

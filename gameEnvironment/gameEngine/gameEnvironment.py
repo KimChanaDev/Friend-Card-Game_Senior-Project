@@ -171,6 +171,7 @@ class Game:
         self.__isRun = False
         self.__isEndGame = False
         self.__reward = [None,None,None,None]
+        self.__playedScoreCard = [0 for i in range(12)]
     def getAllPlayerScore(self):
         result = [self.getPlayer(i).getGameScore() for i in range(4)]
         return result
@@ -359,6 +360,16 @@ class Game:
     def calculateGameScore(self,cards):
         score = sum( card.getScore() for card in cards)
         return score
+    def setPlayedScoreCard(self,cards):
+        suites = ['Hearts','Diamonds','Clubs','Spades']
+        scores  = [5,10,'K']
+        for card in cards:
+            if card.getActualPoint() in scores:
+                suiteIndex = suites.index(card.getSuite())
+                scoreIndex = scores.index(card.getActualPoint())
+                self.__playedScoreCard[suiteIndex * 3 + scoreIndex] = 1
+    def getPlayedScoreCard(self):
+        return self.__playedScoreCard
     def play_turn(self,action):
         if self.isFirstTurnEver():
             self.showDataWhenRoundGetStart()
@@ -382,6 +393,9 @@ class Game:
         else:
             self.__turn+=1
             self.incTurnPlayerIndex()
+    def getTurn(self):
+        return self.__turn
+    
     def getRound(self):
         return self.__round
     def incRound(self):
@@ -422,6 +436,7 @@ class Game:
  
     def processAfterRoundEnd(self):
         highestCardIndex = self.determineHighestCard(self.__playedCardsEachRound)
+        self.setPlayedScoreCard(self.__playedCardsEachRound)
         playerIndex = (highestCardIndex + self.getTurnPlayerIndex()+1)%4
         score = self.calculateGameScore(self.__playedCardsEachRound)
         self.setRewardEachRound(highestCardIndex,score)
