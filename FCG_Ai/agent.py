@@ -26,7 +26,7 @@ class Agent:
         self.memory = deque() # popleft()
         self.model = Linear_QNet(141, 256, 28)
         self.trainer = QTrainer(self.model, lr=LR, gamma=self.gamma)
-        self.n_largest = 0
+        
     def loadModel(self,path):
         self.model.load_state_dict(torch.load(path))
         self.model.eval()
@@ -77,56 +77,37 @@ class Agent:
     def train_short_memory(self, state, action, reward, next_state, done):
         self.trainer.train_step(state, action, reward, next_state, done)
 
-    def get_action(self, state,n_largest):
-        # random moves: tradeoff exploration / exploitation
-        # 'Hearts','Diamonds','Clubs','Spades'
+    def initOutput(self):
         club_to_play = [0,0,0,0,0,0,0]
         spade_to_play = [0,0,0,0,0,0,0] 
         diamon_to_play = [0,0,0,0,0,0,0] 
         heart_to_play = [0,0,0,0,0,0,0]
-        card_to_play = heart_to_play+diamon_to_play+club_to_play+spade_to_play 
+        output = heart_to_play+diamon_to_play+club_to_play+spade_to_play
+        return output  
+    
+    def get_action(self, state,n_largest):
+        
+        
         self.epsilon = 8000-self.n_games
         rand = random.randint(0,200)
+        card_to_play = self.initOutput()
         # print(rand)
         if  rand< self.epsilon:
             action = random.randint(0, 27)
             #print(action)
             card_to_play[action] = 1
         else:
-            state0 = torch.tensor(state, dtype=torch.float)
-            prediction = self.model(state0)
-            # print(prediction)
-            validAction = [prediction[i] if notViolateRule(state0,i) else -100000 for i in range(28)]
-            validAction = torch.tensor(validAction, dtype=torch.float)
-            values, indices = torch.topk(validAction, k=28)
-            action = indices[self.n_largest].item()
-            
-            card_to_play[action] = 1
-            # print('state',state0)
-            # print('valid',validAction)
-            # print(prediction)
-            # print(prediction,"(predict)")
-            # action = (torch.argmax(prediction).item() + n_largest) % 28
-            # print(action,'action')
+            self.get_best_action(state)
             
         return card_to_play
-    def get_best_action(self, state,n_largest):
-        # random moves: tradeoff exploration / exploitation
-        # 'Hearts','Diamonds','Clubs','Spades'
-        club_to_play = [0,0,0,0,0,0,0]
-        spade_to_play = [0,0,0,0,0,0,0] 
-        diamon_to_play = [0,0,0,0,0,0,0] 
-        heart_to_play = [0,0,0,0,0,0,0]
-        card_to_play = heart_to_play+diamon_to_play+club_to_play+spade_to_play 
-        
+    def get_best_action(self, state):
         state0 = torch.tensor(state, dtype=torch.float)
         prediction = self.model(state0)
-        values, indices = torch.topk(prediction, k=28)
-        # print(prediction)
-        # print(prediction,"(predict)")
-        # action = (torch.argmax(prediction).item() + n_largest) % 28
-        action = indices[n_largest].item()
-        # print(action,'action')
+        card_to_play = self.initOutput()
+        validAction = [prediction[i] if notViolateRule(state0,i) else -100000 for i in range(28)]
+        validAction = torch.tensor(validAction, dtype=torch.float)
+        values, indices = torch.topk(validAction, k=28)
+        action = indices[0].item()
         card_to_play[action] = 1
         return card_to_play
 
@@ -182,11 +163,11 @@ def play(newAgent):
                     n_largest = (n_largest + 1) % 28
             else:
                 old_state_old,old_done = oldAgent.get_state(game)
-                n_largest = 0
-                old_output = oldAgent.get_best_action(old_state_old,n_largest)
+               
+                old_output = oldAgent.get_best_action(old_state_old)
                 while not playCard(game,old_output):
-                    old_output = oldAgent.get_best_action(old_state_old,n_largest)
-                    n_largest+=1
+                    old_output = oldAgent.get_best_action(old_state_old)
+                    
             
             # else:
             #     while True:
