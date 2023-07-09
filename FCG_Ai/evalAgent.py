@@ -54,10 +54,10 @@ def testBot(agent,oldAgent):
     #     if game.getTurnPlayerIndex()==0:
     #         state_old,done = agent.get_state(game)
     #         n_largest = 0
-    #         output = agent.get_action(state_old,n_largest)
+    #         output = agent.get_best_action(state_old,n_largest)
     #         while not playCard(game,output):
     #             n_largest+=1
-    #             output = agent.get_action(state_old,n_largest)
+    #             output = agent.get_best_action(state_old,n_largest)
     #             error = True
     #         # print(n_largest,'n_largest')    
     #         if error==True:
@@ -78,11 +78,11 @@ def testBot(agent,oldAgent):
 
 def main():
     oldAgent = Agent()
-    oldAgent.loadModel('C:\\Users\\User\\Desktop\\friendCardGame\\model\\ez_third_gen.pth')
+    oldAgent.loadModel('C:\\Users\\User\\Desktop\\friendCardGame\\model\\ez_sixth_gen.pth')
 
 
     agent = Agent()
-    agent.loadModel('C:\\Users\\User\\Desktop\\friendCardGame\\model\\ez_fourth_gen.pth')
+    agent.loadModel('C:\\Users\\User\\Desktop\\friendCardGame\\model\\ez_seventh_gen.pth')
     for i in range(1000):
         # print(i)
         testBot(agent,oldAgent)

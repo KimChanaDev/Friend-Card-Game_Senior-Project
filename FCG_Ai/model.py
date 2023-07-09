@@ -4,7 +4,7 @@ import torch.optim as optim
 import torch.nn.functional as F
 import os
 import numpy as np
-
+from FCG_Ai.utils import *
 class Linear_QNet(nn.Module):
     def __init__(self, input_size, hidden_size, output_size):
         super().__init__()
@@ -70,7 +70,7 @@ class QTrainer:
                 while True:
                     
                     top_values, top_indices = torch.topk(self.model(next_state[idx]), k=k)
-                    if self.notViolateRule(next_state[idx],top_indices[k-1].item()):
+                    if notViolateRule(next_state[idx],top_indices[k-1].item()):
                          Q_new = reward[idx] + self.gamma * top_values[k-1].item()
                          break
                     else:
@@ -86,63 +86,5 @@ class QTrainer:
         loss = self.criterion(target, pred)
         loss.backward()
         self.optimizer.step()
-    def notViolateRule(self,state_tensor,action):
-        state_array = state_tensor.numpy()
-        cardInhand = state_array[0:52]
-        leadingSuite = state_array[52:56]
-        trumpSuite = state_array[56:60]
-        self.isCardInhand(cardInhand,action)
-        # check if card is in hand
-        if not self.isCardInhand(cardInhand,action):
-            return False
-        # check if it is a leading card otherwise check if card follow leading card
-        if self.isLeadingAction(leadingSuite):
-            return True
-        if self.isFollowLeading(leadingSuite,action):
-            return True
-        # check if card is a trump
-        # if self.isTrumpcard(trumpSuite,action):
-        #     return True
-        # check if void card
-        if self.isVoidCard(cardInhand,leadingSuite):
-            return True
-        return False
-    def isCardInhand(self,cards,action):
-         # print(action)
-        row_index = int(action / 7)
-        #  print(row_index)
 
-        col_index = int(action%7)
-        # points = [0,5,10,'J','Q','K','A']
-        # smallPoints = [2,3,4,5,6,7,8,9,10,'J','Q','K','A']
-        mapActToOut = {0:[0,1,2,4,5,6,7],1:[3],2:[8],3:[9],4:[10],5:[11],6:[12]}
-        # print(mapActToOut[col_index])
-        for i in range(len(mapActToOut[col_index])):
-            if (cards[(row_index*13)+mapActToOut[col_index][i]]==1):
-                return True
-        return False
-    def isTrumpcard(self,trump,action):
-        row_index = int(action / 7)
-        if trump[row_index]==1:
-            return True
-        return False
-    def isVoidCard(self,cards,leadingSuite):
-    
-        leadingSuiteIndex = np.where(leadingSuite == 1)
-        leadingSuiteIndex = leadingSuiteIndex[0][0]
-        # print(leadingSuiteIndex)
-        for i in range(13):
-            if cards[leadingSuiteIndex*13+i]==1:
-                return False
-        return True
-    
-    def isFollowLeading(self,leadingSuite,action):
-        row_index = int(action / 7)
-        if leadingSuite[row_index]==1:
-            return True
-        return False
-    def isLeadingAction(self,leadingSuite):
-        if all(suite == 0 for suite in leadingSuite):
-            return True
-        return False
 

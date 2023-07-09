@@ -5,7 +5,7 @@ from collections import deque
 from GameEnvironment.gameEngine.gameEnvironment import *
 from model import Linear_QNet, QTrainer
 from helper import plot
-
+from FCG_Ai.utils import *
 MAX_MEMORY = 2000000
 BATCH_SIZE = 10000
 LR = 0.01
@@ -96,7 +96,7 @@ class Agent:
             state0 = torch.tensor(state, dtype=torch.float)
             prediction = self.model(state0)
             # print(prediction)
-            validAction = [prediction[i] if self.notViolateRule(state0,i) else -100000 for i in range(28)]
+            validAction = [prediction[i] if notViolateRule(state0,i) else -100000 for i in range(28)]
             validAction = torch.tensor(validAction, dtype=torch.float)
             values, indices = torch.topk(validAction, k=28)
             action = indices[self.n_largest].item()
@@ -134,55 +134,6 @@ class Agent:
     def get_reward(self,game):
         return game.getReward()
         
-    def notViolateRule(self,state_tensor,action):
-        state_array = state_tensor.numpy()
-        cardInhand = state_array[0:52]
-        leadingSuite = state_array[52:56]
-        trumpSuite = state_array[56:60]
-      
-        if not self.isCardInhand(cardInhand,action):
-            return False
-        if self.isLeadingAction(leadingSuite):
-            return True
-        if self.isFollowLeading(leadingSuite,action):
-            return True
-        if self.isVoidCard(cardInhand,leadingSuite):
-            return True
-        return False
-    def isCardInhand(self,cards,action):
-        # print(action)
-        row_index = int(action / 7)
-        #  print(row_index)
-
-        col_index = int(action%7)
-        # points = [0,5,10,'J','Q','K','A']
-        # smallPoints = [2,3,4,5,6,7,8,9,10,'J','Q','K','A']
-        mapActToOut = {0:[0,1,2,4,5,6,7],1:[3],2:[8],3:[9],4:[10],5:[11],6:[12]}
-        # print(mapActToOut[col_index])
-        for i in range(len(mapActToOut[col_index])):
-            if (cards[(row_index*13)+mapActToOut[col_index][i]]==1):
-                return True
-        return False
-    
-    def isVoidCard(self,cards,leadingSuite):
-
-        leadingSuiteIndex = np.where(leadingSuite == 1)
-        leadingSuiteIndex = leadingSuiteIndex[0][0]
-        # print(leadingSuiteIndex)
-        for i in range(13):
-            if cards[leadingSuiteIndex*13+i]==1:
-                return False
-        return True
-
-    def isFollowLeading(self,leadingSuite,action):
-        row_index = int(action / 7)
-        if leadingSuite[row_index]==1:
-            return True
-        return False
-    def isLeadingAction(self,leadingSuite):
-        if all(suite == 0 for suite in leadingSuite):
-            return True
-        return False
 
 def play(newAgent):
     plot_scores = []
@@ -215,8 +166,8 @@ def play(newAgent):
     train_done = None
    
 
-    # oldAgent = Agent()
-    # oldAgent.loadModel('C:\\Users\\User\\Desktop\\friendCardGame\\model\\ez_third_gen.pth')
+    oldAgent = Agent()
+    oldAgent.loadModel('C:\\Users\\User\\Desktop\\friendCardGame\\model\\ez_sixth_gen.pth')
     
     while not game.isEndGame():
 
@@ -229,20 +180,21 @@ def play(newAgent):
                 while not playCard(game,output):
                     output = newAgent.get_action(state_old,n_largest)
                     n_largest = (n_largest + 1) % 28
-            # else:
-            #     old_state_old,old_done = oldAgent.get_state(game)
-            #     n_largest = 0
-            #     old_output = oldAgent.get_best_action(old_state_old,n_largest)
-            #     while not playCard(game,old_output):
-            #         old_output = oldAgent.get_best_action(old_state_old,n_largest)
-            #         n_largest+=1
             else:
-                while True:
-                    cardInHand = game.getPlayer(game.getTurnPlayerIndex()).getAllCard()
-                    rand = random.randint(0,len(cardInHand)-1)
-                    randCard = cardInHand[rand]
-                    if game.play_turn(randCard):
-                        break
+                old_state_old,old_done = oldAgent.get_state(game)
+                n_largest = 0
+                old_output = oldAgent.get_best_action(old_state_old,n_largest)
+                while not playCard(game,old_output):
+                    old_output = oldAgent.get_best_action(old_state_old,n_largest)
+                    n_largest+=1
+            
+            # else:
+            #     while True:
+            #         cardInHand = game.getPlayer(game.getTurnPlayerIndex()).getAllCard()
+            #         rand = random.randint(0,len(cardInHand)-1)
+            #         randCard = cardInHand[rand]
+            #         if game.play_turn(randCard):
+            #             break
         reward = newAgent.get_reward(game)[order]
         if  game.isEndGame():
             train_state_new = state_old
@@ -313,13 +265,13 @@ def playCard(game,output):
 
 def main():
     newAgent = Agent()
-    # newAgent.loadModel('C:\\Users\\User\\Desktop\\friendCardGame\\model\\ez_third_gen.pth')
+    newAgent.loadModel('C:\\Users\\User\\Desktop\\friendCardGame\\model\\ez_sixth_gen.pth')
     for i in range(10000):
         play(newAgent)
-        if i % 1000 ==0:
+        if (i+1) % 1000 ==0:
             newAgent.train_long_memory()
         print('round',i)  
-    newAgent.model.save('ez_first_gen.pth')
+    newAgent.model.save('ez_seventh_gen.pth')
 if __name__ == '__main__':
     main()
 
