@@ -1,0 +1,28 @@
+body{
+  margin: 0;
+  width: 100%;
+  min-height: 100vh;
+}
+
+#root{
+  display: grid;
+  width: auto;
+  min-height: 100vh;
+  /* justify-content: center; */
+  
+}
+
+figure img{
+  width: 100px;
+  height:200px
+  
+}
+figure{
+  display:flex;
+  flex-wrap: wrap;
+  justify-self: center;
+  align-self: flex-end;
+  /* position:absolute;
+  top: 100px;
+  left: 100px; */
+}
