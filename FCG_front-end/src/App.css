@@ -12,6 +12,10 @@ body{
   /* justify-content: center; */
   
 }
+figure img:not(:first-child) {
+  /* Your styles here */
+  position: relative;
+}
 
 figure img{
   width: 8%;
