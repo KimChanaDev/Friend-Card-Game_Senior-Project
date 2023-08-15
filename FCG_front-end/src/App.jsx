@@ -6,7 +6,8 @@ function App() {
   const n = 10
   const myArray = new Array(n).fill(0);
   const picStyles = {"width":`${Math.min(100/n,100/3)}%`}
-  const cardName = '9_of_clubs.svg'
+  // const cardName = '9_of_clubs.svg'
+  const cardName = 'back.svg'
   const cardPath = "public\\SVG-cards-1.3\\" + cardName
   
   return (
@@ -16,6 +17,8 @@ function App() {
         
       </figure>
   )
+
+  
 }
 
 export default App
