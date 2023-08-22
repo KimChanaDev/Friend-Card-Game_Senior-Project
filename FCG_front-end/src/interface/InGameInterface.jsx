@@ -1,9 +1,9 @@
 import { useState } from 'react'
 
 import './IngameInterface.css'
-
+import PlayerCard from '../component/PlayerCard';
 function InGameInterface() {
-  const n = 12
+  const n = 9
   const myArray = new Array(n).fill(0);
   const picStyles = {"width":`${Math.min(100/(n),100/9)}%`}
   const cardName = '9_of_clubs.svg'
@@ -16,7 +16,7 @@ function InGameInterface() {
   
     </figure>
     <figure className='left' >
-    
+      <PlayerCard/>
     </figure>
 
     <figure className='right'>

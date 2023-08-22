@@ -22,7 +22,7 @@ body{
     /* border: 2px solid #ffa94d; */
      border-radius: 5px;
   }
-  figure img:not(:first-child) {
+  figure.bot img:not(:first-child) {
     /* Your styles here */
     position: relative;
   }
@@ -60,6 +60,7 @@ body{
     margin-block: 0px 0px;
     margin-inline: 0px 0px;
     display:flex;
+    justify-content: center;
     
   }
   

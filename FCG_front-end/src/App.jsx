@@ -1,7 +1,13 @@
 import InGameInterface from "./interface/InGameInterface"
 
 function App() {
-  return <InGameInterface/>
+  return (
+    <>
+        <InGameInterface/>
+        
+    </>
+    
+  )
 }
 
 export default App
