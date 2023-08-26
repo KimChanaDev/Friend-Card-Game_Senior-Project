@@ -1,7 +1,7 @@
-h6.player_name{
+h3.player_name{
     border-radius: 3px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-    border: 2px solid #e74c3c;
+    border: 1px solid #e74c3c;
     background-color: rgb(52, 152, 219);
     margin-block: 0px 2px;
     text-align: center;
@@ -17,10 +17,11 @@ section.profile>div>img{
 section.profile{
     width: 85%;
     height: 30%;
-    display:grid;
+    display:flex;
     justify-content: space-evenly;
-    border: 2px solid #ffa94d;
+    border: 1px solid #ffa94d;
     border-radius: 5px;
+    flex-direction: column;
   
 }
 
@@ -32,5 +33,13 @@ section.profile>div>span{
 
 section.profile>div{
     display: flex;
+    
    
 }
+section.individual_score{
+    text-align: center;
+    flex-grow: 1;
+    border: 1px solid #ffa94d;
+    border-radius: 5px;
+}
+

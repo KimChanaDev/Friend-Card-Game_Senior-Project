@@ -2,6 +2,8 @@ import { useState } from 'react'
 
 import './IngameInterface.css'
 import PlayerCard from '../component/PlayerCard';
+import FriendCard from '../component/FriendCard';
+import TrumpCard from '../component/TrumpCard';
 function InGameInterface() {
   const n = 9
   const myArray = new Array(n).fill(0);
@@ -12,16 +14,20 @@ function InGameInterface() {
   const offset = 10
   return (
     <>
-    <figure className='top' >
-  
-    </figure>
-    <figure className='left' >
-      <PlayerCard/>
-    </figure>
+    <section className='top' >
+      <FriendCard/>
+      <TrumpCard/>
+    </section>
+    <section className='left' >
+      <PlayerCard name = {'khonKohok1'}/>
+      <PlayerCard name = {'khonKohok2'}/>
+    </section>
 
-    <figure className='right'>
+    <section className='right'>
+      <PlayerCard name = {'khonKohok3'}/>
+      <PlayerCard name = {'khonKohok4'}/>
     
-    </figure>
+    </section>
 
     <figure className='bot' style = {{paddingInlineStart:`${(n-1)*offset}px`}}>
         {myArray.map( (e,i)=><img src= {cardPath} style = {{...picStyles,"right":i*offset}}   alt="" />)}  

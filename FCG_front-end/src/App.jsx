@@ -1,4 +1,4 @@
-import InGameInterface from "./interface/InGameInterface"
+import InGameInterface from "./interface/inGameInterface"
 
 function App() {
   return (

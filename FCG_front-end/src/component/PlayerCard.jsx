@@ -1,13 +1,17 @@
 import './PlayerCard.css'
 
-function PlayerCard() {
+function PlayerCard({name}) {
  
   return (
     <section className='profile'>
-        <h6 className='player_name'>test</h6>  
+        <h3 className='player_name'>{name}</h3>  
         <div >
             <img  src="./khonKoHok.jpg" alt="" />
-            <span>score</span>
+            <section className='individual_score'>
+              <h4>score</h4>
+              <p>20</p>
+            </section>
+            
         </div>
        
         
