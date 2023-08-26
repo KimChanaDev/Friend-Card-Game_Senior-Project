@@ -83,3 +83,24 @@ body{
     justify-content: space-evenly;
    
   }
+
+  section.mid{
+    grid-column: 3/9;
+    grid-row:3/9;
+    justify-content: center;
+    display:grid;
+    grid-template-columns: repeat(10, 10%);
+    grid-template-rows: repeat(10, 10%);
+  }
+  section.mid div{
+    align-items: center;
+    grid-column: 1/11;
+    grid-row:1/9;
+    overflow: hidden;
+    justify-content: center;
+    display: flex;
+  }
+
+  section.mid img{
+    height: 65%;
+  }

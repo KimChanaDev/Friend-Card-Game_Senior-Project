@@ -4,6 +4,9 @@ import './IngameInterface.css'
 import PlayerCard from '../component/PlayerCard';
 import FriendCard from '../component/FriendCard';
 import TrumpCard from '../component/TrumpCard';
+import CardTable from '../component/CardTable';
+import TotalScoreBoard from '../component/TotalScoreBoard';
+import EmojiPanel from '../component/EmojiPanel';
 function InGameInterface() {
   const n = 9
   const myArray = new Array(n).fill(0);
@@ -17,9 +20,11 @@ function InGameInterface() {
     <section className='top' >
       <FriendCard/>
       <TrumpCard/>
+      <CardTable/>
+
     </section>
     <section className='left' >
-      <PlayerCard name = {'khonKohok1'}/>
+      <PlayerCard name = {'khonKohok1 👑'}/>
       <PlayerCard name = {'khonKohok2'}/>
     </section>
 
@@ -32,6 +37,15 @@ function InGameInterface() {
     <figure className='bot' style = {{paddingInlineStart:`${(n-1)*offset}px`}}>
         {myArray.map( (e,i)=><img src= {cardPath} style = {{...picStyles,"right":i*offset}}   alt="" />)}  
     </figure>
+
+    <section className='mid'>
+      <div>
+         <img src={cardPath} alt="" />
+      </div>
+        
+        {/* <TotalScoreBoard/> */}
+        < EmojiPanel/>
+    </section>
     </>
     
 

@@ -1,0 +1,16 @@
+.emoji_panel li {
+    height: 30px;
+    width: 40px;
+    background-color: #bbb;
+    border-radius: 50%;
+    display: inline-block;
+    text-align: center;
+    font-size: 20px;
+   
+  }
+.emoji_panel{
+    grid-column: 1/10;
+    grid-row:9/11;
+    justify-content:end;
+    display: flex;
+}
