@@ -1,7 +1,13 @@
-import InGameInterface from "./interface/InGameInterface"
-import './interface/App.css'
+import InGameInterface from "./interface/inGameInterface"
+
 function App() {
-  return <InGameInterface/>
+  return (
+    <>
+        <InGameInterface/>
+        
+    </>
+    
+  )
 }
 
 export default App
