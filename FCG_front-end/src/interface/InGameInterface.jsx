@@ -29,7 +29,7 @@ function InGameInterface() {
     </section>
 
     <section className='right'>
-      <SettingsIcon className='setting'  sx={{ fontSize: 60 }}/>
+      <SettingsIcon className='setting'  sx={{ fontSize: 50 }}/>
      
      
       <PlayerCard name = {'khonKohok3'}/>
@@ -49,10 +49,7 @@ function InGameInterface() {
         {/* <TotalScoreBoard/> */}
         < EmojiPanel/>
     </section>
-    </>
-    
-
-      
+    </>  
   )
 }
 export default InGameInterface

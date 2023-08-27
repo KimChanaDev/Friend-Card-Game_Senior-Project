@@ -108,5 +108,7 @@ body{
     /* margin-bottom: auto; */
    position: absolute;
    top: 0;
+   background-color: #bbb;
+   border-radius: 50%;
     
    }
