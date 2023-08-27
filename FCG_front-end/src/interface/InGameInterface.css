@@ -103,7 +103,7 @@ body{
   section.mid img{
     height: 65%;
   }
-  section.right>.setting{
+  section.right .setting{
     align-self: flex-end;
     /* margin-bottom: auto; */
    position: absolute;

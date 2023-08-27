@@ -1,15 +1,15 @@
 import './EmojiPanel.css'
 
 function EmojiPanel() {
- 
+
   return (
     <ul className='emoji_panel'>
-        <li>❤️</li>
-        <li>🤣</li>
-        <li>🤮</li>
-        <li>😭</li>
-
-    </ul>      
+      
+        <li> <button>❤️</button></li>
+        <li> <button>🤣</button></li>
+        <li><button>🤮</button></li>
+        <li><button>😭</button></li>
+    </ul>
   )
 }
 export default EmojiPanel
