@@ -4,8 +4,8 @@ import BiddingInterface from "./interface/BiddingInterface"
 function App() {
   return (
     <>
-        {/* <BiddingInterface/> */}
-        <InGameInterface/>
+        <BiddingInterface/>
+        {/* <InGameInterface/> */}
         
     </>
     

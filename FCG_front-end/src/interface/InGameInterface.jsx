@@ -7,7 +7,7 @@ import TrumpCard from '../component/TrumpCard';
 import CardTable from '../component/CardTable';
 import TotalScoreBoard from '../component/TotalScoreBoard';
 import EmojiPanel from '../component/EmojiPanel';
-import { IconButton } from '@mui/material';
+
 function InGameInterface() {
   const n = 9
   const myArray = new Array(n).fill(0);
@@ -32,10 +32,6 @@ function InGameInterface() {
     <section className='right'>
     
         <SettingsIcon className='setting'  sx={{ fontSize: 50 }}/>
-      
-      
-     
-     
       <PlayerCard name = {'khonKohok3'}/>
       <PlayerCard name = {'khonKohok4'}/>
     
