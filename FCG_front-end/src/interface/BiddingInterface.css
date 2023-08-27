@@ -8,6 +8,7 @@ body{
     display: grid;
     max-width: 100vw;
     min-height: 100vh;
+    max-height: 100vh;
     background-color: rgb(6, 108, 6);
     grid-template-columns: repeat(10, 10%);
     grid-template-rows: repeat(10, 10%);
@@ -103,10 +104,5 @@ body{
   section.mid img{
     height: 65%;
   }
-  section.right>.setting{
-    align-self: flex-end;
-    /* margin-bottom: auto; */
-   position: absolute;
-   top: 0;
-    
-   }
+
+  

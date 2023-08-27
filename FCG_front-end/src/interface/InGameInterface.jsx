@@ -1,5 +1,5 @@
 import { useState } from 'react'
-
+import SettingsIcon from '@mui/icons-material/Settings';
 import './IngameInterface.css'
 import PlayerCard from '../component/PlayerCard';
 import FriendCard from '../component/FriendCard';
@@ -29,6 +29,9 @@ function InGameInterface() {
     </section>
 
     <section className='right'>
+      <SettingsIcon className='setting'  sx={{ fontSize: 60 }}/>
+     
+     
       <PlayerCard name = {'khonKohok3'}/>
       <PlayerCard name = {'khonKohok4'}/>
     
