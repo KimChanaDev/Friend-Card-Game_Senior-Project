@@ -9,8 +9,11 @@
    
   }
 .emoji_panel{
-    grid-column: 1/10;
+    grid-column: 3/10;
     grid-row:9/11;
     justify-content:end;
     display: flex;
+}
+.emoji_panel .emoji_button{
+  all: unset;
 }
