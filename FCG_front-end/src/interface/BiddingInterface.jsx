@@ -40,12 +40,23 @@ function BiddingInterface() {
 
       </section>
 
-      <figure >
-
-      </figure>
+      <section className='bot'>
+          <ol>
+            <li><button>55</button></li>
+            <li><button>55</button></li>
+            <li><button>55</button></li>
+            <li><button>55</button></li>
+            
+          </ol>
+          <button class="bg-green-500 confirm_button hover:bg-green-700 text-black font-bold py-2 px-4 border-b-4 border-green-700 hover:border-green-800 rounded">
+            confirm
+          </button>
+      </section>
 
       <section className='mid'>
-        {/* <TotalScoreBoard/> */}
+      <button class="bg-orange-500 pass_button hover:bg-orange-700 text-black font-bold py-2 px-4 border-b-4 border-orange-700 hover:border-orange-800 rounded">
+        pass
+      </button>
         < EmojiPanel />
       </section>
     </>
