@@ -1,4 +1,4 @@
-import InGameInterface from "./interface/inGameInterface"
+// import InGameInterface from "./interface/inGameInterface"
 import BiddingInterface from "./interface/BiddingInterface"
 
 function App() {
