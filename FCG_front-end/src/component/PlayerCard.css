@@ -1,11 +1,17 @@
-h3.player_name{
+div.player_name_panel{
     border-radius: 3px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
     border: 1px solid #e74c3c;
     background-color: rgb(52, 152, 219);
     margin-block: 0px 2px;
+   
     text-align: center;
+    display: flex;
 }
+div.player_name_panel>h3.player_name{
+    margin-left: auto;
+}
+
 
 section.profile>div>img{
    width:60%;
@@ -25,15 +31,12 @@ section.profile{
   
 }
 
-section.profile>div>span{
-    align-self: center;
-    margin-inline-start: 10%;
-    /* justify-self: center; */
-}
+
 
 section.profile>div{
     display: flex;
-    
+    /* justify-content: center;
+    padding-inline-start: 0; */
    
 }
 section.individual_score{
@@ -43,3 +46,6 @@ section.individual_score{
     border-radius: 5px;
 }
 
+section.profile>div.player_name_panel>button.kick_button{
+    margin-left: auto;
+}
