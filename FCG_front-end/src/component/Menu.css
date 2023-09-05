@@ -1,0 +1,31 @@
+section.mid>div.menu_border{
+    border-radius: 1px;
+    border: 1px solid orange;
+    grid-column: 1/11;
+    grid-row:1/9;
+    position: relative;
+    overflow: visible;
+}
+
+section.mid>div.menu_border>button.add_bot_button{
+    position: absolute;
+    top: 90%;
+   
+    height: 20%;
+    width: 23%;
+    left: 10%;
+}
+section.mid>div.menu_border>button.quit_button{
+    position: absolute;
+    top: 90%;
+   
+    height: 20%;
+    width: 23%;
+    left: 60%;
+}
+section.mid>div.menu_border>p{
+    text-align: center;
+    padding-block-start: 10%;
+    font-weight: bold;
+    font-size: larger;
+}
