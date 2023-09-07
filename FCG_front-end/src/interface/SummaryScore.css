@@ -1,0 +1,21 @@
+.summary_table{
+    display: flex;
+   flex-direction: column;
+    
+}
+#root{
+   
+    max-width: 100vw;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    /* justify-content: center; */  
+  }
+.close_button{
+    
+    width: 10%;
+    align-self: center;
+    margin-block-start: 1%;
+    margin-block-end: 1%;
+}
