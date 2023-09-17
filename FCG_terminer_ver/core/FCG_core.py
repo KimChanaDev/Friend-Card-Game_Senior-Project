@@ -332,8 +332,6 @@ class Game:
         if self.isVoidCard(player.getAllCard(),self.__playedCardsEachRound[0]):
             return playedCard
         return False
-    
-   
     def updatePlayedCardEachRound(self,card): 
         self.__playedCardsEachRound.append(card)
     def updateCardInPlayerHand(self,playerIndex,card):
