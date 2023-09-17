@@ -1,5 +1,5 @@
 import { useState } from 'react'
-
+import SettingsIcon from '@mui/icons-material/Settings';
 import './IngameInterface.css'
 import PlayerCard from '../component/PlayerCard';
 import FriendCard from '../component/FriendCard';
@@ -7,6 +7,7 @@ import TrumpCard from '../component/TrumpCard';
 import CardTable from '../component/CardTable';
 import TotalScoreBoard from '../component/TotalScoreBoard';
 import EmojiPanel from '../component/EmojiPanel';
+
 function InGameInterface() {
   const n = 9
   const myArray = new Array(n).fill(0);
@@ -29,6 +30,8 @@ function InGameInterface() {
     </section>
 
     <section className='right'>
+    
+        <SettingsIcon className='setting'  sx={{ fontSize: 50 }}/>
       <PlayerCard name = {'khonKohok3'}/>
       <PlayerCard name = {'khonKohok4'}/>
     
@@ -46,10 +49,7 @@ function InGameInterface() {
         {/* <TotalScoreBoard/> */}
         < EmojiPanel/>
     </section>
-    </>
-    
-
-      
+    </>  
   )
 }
 export default InGameInterface

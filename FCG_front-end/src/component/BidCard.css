@@ -1,0 +1,23 @@
+.bid_card{
+    display: inline-block;
+    margin-inline-end: 1em;
+    width: 20%;
+    height: 90%;
+    border-radius: 2px;
+    border: 2px solid #ffa94d;
+    text-align: center;
+    padding-block-start: 3%;
+    
+    
+  }
+
+  .bid_group{
+    align-self: center;
+    width:85%;
+    height: 90%;
+    margin :0 0 0 0;
+  }
+   .bid_group .bid_card button{
+    font-size: large;
+    font-weight: bold;
+  }
