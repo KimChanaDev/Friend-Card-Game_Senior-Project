@@ -74,7 +74,7 @@ export abstract class SocketHandler
 			HandlerValidation.HandshakeHasGameIdAndMiddlewareHasJWT(socket);
 			const gameId = socket.handshake.query.gameId as string;
 			const userId = socket.middlewareData.jwt?.sub as string;
-			HandlerValidation.SocketHandlerNotHasUser(userId);
+			HandlerValidation.SocketHandlerNotHasUser(SocketHandler.connectedUsers, userId);
 
 			const userDoc = await UserModel.findById(userId);
 			const gameRoom: GameRoom | undefined = GamesStore.getInstance.GetGameById(gameId);

@@ -4,13 +4,12 @@ import { GAME_STATE } from "../Enum/GameState.js";
 import { FriendCardGameRoom } from "../GameFlow/Game/FriendCardGameRoom.js";
 import { FriendCardPlayer } from "../GameFlow/Player/FriendCardPlayer.js";
 import { SocketBadConnectionError, SocketGameAlreadyStartedError, SocketGameNotExistError, SocketRoomFullError, SocketSessionExpiredError, SocketUnauthorizedError, SocketWrongRoomPasswordError } from "../Error/SocketErrorException.js";
-import { SocketHandler } from "./SocketHandler.js";
 import { GameRoom } from "../GameFlow/Game/GameRoom.js";
 import { IJwtValidation } from "../GameLogic/Utils/Authorization/JWT.js";
 import { JwtValidationError } from "../Enum/JwtValidationError.js";
 import { Player } from "../GameFlow/Player/Player.js";
 
-export abstract class HandlerValidation extends SocketHandler
+export abstract class HandlerValidation
 {
     public static IsPlayerTurn(gameRoom: FriendCardGameRoom, player: FriendCardPlayer): void
     {
@@ -49,9 +48,9 @@ export abstract class HandlerValidation extends SocketHandler
         if(!socket.handshake.query.gameId || !socket.middlewareData.jwt)
             throw new SocketBadConnectionError();
     }
-    public static SocketHandlerNotHasUser(userId: string): void
+    public static SocketHandlerNotHasUser(connectedUsers: Set<string>,userId: string): void
     {
-        if(SocketHandler.connectedUsers.has(userId))
+        if(connectedUsers.has(userId))
             throw new SocketBadConnectionError();
     }
     public static HasGameRoom(gameRoom: GameRoom | undefined): void
