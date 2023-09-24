@@ -28,7 +28,7 @@ export abstract class SocketHandler
 			SocketHandler.io = io;
 			SocketHandler.isIoSet = true;
 		}
-
+		
 		const namespace: string = '/' + namespaceName;
 		SocketHandler.InitializeIo(namespace);
 		this.namespace = SocketHandler.io.of(namespace);
@@ -112,7 +112,9 @@ export abstract class SocketHandler
 	}
 	private RegisterListeners(): void
 	{
+		console.log('Before connection');
 		this.namespace.on(BUILD_IN_SOCKET_GAME_EVENTS.CONNECTION, (socket: Socket) => {
+			console.log('After connection');
 			const gameAndPlayer: {gameRoom: GameRoom, player: Player} | undefined = this.RegisterBaseListeners(socket);
 			if (!gameAndPlayer) return;
 			this.OnConnection(socket, gameAndPlayer.gameRoom, gameAndPlayer.player);

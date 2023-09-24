@@ -16,7 +16,7 @@ export abstract class HandlerValidation
         if(!gameRoom.GetCurrentRoundGame().IsPlayerTurn(player.id))
             throw new Error("Not your turn");
     }
-    public static HasCardOnHandAndIsTurn(gameRoom: FriendCardGameRoom, player: FriendCardPlayer, cardId: CardId): void
+    public static HasCardOnHand(gameRoom: FriendCardGameRoom, player: FriendCardPlayer, cardId: CardId): void
     {
         if (!gameRoom.GetCurrentRoundGame().CanPlayerPlaySpecificCard(player, cardId))
             throw new Error("Cannot play that card");
@@ -40,7 +40,7 @@ export abstract class HandlerValidation
     }
     public static IsOwnerRoom(gameRoom: FriendCardGameRoom, player: FriendCardPlayer): void
     {
-        if(player.id === gameRoom.owner.id)
+        if(player.id !== gameRoom.owner.id)
             throw new Error("You are not Owner");
     }
     public static HandshakeHasGameIdAndMiddlewareHasJWT(socket: Socket): void
@@ -116,12 +116,17 @@ export abstract class HandlerValidation
     }
     public static AuctionPointGreaterThan(pass: boolean,newPoint: number, previosPoint: number): void
     {
-        if(!pass && (newPoint < previosPoint))
+        if(!pass && (newPoint <= previosPoint))
             throw new Error("New auction point less than previos");
     }
-    public static NotHasCardInHand(gameRoom: FriendCardGameRoom, friendCard: CardId): void
+    public static NotHasCardInHand(gameRoom: FriendCardGameRoom, player: FriendCardPlayer, friendCard: CardId): void
     {
-        if (gameRoom.GetCurrentRoundGame().GetCurrentPlayer().GetHandCard().HasCard(friendCard))
-            throw new Error("You have this card in your hand");
+        if (player.GetHandCard().HasCard(friendCard))
+            throw new Error("You have this card on your hand");
+    }
+    public static NotAlreadySetTrumpAndFriend(gameRoom: FriendCardGameRoom)
+    {
+        if(gameRoom.GetCurrentRoundGame().IsTrumpAndFriendNotUndefined())
+            throw new Error("Trump and friend already setup");
     }
 }
