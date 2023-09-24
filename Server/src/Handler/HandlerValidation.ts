@@ -4,20 +4,19 @@ import { GAME_STATE } from "../Enum/GameState.js";
 import { FriendCardGameRoom } from "../GameFlow/Game/FriendCardGameRoom.js";
 import { FriendCardPlayer } from "../GameFlow/Player/FriendCardPlayer.js";
 import { SocketBadConnectionError, SocketGameAlreadyStartedError, SocketGameNotExistError, SocketRoomFullError, SocketSessionExpiredError, SocketUnauthorizedError, SocketWrongRoomPasswordError } from "../Error/SocketErrorException.js";
-import { SocketHandler } from "./SocketHandler.js";
 import { GameRoom } from "../GameFlow/Game/GameRoom.js";
 import { IJwtValidation } from "../GameLogic/Utils/Authorization/JWT.js";
 import { JwtValidationError } from "../Enum/JwtValidationError.js";
 import { Player } from "../GameFlow/Player/Player.js";
 
-export abstract class HandlerValidation extends SocketHandler
+export abstract class HandlerValidation
 {
     public static IsPlayerTurn(gameRoom: FriendCardGameRoom, player: FriendCardPlayer): void
     {
         if(!gameRoom.GetCurrentRoundGame().IsPlayerTurn(player.id))
             throw new Error("Not your turn");
     }
-    public static HasCardOnHandAndIsTurn(gameRoom: FriendCardGameRoom, player: FriendCardPlayer, cardId: CardId): void
+    public static HasCardOnHand(gameRoom: FriendCardGameRoom, player: FriendCardPlayer, cardId: CardId): void
     {
         if (!gameRoom.GetCurrentRoundGame().CanPlayerPlaySpecificCard(player, cardId))
             throw new Error("Cannot play that card");
@@ -41,7 +40,7 @@ export abstract class HandlerValidation extends SocketHandler
     }
     public static IsOwnerRoom(gameRoom: FriendCardGameRoom, player: FriendCardPlayer): void
     {
-        if(player.id === gameRoom.owner.id)
+        if(player.id !== gameRoom.owner.id)
             throw new Error("You are not Owner");
     }
     public static HandshakeHasGameIdAndMiddlewareHasJWT(socket: Socket): void
@@ -49,9 +48,9 @@ export abstract class HandlerValidation extends SocketHandler
         if(!socket.handshake.query.gameId || !socket.middlewareData.jwt)
             throw new SocketBadConnectionError();
     }
-    public static SocketHandlerNotHasUser(userId: string): void
+    public static SocketHandlerNotHasUser(connectedUsers: Set<string>,userId: string): void
     {
-        if(SocketHandler.connectedUsers.has(userId))
+        if(connectedUsers.has(userId))
             throw new SocketBadConnectionError();
     }
     public static HasGameRoom(gameRoom: GameRoom | undefined): void
@@ -117,12 +116,17 @@ export abstract class HandlerValidation extends SocketHandler
     }
     public static AuctionPointGreaterThan(pass: boolean,newPoint: number, previosPoint: number): void
     {
-        if(!pass && (newPoint < previosPoint))
+        if(!pass && (newPoint <= previosPoint))
             throw new Error("New auction point less than previos");
     }
-    public static NotHasCardInHand(gameRoom: FriendCardGameRoom, friendCard: CardId): void
+    public static NotHasCardInHand(gameRoom: FriendCardGameRoom, player: FriendCardPlayer, friendCard: CardId): void
     {
-        if (gameRoom.GetCurrentRoundGame().GetCurrentPlayer().GetHandCard().HasCard(friendCard))
-            throw new Error("You have this card in your hand");
+        if (player.GetHandCard().HasCard(friendCard))
+            throw new Error("You have this card on your hand");
+    }
+    public static NotAlreadySetTrumpAndFriend(gameRoom: FriendCardGameRoom)
+    {
+        if(gameRoom.GetCurrentRoundGame().IsTrumpAndFriendNotUndefined())
+            throw new Error("Trump and friend already setup");
     }
 }

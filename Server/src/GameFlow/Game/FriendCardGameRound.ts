@@ -14,8 +14,8 @@ export class FriendCardGameRound
     private readonly discarded = new DeckLogic();
     private roundState: GAME_STATE = GAME_STATE.NOT_STARTED;
     private gameplayState: GAME_STATE = GAME_STATE.NOT_STARTED;
-    private trumpColor: ColorType = null!;
-    private friendCard: CardId = null!;
+    private trumpColor: ColorType | undefined = undefined;
+    private friendCard: CardId | undefined= undefined;
     private auctionPoint: number = 50;
     private playersInOrder: FriendCardPlayer[] = [];
     private highestAuctionId: string = '';
@@ -57,15 +57,15 @@ export class FriendCardGameRound
         }
         this.currentPlayerNumber = FriendCardGameRoundLogic.NextPlayer(this.currentPlayerNumber, this.playersInOrder.length);
     }
-    public SetTrumpAndFriendProcess(trumpColor: ColorType, friendCard: CardId): void
+    public SetTrumpAndFriendProcess(trumpColor: ColorType, friendCard: CardId, player: FriendCardPlayer): void
     {
         this.trumpColor = trumpColor;
         this.friendCard = friendCard;
         const highestAuctionPlayer : FriendCardPlayer | undefined= this.GetHighestAuctionPlayer();
         const friendPlayer: FriendCardPlayer | undefined  = this.GetFriendPlayer();
-        
         FriendCardGameRoundLogic.InitializeTeam(highestAuctionPlayer, friendPlayer, this.playersInOrder, this.auctionWinnerTeamIds, this.anotherTeamIds);
         FriendCardGameRoundLogic.InitializeTrick(13, this.trickCardMap);
+        this.currentPlayerNumber = this.playersInOrder.findIndex(p => p.id === player.id);
         this.currentTrickNumber = 0;
     }
     
@@ -76,7 +76,7 @@ export class FriendCardGameRound
         const leaderColor: ColorType | undefined = leaderCardId ? CardLogic.GetColor(leaderCardId) : undefined;
         if(leaderColor && this.GetCurrentPlayer().GetHandCard().HasColor(leaderColor))
         {
-            if(leaderCardId && (CardLogic.IsColorSameAs(cardId, leaderCardId) || CardLogic.IsColor(cardId, this.trumpColor)))
+            if(leaderCardId && (CardLogic.IsColorSameAs(cardId, leaderCardId) || CardLogic.IsColor(cardId, this.trumpColor!)))
             {
                 removeCard = cardId;
             }
@@ -98,7 +98,7 @@ export class FriendCardGameRound
         if (isFinishedTrick)
         {
             this.currentPlayerNumber =  FriendCardGameRoundLogic.CalculateWinnerTrickSetNextLeader(
-                                        this.trumpColor, 
+                                        this.trumpColor!, 
                                         leaderColor!, 
                                         currentTrickCardModel!,
                                         this.playersInOrder,
@@ -130,7 +130,20 @@ export class FriendCardGameRound
     public IsFriendAppeared(): boolean { return this.isFriendAppeared; }
     public GetAuctionWinnerTeamIds(): string[] { return this.auctionWinnerTeamIds; }
     public GetAnotherTeamIds(): string[] { return this.anotherTeamIds; }
-    public GetFriendPlayer(): FriendCardPlayer | undefined { return this.playersInOrder.find(p => {p.GetHandCard().HasCard(this.friendCard)})}
+    public GetFriendPlayer(): FriendCardPlayer | undefined 
+    { 
+        let friendPlayer: FriendCardPlayer | undefined = undefined;
+        if(this.friendCard){
+            this.playersInOrder.forEach(player => {
+                if(player.GetHandCard().HasCard(this.friendCard!)) 
+                    friendPlayer = player;
+            })
+        }
+        return friendPlayer;
+    }
+    public IsTrumpAndFriendNotUndefined(): boolean { return this.trumpColor !== undefined && this.auctionPoint !== undefined; }
+    public GetPlayerInOrder(): FriendCardPlayer[] { return this.playersInOrder; }
+    public GetCurrentTrickNumber(): number { return this.currentTrickNumber; }
     public GetCurrentPlayer(): FriendCardPlayer { return this.playersInOrder[this.currentPlayerNumber]; }
     public GetHighestAuctionPlayer(): FriendCardPlayer | undefined { return this.playersInOrder.find(a => a.id === this.highestAuctionId); }
     public IsPlayerTurn(playerId: string) : boolean { return this.GetCurrentPlayer()?.id === playerId; }

@@ -2,9 +2,10 @@ import { GAME_STATE } from "../../Enum/GameState.js";
 import { BaseResponseDTO } from "./Response/BaseResponseDTO.js";
 export type AuctionPointDTO = {
     playerId?: string;
+    isPass: boolean;
     nextPlayerId: string;
-    currentHighestAuctionPlayerId: string;
-    currentAuctionPoint: number;
+    HighestAuctionPlayerId: string;
+    HighestAuctionPoint: number;
     gameplayState: GAME_STATE
 };
 

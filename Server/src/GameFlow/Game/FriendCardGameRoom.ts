@@ -23,6 +23,7 @@ export class FriendCardGameRoom extends GameRoom
         this.currentRoundNumber = 0;
     }
     public GetCurrentRoundGame(): FriendCardGameRound { return this.roundsInGame[this.currentRoundNumber]; }
+    public GetCurrentRoundNumber(): number { return this.currentRoundNumber; }
     public IsCurrentRoundGameFinished(): boolean { return this.GetCurrentRoundGame().GetRoundState() === GAME_STATE.FINISHED && this.GetCurrentRoundGame().GetGameplayState() === GAME_STATE.FINISHED; }
     public GetAllPlayerAsArray(): FriendCardPlayer[] { return Array.from(this.playersInGame.values()); }
     public GetAllPlayerIdAsArray(): string[]
