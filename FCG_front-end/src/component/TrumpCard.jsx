@@ -5,8 +5,10 @@ function TrumpCard() {
   const cardPath = "\\SVG-cards-1.3\\" + cardName
   return (
     <section className='trump_card'>
+        <div className='card_img'>
+          <img src={cardPath} alt="" />
+        </div>
         <p>TRUMP CARD</p>
-        <img src={cardPath} alt="" />
     </section>
     
 

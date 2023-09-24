@@ -2,41 +2,34 @@ import './CardTable.css'
 
 function CardTable() {
     return (
-        <table>
+        <table className='played_card text-xs text-center'>
             <tr>
-                <th>Suite</th>
-                <th>5</th>
-                <th>10</th>
-                <th>k</th>
-              
-            </tr>
-            <tr>
-                <td>♣️</td>
-                <td>✅</td>
-                <td></td>
-                <td></td>
+                <td>♣️ </td>
+                <td>5</td>
+                <td>10</td>
+                <td>K</td>
 
               
             </tr>
             <tr>
                 <td>♠️</td>
-                <td>✅</td>
-                <td>✅</td>
+                <td>5</td>
+                <td>10</td>
                 <td></td>
              
             </tr>
             <tr>
-                <td>♢</td>
-                <td>✅</td>
+                <td className='text-red-600'>♦️</td>
+                <td>5</td>
                 <td></td>
-                <td>✅</td>
+                <td></td>
              
             </tr>
             <tr>
-                <td>♡</td>
-                <td>✅</td>
-                <td></td>
-                <td></td>
+                <td className='text-red-600'>♥️</td>
+                <td>5</td>
+                <td>10</td>
+                <td>K</td>
              
             </tr>
         </table>

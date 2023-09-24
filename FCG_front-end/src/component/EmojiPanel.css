@@ -10,10 +10,10 @@
    
   }
 .emoji_panel{
-    grid-column: 3/10;
-    grid-row:9/11;
-    justify-content:end;
+    
+    justify-content:center;
     display: flex;
+    flex-direction: column;
 }
 .emoji_panel .emoji_button{
   all: unset;

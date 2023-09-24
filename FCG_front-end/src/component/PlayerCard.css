@@ -40,7 +40,9 @@ section.profile>div{
    
 }
 section.individual_score{
-    text-align: center;
+    display: flex;
+    justify-content: center;
+    /* text-align: center; */
     flex-grow: 1;
     border: 1px solid #ffa94d;
     border-radius: 5px;
@@ -48,4 +50,10 @@ section.individual_score{
 
 section.profile>div.player_name_panel>button.kick_button{
     margin-left: auto;
+}
+
+section.profile>div.player_name_panel>p.score{
+    margin-left: auto;
+    background-color: #bbb;
+   border-radius: 50%;
 }

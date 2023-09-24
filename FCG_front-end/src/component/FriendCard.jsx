@@ -5,11 +5,11 @@ function FriendCard() {
   const cardPath = "\\SVG-cards-1.3\\" + cardName
   return (
     <section className='friend_card'>
-        <p>FRIEND CARD</p>
-        <img src={cardPath} alt="" />
+        <div className='card_img'>
+          <img src={cardPath} alt="" />
+        </div> 
         
-       
-        
+        <p>FRIEND CARD</p> 
     </section>
     
 
