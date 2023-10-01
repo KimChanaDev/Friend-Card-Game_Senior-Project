@@ -1,59 +1,29 @@
-div.player_name_panel{
-    border-radius: 3px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-    border: 1px solid #e74c3c;
-    background-color: rgb(52, 152, 219);
-    margin-block: 0px 2px;
-   
-    text-align: center;
+div.player_info{
+    margin-inline-start: auto;
+    margin-inline-end: auto;
     display: flex;
+    flex-direction: column;
+    justify-content: center;
+    text-align: center; 
 }
-div.player_name_panel>h3.player_name{
-    margin-left: auto;
-}
-
-
-section.profile>div>img{
-   width:60%;
+div.player_info>p{
+    color: rgba(0, 0, 0, 0.60);
+ }
+section.profile>img{
+   width:45%;
    height: 100%;
-   
-  
-
+   border-radius: 9999px;
 }
 section.profile{
     width: 85%;
     height: 30%;
     display:flex;
-    justify-content: space-evenly;
-    border: 1px solid #ffa94d;
-    border-radius: 5px;
-    flex-direction: column;
-  
+    border: 1px solid rgba(241, 236, 236, 0.50);
+    border-radius: 9999px;
+    background-color: rgba(241, 236, 236, 0.50);
+    
 }
-
-
-
-section.profile>div{
-    display: flex;
-    /* justify-content: center;
-    padding-inline-start: 0; */
-   
-}
-section.individual_score{
-    display: flex;
-    justify-content: center;
-    /* text-align: center; */
-    flex-grow: 1;
-    border: 1px solid #ffa94d;
-    border-radius: 5px;
-}
-
-section.profile>div.player_name_panel>button.kick_button{
+section.profile>div.player_profile>button.kick_button{
     margin-left: auto;
 }
 
-section.profile>div.player_name_panel>p.score{
-    margin-left: auto;
-    background-color: #bbb;
-   border-radius: 50%;
-}

@@ -62,6 +62,8 @@ body{
 
   figure.bot>img{
     transform: skew(0deg,-4deg);
+    cursor: pointer;
+    
   }
   
   

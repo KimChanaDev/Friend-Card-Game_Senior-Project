@@ -47,14 +47,10 @@ function InGameInterface() {
           <div>
             <img src={cardPath} alt="" />
           </div>
-
           {/* <TotalScoreBoard/> */}
-
         </section>
         < EmojiPanel />
-       
       </div>
-
     </>
   )
 }
