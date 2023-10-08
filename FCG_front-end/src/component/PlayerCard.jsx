@@ -1,7 +1,8 @@
 
 import './PlayerCard.css'
-function PlayerCard({ name, desc, isInLobby, isLeft, isBidding, isMax, bidScore,isPass }) {
+function PlayerCard({ name, desc, isInLobby, isLeft, isBidding, isMax, bidScore,isPass,isPlay,isTop }) {
   const bidShowPosition = {right:isLeft&&'-2rem',left:!isLeft&&'-2rem'}
+  const timerPosition = {bottom:isTop&&'-3rem',top:!isTop&&'-3rem'}
   return (
     <>
       <section className='profile '>
@@ -24,9 +25,15 @@ function PlayerCard({ name, desc, isInLobby, isLeft, isBidding, isMax, bidScore,
                pass
               </p>
         }
-      
-      </section>
+        {isPlay&& 
+          <div className='timer' style={timerPosition}>
+              <p style={{order:isTop?2:1}}>Timer</p>
+              <p style={{order:isTop?1:2}} className='timer_value'>30</p>
+          </div>
 
+        }
+        
+      </section>
     </>
 
 

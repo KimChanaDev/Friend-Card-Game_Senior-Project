@@ -8,7 +8,7 @@ function TrumpCard() {
         <div className='card_img'>
           <img src={cardPath} alt="" />
         </div>
-        <p>TRUMP CARD</p>
+        <p>TRUMP</p>
     </section>
     
 

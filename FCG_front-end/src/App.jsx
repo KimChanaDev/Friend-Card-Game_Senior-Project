@@ -1,12 +1,12 @@
-// import InGameInterface from "./interface/inGameInterface"
-import BiddingInterface from "./interface/BiddingInterface"
+import InGameInterface from "./interface/inGameInterface"
+// import BiddingInterface from "./interface/BiddingInterface"
 // import InLobby from "./interface/InLobby"
 // import SummaryScore from "./interface/SummaryScore"
 function App() {
   return (
     <>
-        <BiddingInterface/>
-        {/* <InGameInterface/> */}
+        {/* <BiddingInterface/> */}
+        <InGameInterface/>
         {/* <InLobby/> */}
         {/* <SummaryScore/> */}
         

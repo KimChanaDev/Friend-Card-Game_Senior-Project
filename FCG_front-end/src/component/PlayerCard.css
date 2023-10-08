@@ -52,3 +52,19 @@ section.profile>.pass{
     text-align: center;
 }
 
+section.profile .timer{
+    position: absolute;
+    right: 0px;
+    font-weight: bold;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    
+}
+section.profile .timer .timer_value{
+    background-color: #FFAF66;
+    border: 1px solid black;
+    border-radius: 9999px;
+    
+    font-size: large;
+}

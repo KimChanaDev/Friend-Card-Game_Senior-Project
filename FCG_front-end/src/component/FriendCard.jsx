@@ -9,7 +9,7 @@ function FriendCard() {
           <img src={cardPath} alt="" />
         </div> 
         
-        <p>FRIEND CARD</p> 
+        <p>FRIEND</p> 
     </section>
     
 

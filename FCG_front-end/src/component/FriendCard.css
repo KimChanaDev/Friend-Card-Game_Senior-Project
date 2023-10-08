@@ -32,4 +32,7 @@ section.friend_card p{
     margin-top: 2%;
     width: 100%;
     text-align: center;
+    border-radius: 1rem;
+    color: white;
+    background: #081128;
 }

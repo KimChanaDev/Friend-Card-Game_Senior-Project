@@ -13,13 +13,8 @@ body{
     max-height: 100vh;
     min-width: 100vw;
     min-height: 100vh;
-    background-image: url('public/1.jpg');
-    background-size: cover;
-    -webkit-filter: blur(5px);
-    -moz-filter: blur(5px);
-    -o-filter: blur(5px);
-    -ms-filter: blur(5px);
-    filter: blur(20px);
+    background: linear-gradient(180deg, #75A7E2 0%, rgba(255, 255, 255, 0.04) 99.99%, rgba(255, 255, 255, 0.00) 100%), #FFF;
+    
   }
   .content {
     position: fixed;
@@ -55,63 +50,31 @@ body{
     /* border: 2px solid #ffa94d; */
      border-radius: 5px;
   }
-  figure.bot img:not(:first-child) {
-    /* Your styles here */
-    position: relative;
-  }
-
-  figure.bot>img{
-    transform: skew(0deg,-4deg);
-    cursor: pointer;
-    
-  }
-  
-  
-  
-  
-  figure.bot{
-    grid-column: 1/21;
-    grid-row:18/21;
-    margin-block: 0px 0px;
-    margin-inline: 0px 0px;
-    display:flex;
-    flex-wrap: wrap;
-    overflow: hidden;
-    padding: 0px 0px 0px 0px;
-    justify-content: center;
-
-  }
-  
-  
+ 
   section.left{
-    grid-column: 3/7;
-    grid-row:4/18;
+    grid-column: 2/7;
+    grid-row:2/21;
     margin-block: 0px 0px;
     margin-inline: 0px 0px;
     display: flex;
     flex-direction: column;
-    justify-content: space-evenly;
+    justify-content: space-around;
     align-items: center;
     
   }
-  
   
   section.right{
-    grid-column: 15/19;
-    grid-row:4/18;
+    grid-column: 15/20;
+    grid-row:2/21;
     margin-block: 0px 0px;
     margin-inline: 0px 0px;
     display: flex;
     flex-direction: column;
-    justify-content: space-evenly;
+    justify-content: space-around;
     align-items: center;
+   
   
   }
-  ul.emoji_panel{
-    grid-column: 20/21;
-    grid-row:4/18;
-  }
-  
   
   section.top{
     grid-column: 1/21;
@@ -119,40 +82,81 @@ body{
     margin-block: 0px 0px;
     margin-inline: 0px 0px;
     display:flex;
+    margin-block: 0px 0px;
+    margin-inline: 0px 0px;
     justify-content:center;
-    grid-template-rows: repeat(4, 25%);
-    
-  }
-  
-
-  section.mid{
-    grid-column: 8/14;
-    grid-row:4/18;
-    justify-content: center;
-    display:grid;
-    grid-template-columns: repeat(10, 10%);
-    grid-template-rows: repeat(10, 10%);
-  }
-  section.mid div{
-    align-items: center;
-    grid-column: 1/21;
-    grid-row:1/18;
-    overflow: hidden;
-    justify-content: center;
-    display: flex;
+ 
+    /* justify-content: space-evenly; */
   }
 
   section.mid img{
-    height: 40%;
+    height: 60%;
+    margin-block-start: 3rem;
+    color: #75A7E2;
   }
-  section.top .setting{
-    /* align-self: flex-end; */
-    /* margin-bottom: auto; */
-    position: absolute;
-    left: 95%;
+  section.top section.friend_card{
+      /* margin-right: auto; */
+      margin-left: auto;
+  }
   
+  section.mid{
+    grid-column: 7/15;
+    grid-row:7/16;
+    justify-content: center;
+    align-content: center;
+    display:flex;
+   
+    border-radius: 84px;
+    border: 1px solid #050357;
+    background: linear-gradient(180deg, rgba(233, 233, 233, 0.00) 0%, rgba(3, 0, 172, 0.25) 100%);
+    /* border: 1px solid orange; */
+  }
+
+  section.top .setting{
+    margin-inline-start: auto;
+    /* margin-bottom: auto; */ 
    background-color: #bbb;
    border-radius: 50%;
-   
-    
    }
+   .slide_bar{
+    grid-column: 20/21;
+    grid-row:9/16;
+    margin-inline-start:auto;
+   }
+   .emoji_panel{
+    grid-column: 19/21;
+    grid-row:3/20;
+    margin-inline-start:auto;
+   }
+
+
+section.profile{
+    width: 80%;
+    height: 20%;
+}
+
+.bot{
+  grid-column: 1/21;
+  grid-row:17/21;
+  margin-block: 0px 0px;
+  margin-inline: 0px 0px;
+  display:flex;
+  flex-wrap: wrap;
+  overflow: hidden;
+  padding: 0px 0px 0px 0px;
+  justify-content: center;
+}
+
+figure.bot img:not(:first-child) {
+  /* Your styles here */
+  position: relative;
+}
+
+figure.bot>img{
+  transform: skew(0deg,-4deg);
+  cursor: pointer;
+  
+}
+figure.bot>img:hover{
+  background-color:grey;
+}
