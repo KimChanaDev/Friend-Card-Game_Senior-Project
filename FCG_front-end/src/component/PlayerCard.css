@@ -13,6 +13,8 @@ section.profile>img{
    width:45%;
    height: 100%;
    border-radius: 9999px;
+   background:   rgba(14, 34, 106, 0.42);
+   
 }
 section.profile{
     width: 85%;
@@ -31,5 +33,22 @@ section.profile>button.kick_button_right{
     position: absolute;
     right: 0px;
 }
-
+section.profile>.bidScore{
+    position: absolute;
+    width: 3rem;
+    top: 35%;
+    border-radius: 97px;
+    border: 2px solid #000;
+    background: #A1CDFF;
+    text-align: center;
+    font-size: 1.5rem;
+}
+section.profile>.pass{
+    position: absolute;
+    width: 3rem;
+    top: 20%;
+    background: #EC7676;
+    border-radius: 1rem;
+    text-align: center;
+}
 
