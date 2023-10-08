@@ -19,3 +19,18 @@
     margin-block-start: 1%;
     margin-block-end: 1%;
 }
+thead tr:nth-of-type(even) {
+ 
+  background: #B7D4F6;
+}
+.summary_table{
+  
+  border-radius: 1rem;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.18) 0%, rgba(117, 167, 226, 0.42) 100%), #FFF;
+}
+tbody th{
+  color: #576FEC;
+}
+tbody tr:last-of-type th {
+  color: #192B8A;
+}
