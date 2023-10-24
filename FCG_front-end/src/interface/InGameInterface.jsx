@@ -11,7 +11,7 @@ import SlideBar from '../component/SlideBar';
 import './IngameInterface.css'
 
 
-function InGameInterface({cardInhand = [],cardInfield = [],GameScore = []}) {
+function InGameInterface({cardInhand = [],cardInfield = [],GameScore = [],friendCard,trumpCard,turn = []}) {
   const dictCard = {
     1:'2_of_hearts.svg',2:'3_of_hearts.svg',3:'4_of_hearts.svg',4:'5_of_hearts.svg',5:'6_of_hearts.svg',
     6:'7_of_hearts.svg',7:'8_of_hearts.svg',8:'9_of_hearts.svg',9:'10_of_hearts.svg',10:'jack_of_hearts.svg',
@@ -30,12 +30,15 @@ function InGameInterface({cardInhand = [],cardInfield = [],GameScore = []}) {
     50:'queen_of_spades.svg',51:'king_of_spades.svg',52:'ace_of_spades.svg'
 
   }
+  const suites = {'Hearts':'ace_of_hearts.svg','Diamonds':'ace_of_diamonds.svg','Clubs':'ace_of_clubs.svg','Spades':'ace_of_spades.svg'}
   const n = cardInhand.length
   // const myArray = new Array(n).fill(0);
   const picStyles = { "width": `${Math.min(100 / (n), 100 / 9)}%` }
   const cardInhand_map = cardInhand.map((e)=>"..\\public\\SVG-cards-1.3\\" + dictCard[e+1])
   console.log(cardInfield)
   const cardinfiled_map = cardInfield.map((e)=>"..\\public\\SVG-cards-1.3\\" + dictCard[e+1])
+  const friendCard_map = dictCard[friendCard+1]
+  const trumpCard_map = suites[trumpCard]
   // const cardName = 'back.svg'
   // const cardPath = "..\\public\\SVG-cards-1.3\\" + cardName
   const offset = 25
@@ -46,30 +49,31 @@ function InGameInterface({cardInhand = [],cardInfield = [],GameScore = []}) {
       </div>
       <div class="content">
         <section className='top' >
-          <FriendCard />
-          <TrumpCard />
+          <FriendCard cardName={friendCard_map}/>
+          <TrumpCard  cardName={trumpCard_map}/>
           {/* <CardTable/> */}
           <SettingsIcon className='setting' sx={{ fontSize: 50 }} />
 
         </section>
         <section className='left' >
         <PlayerCard name={'khonKohok1'} isLeft={true}
-                      bidScore={20} isPlay={true} isTop={true}
+                      bidScore={20} isPlay={turn[0]} isTop={true}
                       score={GameScore[0]}
           />
           <PlayerCard name={'khonKohok2'}   isLeft={true}  
-                       bidScore={20} isPass={true} isPlay={true}
+                       bidScore={20}  isPlay={turn[1]}
                        score={GameScore[1]}
           />
         </section>
-
         <section className='right'>
-        <PlayerCard name={'khonKohok1'} isLeft={false} 
-                      bidScore={20} score={GameScore[2]}
+        <PlayerCard name={'khonKohok4'} isLeft={false}
+                      isPlay={turn[3]}
+                      bidScore={20} score={GameScore[3]}
           />
-          <PlayerCard name={'khonKohok2'}  isLeft={false} 
-                       bidScore={20} isPass={true}
-                       score={GameScore[3]}
+          <PlayerCard name={'khonKohok3'}  isLeft={false} 
+                       bidScore={20} 
+                       isPlay={turn[2]}
+                       score={GameScore[2]}
           />
         </section>
 

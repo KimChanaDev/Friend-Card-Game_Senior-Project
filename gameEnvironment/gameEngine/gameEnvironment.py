@@ -411,11 +411,17 @@ class Game:
             self.showDataWhenRoundGetStart()
     def sendToApi(self):
         time.sleep(7)
+        turn = self.getTurnPlayerIndex()
+        turnArr = [False if turn!=i else True for i in range(4)]
+        trumpCard = self.getTrumpCard()
+        friendCard = self.getFriendCard().getId()
         cardInhand = [card.getId() for card in sorted(self.getPlayer(0).getAllCard())]
         cardPlayedEachRound = self.getPlayedCardEachRound()
         IDcardPlayedEachRound  = [ card.getId() for card in cardPlayedEachRound]
         Allscore = [ self.getPlayer(i).getGameScore() for i in range(4)]
-        output = {'cardInhand':cardInhand,'cardInfield':IDcardPlayedEachRound,'matchScore':Allscore}
+        output = {'cardInhand':cardInhand,'cardInfield':IDcardPlayedEachRound,'matchScore':Allscore,
+                  'turn':turnArr,'trumpCard':trumpCard,'friendCard':friendCard
+        }
         print('yo') 
         requests.post('http://127.0.0.1:3000/game', json=output)
         

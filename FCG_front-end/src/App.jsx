@@ -38,7 +38,9 @@ function App() {
   return (
     <>
         {/* <BiddingInterface/> */}
-        <InGameInterface cardInhand={msg['cardInhand']} cardInfield={msg['cardInfield']} GameScore={msg['matchScore']} />
+        <InGameInterface cardInhand={msg['cardInhand']} cardInfield={msg['cardInfield']} 
+          friendCard={msg['friendCard']} trumpCard={msg['trumpCard']} turn={msg['turn']}
+        GameScore={msg['matchScore']} />
         {/* <InLobby/> */}
         {/* <SummaryScore/> */}
         {/* <SelectCard/> */}

@@ -168,7 +168,6 @@ def train(newAgent):
                     n_largest = (n_largest + 1) % 28
             else:
                 old_state_old,old_done = oldAgent.get_state(game)
-               
                 old_output = oldAgent.get_best_action(old_state_old)
                 while not playCard(game,old_output):
                     old_output = oldAgent.get_best_action(old_state_old)
@@ -233,12 +232,12 @@ def play(newAgent):
         for i in range(4):
             if game.getTurnPlayerIndex() ==0:
                 state_old,done = newAgent.get_state(game)
-                n_largest = 0
-                output = newAgent.get_action(state_old,n_largest)
+                
+                output = newAgent.get_best_action(state_old)
                 order = i
                 while not playCard(game,output):
-                    output = newAgent.get_action(state_old,n_largest)
-                    n_largest = (n_largest + 1) % 28
+                    output = newAgent.get_best_action(state_old)
+            
                 # newAgent.sendToApi(game)
             else:
                 old_state_old,old_done = oldAgent.get_state(game)
