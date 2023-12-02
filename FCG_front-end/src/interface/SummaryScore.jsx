@@ -4,8 +4,13 @@ function SummaryScore() {
         <>
             <div class="relative overflow-x-auto summary_table border-double border-4 border-gray-600">
                 <table class="w-full text-sm text-left text-dark dark:text-gray-400">
-                    <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
-                        <tr>
+                    <thead class="text-xs  uppercase ">
+                        <tr >
+                            <th colSpan={5} className='text-center text-white bg-black text-base'>
+                                Game Summary
+                            </th>
+                        </tr>
+                        <tr className='text-black'>
                             <th scope="col" class="px-6 py-3">
                                 
                             </th>
@@ -24,8 +29,8 @@ function SummaryScore() {
                         </tr>
                     </thead>
                     <tbody>
-                        <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
-                            <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                        <tr class="border-b dark:bg-gray-800 dark:border-gray-700">
+                            <th scope="row" class="px-6 py-4 font-medium  whitespace-nowrap dark:text-white">
                                 Round 1
                             </th>
                             <td class="px-6 py-4">
@@ -35,21 +40,21 @@ function SummaryScore() {
                                 0 ⭐
                             </td>
                             <td class="px-6 py-4">
-                                0 ⭐
+                                0 ✨
                             </td>
                             <td class="px-6 py-4">
                                 0
                             </td>
                         </tr>
-                        <tr class="bg-white  dark:bg-gray-800 border-b dark:border-gray-700">
-                            <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                        <tr class=" dark:bg-gray-800 border-b dark:border-gray-700">
+                            <th scope="row" class="px-6 py-4 font-medium  whitespace-nowrap dark:text-white">
                             Round 2
                             </th>
                             <td class="px-6 py-4">
                                 0 ⭐
                             </td>
                             <td class="px-6 py-4">
-                                0 ⭐
+                                0 ✨
                             </td>
                             <td class="px-6 py-4">
                                 0
@@ -58,8 +63,8 @@ function SummaryScore() {
                                 0
                             </td>
                         </tr>
-                        <tr class="bg-white dark:bg-gray-800 border-b dark:border-gray-700">
-                            <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                        <tr class=" dark:bg-gray-800 border-b dark:border-gray-700">
+                            <th scope="row" class="px-6 py-4 font-medium  whitespace-nowrap dark:text-white">
                             Round 3
                             </th>
                             <td class="px-6 py-4">
@@ -72,11 +77,11 @@ function SummaryScore() {
                                 0 ⭐
                             </td>
                             <td class="px-6 py-4">
-                                0 ⭐
+                                0 ✨
                             </td>
                         </tr>
-                        <tr class="bg-white dark:bg-gray-800 border-b dark:border-gray-700">
-                            <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                        <tr class="dark:bg-gray-800 border-b dark:border-gray-700">
+                            <th scope="row" class="px-6 py-4 font-medium  whitespace-nowrap dark:text-white">
                             Round 4
                             </th>
                             <td class="px-6 py-4">
@@ -89,11 +94,11 @@ function SummaryScore() {
                                 0
                             </td>
                             <td class="px-6 py-4">
-                                10 ⭐
+                                10 ✨
                             </td>
                         </tr>
-                        <tr class="bg-white dark:bg-gray-800">
-                            <th scope="row" class="px-6 py-4 font-medium text-green-500 whitespace-nowrap dark:text-white">
+                        <tr class=" dark:bg-gray-800">
+                            <th scope="row" class="px-6 py-4 font-medium  whitespace-nowrap dark:text-white">
                                 Total Score
                             </th>
                             <td class="px-6 py-4">
@@ -105,13 +110,13 @@ function SummaryScore() {
                             <td class="px-6 py-4">
                                 0 
                             </td>
-                            <td class="px-6 py-4 text-red-800 font-bold">
+                            <td class="px-6 py-4 text-red-600 font-bold">
                                 10 👑
                             </td>
                         </tr>
                     </tbody>
                 </table>
-                <button class=" close_button bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 border border-green-700 rounded">
+                <button class=" close_button bg-black  text-white font-bold py-2 px-4 border rounded-3xl">
   close
 </button>
             </div>

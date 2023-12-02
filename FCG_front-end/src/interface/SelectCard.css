@@ -19,3 +19,12 @@
    flex-direction: column;
     
 }
+thead{
+  background-color: black;
+  color: white;
+}
+.select_table  {
+  border-radius: 1rem;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.18) 0%, rgba(117, 167, 226, 0.42) 100%), #FFF;
+  
+}

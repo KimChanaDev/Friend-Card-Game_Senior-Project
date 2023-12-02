@@ -8,14 +8,14 @@ function Menu() {
             <p>
                 Waiting for Player
             </p>
-            <button class="add_bot_button bg-blue-500 hover:bg-blue-700 text-black font-bold py-2  border border-blue-700 rounded">
+            <button class="add_bot_button bg-black hover:bg-blue-700 text-white font-bold py-2  border border-blue-700 rounded-2xl">
                 Add Bot
             </button>
-            <button class="quit_button bg-blue-500 hover:bg-blue-700 text-black font-bold py-2  border border-blue-700 rounded">
+            <button class="quit_button bg-black hover:bg-blue-700 text-white font-bold py-2  border border-blue-700 rounded-2xl">
                 Quit Lobby
             </button>
 
-         </div>
+       </div>
     
     
     </>
