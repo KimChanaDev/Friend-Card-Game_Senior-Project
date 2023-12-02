@@ -48,4 +48,7 @@ ol.bid_show_group{
     grid-template-rows: repeat(10, 10%);
     grid-column: 1/11;
     grid-row:1/11;
+ 
+
+
 }

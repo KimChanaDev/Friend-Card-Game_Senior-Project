@@ -5,6 +5,8 @@ from collections import deque
 from GameEnvironment.gameEngine.gameEnvironment import *
 from model import Linear_QNet, QTrainer
 from helper import plot
+import requests
+import time
 from FCG_Ai.utils import *
 MAX_MEMORY = 2000000
 BATCH_SIZE = 10000
@@ -59,6 +61,9 @@ class Agent:
         # lack order of player 5 10 k that was play each round
         done = game.isEndGame()
         return np.array(state, dtype=int),done
+
+         
+
 
     def remember(self, state, action, reward, next_state, done):
         self.memory.append((state, action, reward, next_state, done)) # popleft if MAX_MEMORY is reached
@@ -116,7 +121,7 @@ class Agent:
         return game.getReward()
         
 
-def play(newAgent):
+def train(newAgent):
     plot_scores = []
     plot_mean_scores = []
     total_score = 0
@@ -163,7 +168,6 @@ def play(newAgent):
                     n_largest = (n_largest + 1) % 28
             else:
                 old_state_old,old_done = oldAgent.get_state(game)
-               
                 old_output = oldAgent.get_best_action(old_state_old)
                 while not playCard(game,old_output):
                     old_output = oldAgent.get_best_action(old_state_old)
@@ -201,7 +205,49 @@ def play(newAgent):
         train_reward = reward
         train_done  = done
         
-        
+def play(newAgent):
+    p1 = player("p1",0)
+    p2 = player("p2",1)
+    p3 = player("p3",2)
+    p4 = player("p4",3)
+    game = Game(p1,p2,p3,p4)
+    game.setGameScore()
+    game.provideCard()
+    game.determineBidWinner()
+    game.randomTrumpCard()
+    game.setFriendCard()
+    game.identifyTeam()
+    game.reset()
+    state_old = None
+    state_new = None
+    output = None
+    reward =  None
+    done = None 
+    oldAgent = Agent()
+    oldAgent.loadModel('C:\\Users\\User\\Desktop\\friendCardGame\\model\\ez_sixth_gen.pth')
+    round = 1
+    while not game.isEndGame():
+       
+        print(round)
+        for i in range(4):
+            if game.getTurnPlayerIndex() ==0:
+                state_old,done = newAgent.get_state(game)
+                
+                output = newAgent.get_best_action(state_old)
+                order = i
+                while not playCard(game,output):
+                    output = newAgent.get_best_action(state_old)
+            
+                # newAgent.sendToApi(game)
+            else:
+                old_state_old,old_done = oldAgent.get_state(game)
+                # oldAgent.sendToApi(game)
+                old_output = oldAgent.get_best_action(old_state_old)
+                while not playCard(game,old_output):
+                    old_output = oldAgent.get_best_action(old_state_old)
+        round+=1
+          
+
     
           
     # game.summaryScore()
@@ -247,12 +293,13 @@ def playCard(game,output):
 def main():
     newAgent = Agent()
     newAgent.loadModel('C:\\Users\\User\\Desktop\\friendCardGame\\model\\ez_sixth_gen.pth')
-    for i in range(10000):
-        play(newAgent)
-        if (i+1) % 1000 ==0:
-            newAgent.train_long_memory()
-        print('round',i)  
-    newAgent.model.save('ez_seventh_gen.pth')
+    # for i in range(10000):
+    #     train(newAgent)
+    #     if (i+1) % 1000 ==0:
+    #         newAgent.train_long_memory()
+    #     print('round',i)  
+    # newAgent.model.save('ez_seventh_gen.pth')
+    play(newAgent)
 if __name__ == '__main__':
     main()
 

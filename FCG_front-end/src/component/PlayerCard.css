@@ -1,59 +1,70 @@
-div.player_name_panel{
-    border-radius: 3px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-    border: 1px solid #e74c3c;
-    background-color: rgb(52, 152, 219);
-    margin-block: 0px 2px;
-   
-    text-align: center;
+div.player_info{
+    margin-inline-start: auto;
+    margin-inline-end: auto;
     display: flex;
+    flex-direction: column;
+    justify-content: center;
+    text-align: center; 
 }
-div.player_name_panel>h3.player_name{
-    margin-left: auto;
-}
-
-
-section.profile>div>img{
-   width:60%;
+div.player_info>p{
+    color: rgba(0, 0, 0, 0.60);
+ }
+section.profile>img{
+   width:45%;
    height: 100%;
+   border-radius: 9999px;
+   background:   rgba(14, 34, 106, 0.42);
    
-  
-
 }
 section.profile{
     width: 85%;
     height: 30%;
     display:flex;
-    justify-content: space-evenly;
-    border: 1px solid #ffa94d;
-    border-radius: 5px;
+    border: 1px solid rgba(241, 236, 236, 0.50);
+    border-radius: 9999px;
+    background-color: rgba(241, 236, 236, 0.50);
+    position: relative;
+    
+}
+section.profile>button.kick_button_left{
+    position: fixed;
+}
+section.profile>button.kick_button_right{
+    position: absolute;
+    right: 0px;
+}
+section.profile>.bidScore{
+    position: absolute;
+    width: 3rem;
+    top: 35%;
+    border-radius: 97px;
+    border: 2px solid #000;
+    background: #A1CDFF;
+    text-align: center;
+    font-size: 1.5rem;
+}
+section.profile>.pass{
+    position: absolute;
+    width: 3rem;
+    top: 20%;
+    background: #EC7676;
+    border-radius: 1rem;
+    text-align: center;
+}
+
+section.profile .timer{
+    position: absolute;
+    right: 0px;
+    font-weight: bold;
+    text-align: center;
+    display: flex;
     flex-direction: column;
-  
+    
 }
-
-
-
-section.profile>div{
-    display: flex;
-    /* justify-content: center;
-    padding-inline-start: 0; */
-   
-}
-section.individual_score{
-    display: flex;
-    justify-content: center;
-    /* text-align: center; */
-    flex-grow: 1;
-    border: 1px solid #ffa94d;
-    border-radius: 5px;
-}
-
-section.profile>div.player_name_panel>button.kick_button{
-    margin-left: auto;
-}
-
-section.profile>div.player_name_panel>p.score{
-    margin-left: auto;
-    background-color: #bbb;
-   border-radius: 50%;
+section.profile .timer .timer_value{
+    background-color: #FFAF66;
+    border: 1px solid black;
+    border-radius: 9999px;
+    
+    font-size: large;
 }

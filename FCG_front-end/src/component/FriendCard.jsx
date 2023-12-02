@@ -1,7 +1,6 @@
 import './FriendCard.css'
 
-function FriendCard() {
-  const cardName = '9_of_clubs.svg'
+function FriendCard({cardName}) {
   const cardPath = "\\SVG-cards-1.3\\" + cardName
   return (
     <section className='friend_card'>
@@ -9,7 +8,7 @@ function FriendCard() {
           <img src={cardPath} alt="" />
         </div> 
         
-        <p>FRIEND CARD</p> 
+        <p>FRIEND</p> 
     </section>
     
 

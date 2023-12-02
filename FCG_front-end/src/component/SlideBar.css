@@ -1,0 +1,15 @@
+.slide_bar{
+   
+    display:flex;
+    width: 70%;
+    background-color:#2A324D;
+    border-top-left-radius:3rem ;
+    border-bottom-left-radius: 3rem;
+    justify-content:flex-end;
+    align-items: center;
+    overflow: hidden;
+}
+.slide_bar>button .left_arrow{
+   padding-left: 13rem;
+    color: white;
+}

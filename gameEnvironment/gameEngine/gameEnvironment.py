@@ -1,5 +1,6 @@
 import random
-
+import time
+import requests
 
 class player:
     def __init__(self, name,index):
@@ -382,7 +383,8 @@ class Game:
         if card.getSuite() == self.getTrumpCard():
             self.setTrumpPlayedCard(card.getLogicPoint())
         self.updatePlayedCardEachRound(card)
-        self.updateCardInPlayerHand(playerIndex,card) 
+        self.updateCardInPlayerHand(playerIndex,card)
+        self.sendToApi() 
         self.incTurn()
         return True
     
@@ -400,12 +402,28 @@ class Game:
         return self.__round
     def incRound(self):
         self.processAfterRoundEnd()
+        
         self.cleanUpGame()
         if self.__round + 1 > 13:
             self.setEndGameStatus(True)
         else:
             self.__round+=1
             self.showDataWhenRoundGetStart()
+    def sendToApi(self):
+        time.sleep(7)
+        turn = self.getTurnPlayerIndex()
+        turnArr = [False if turn!=i else True for i in range(4)]
+        trumpCard = self.getTrumpCard()
+        friendCard = self.getFriendCard().getId()
+        cardInhand = [card.getId() for card in sorted(self.getPlayer(0).getAllCard())]
+        cardPlayedEachRound = self.getPlayedCardEachRound()
+        IDcardPlayedEachRound  = [ card.getId() for card in cardPlayedEachRound]
+        Allscore = [ self.getPlayer(i).getGameScore() for i in range(4)]
+        output = {'cardInhand':cardInhand,'cardInfield':IDcardPlayedEachRound,'matchScore':Allscore,
+                  'turn':turnArr,'trumpCard':trumpCard,'friendCard':friendCard
+        }
+        print('yo') 
+        requests.post('http://127.0.0.1:3000/game', json=output)
         
         
     def setEndGameStatus(self,endGameStatus):

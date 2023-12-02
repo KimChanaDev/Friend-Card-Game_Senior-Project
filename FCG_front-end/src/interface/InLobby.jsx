@@ -6,30 +6,33 @@ import SettingsIcon from '@mui/icons-material/Settings';
 import EmojiPanel from '../component/EmojiPanel';
 import LobbyInfo from '../component/LobbyInfo';
 import Menu from '../component/Menu';
+import SlideBar from '../component/SlideBar';
 import './InLobby.css'
+
 function InLobby() {
+  
   // const cardName = 'back.svg'
   return (
     <>
       <section className='top' >
         <LobbyInfo/>
+        <SettingsIcon className='setting' sx={{ fontSize: 50 }} />
       </section>
       <section className='left' >
-        <PlayerCard name={'khonKohok1'} />
-        <PlayerCard name={'khonKohok2'} />
+        <PlayerCard name={'👑 khonKohok1'} desc={'uid:1234'} isLeft={true} isInLobby={true}/>
+        <PlayerCard name={'khonKohok2'} desc={'uid:1234'} isLeft={true} isInLobby={true}/>
       </section>
       <section className='right'>
-        <SettingsIcon className='setting' sx={{ fontSize: 50 }} />
-        <PlayerCard name={'khonKohok3'} />
-        <PlayerCard name={'khonKohok4'} />
+        <PlayerCard name={'khonKohok3'} desc={'uid:1234'} isInLobby={true}/>
+        <PlayerCard name={'khonKohok4'} desc={'uid:1234'} isInLobby={true}/>
       </section>
       <section className='mid'>
         <Menu/>
       </section>
-      <section className='bot'>
-      < EmojiPanel />
-      </section>
+      <SlideBar/>
+     
     </>
   )
 }
+
 export default InLobby

@@ -24,13 +24,13 @@ section.trump_card{
 }
 
 section.trump_card p{
-    border-radius: 3px;
-    
-    border: 1px solid #e74c3c;
-    background-color: rgb(243, 243, 243);
+    border-radius: 1rem;
+    color: white;
+    background: #081128;
     font-size:80%;
     width: 100%;
     margin-top: 2%;
     text-align: center;
+    
 
 }
