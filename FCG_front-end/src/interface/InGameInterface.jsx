@@ -11,7 +11,10 @@ import SlideBar from '../component/SlideBar';
 import './IngameInterface.css'
 
 
-function InGameInterface({cardInhand = [],cardInfield = [],GameScore = [],friendCard,trumpCard,turn = []}) {
+function InGameInterface({cardInhand = [],cardInfield = [],GameScore = [],friendCard,
+                          trumpCard,turn = []
+                        }) 
+  {
   const dictCard = {
     1:'2_of_hearts.svg',2:'3_of_hearts.svg',3:'4_of_hearts.svg',4:'5_of_hearts.svg',5:'6_of_hearts.svg',
     6:'7_of_hearts.svg',7:'8_of_hearts.svg',8:'9_of_hearts.svg',9:'10_of_hearts.svg',10:'jack_of_hearts.svg',
@@ -42,6 +45,9 @@ function InGameInterface({cardInhand = [],cardInfield = [],GameScore = [],friend
   // const cardName = 'back.svg'
   // const cardPath = "..\\public\\SVG-cards-1.3\\" + cardName
   const offset = 25
+  const dummy  = []
+  for(let i=1;i<53;i++)
+    dummy.push(dictCard[i])
   return (
     <>
       <div class="background-image">
@@ -78,6 +84,9 @@ function InGameInterface({cardInhand = [],cardInfield = [],GameScore = [],friend
         </section>
 
         <figure className='bot' style={{ paddingInlineStart: `${(n - 1) * offset}px` }}>
+          
+              
+          
           {cardInhand_map.map((e, i) => <img src={e} style={{ ...picStyles, "right": i * offset }} alt="" />)}
         </figure>
 

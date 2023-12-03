@@ -4,7 +4,7 @@ import torch.optim as optim
 import torch.nn.functional as F
 import os
 import numpy as np
-from FCG_Ai.utils import *
+from utils import *
 class Linear_QNet(nn.Module):
     def __init__(self, input_size, hidden_size, output_size):
         super().__init__()
@@ -17,7 +17,7 @@ class Linear_QNet(nn.Module):
         return x
 
     def save(self, file_name='model.pth'):
-        model_folder_path = './model'
+        model_folder_path = './teamwork_model'
         if not os.path.exists(model_folder_path):
             os.makedirs(model_folder_path)
 
@@ -68,7 +68,6 @@ class QTrainer:
             if not done[idx]:
                 k = 1
                 while True:
-                    
                     top_values, top_indices = torch.topk(self.model(next_state[idx]), k=k)
                     if notViolateRule(next_state[idx],top_indices[k-1].item()):
                          Q_new = reward[idx] + self.gamma * top_values[k-1].item()

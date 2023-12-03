@@ -142,7 +142,7 @@ section.profile{
   margin-inline: 0px 0px;
   display:flex;
   flex-wrap: wrap;
-  overflow: hidden;
+  /* overflow: hidden; */
   padding: 0px 0px 0px 0px;
   justify-content: center;
 }
