@@ -1,6 +1,6 @@
 
 import './PlayerCard.css'
-function PlayerCard({ name, score, isInLobby, isLeft, isBidding, isMax, bidScore,isPass,isPlay,isTop }) {
+function PlayerCard({ name, score, isInLobby, isLeft, isBidding, isMax, bidScore,isPass,isPlay,isTop,role }) {
   const bidShowPosition = {right:isLeft&&'-2rem',left:!isLeft&&'-2rem'}
   const timerPosition = {bottom:isTop&&'-3rem',top:!isTop&&'-3rem'}
   return (
@@ -10,7 +10,7 @@ function PlayerCard({ name, score, isInLobby, isLeft, isBidding, isMax, bidScore
 
         <img src="./profile.png" alt="" style={{ order: isLeft ? 1 : 2, zIndex: isInLobby && 999 }} />
         <div className='player_info' style={{ order: isLeft ? 2 : 1 }}>
-          <h3 className='player_name'>{name}  </h3>
+          <h3 className='player_name'>{name} {role==1?'👑':role==2?'✨':''}   </h3>
           <p className='desc text-sm text-red-600'>{score}</p>
         </div>
         {!isLeft && isInLobby && <button className='kick_button_right' style={{ zIndex: 9999 }}>❌</button>}

@@ -4,12 +4,13 @@ import numpy as np
 from collections import deque
 from GameEnvironment.gameEngine.gameEnvironment import *
 from model import Linear_QNet, QTrainer
-from helper import plot
+from FCG_Ai.noob_model.agent import Agent
+# from helper import plot
 import requests
 import time
-from FCG_Ai.utils import *
+from utils import *
 MAX_MEMORY = 2000000
-BATCH_SIZE = 10000
+BATCH_SIZE = 100000
 LR = 0.01
 CARD_DICT = {'Hearts':{2:0,3:1,4:2,5:3,6:4,7:5,8:6,9:7,10:8,'J':9,'Q':10,'K':11,'A':12},
             'Diamonds':{2:13,3:14,4:15,5:16,6:17,7:18,8:19,9:20,10:21,'J':22,'Q':23,'K':24,'A':25},
@@ -19,22 +20,39 @@ CARD_DICT = {'Hearts':{2:0,3:1,4:2,5:3,6:4,7:5,8:6,9:7,10:8,'J':9,'Q':10,'K':11,
     }
 
 
-class Agent:
+class teamAgent:
 
     def __init__(self):
         self.n_games = 0
         self.epsilon = 0 # randomness
         self.gamma = 0.9 # discount rate
         self.memory = deque() # popleft()
-        self.model = Linear_QNet(141, 256, 28)
+        self.model = Linear_QNet(125, 256, 28)
         self.trainer = QTrainer(self.model, lr=LR, gamma=self.gamma)
+        self.buddyCard = None
+        self.buddyIndex = None
         
     def loadModel(self,path):
         self.model.load_state_dict(torch.load(path))
         self.model.eval()
         self.trainer = QTrainer(self.model, lr=LR, gamma=self.gamma)
 
-    
+    def convert_card_array_size_from_52_to_28(self,card):
+        
+        card = np.array(card).reshape(4,13)
+        newCard = np.zeros([4,7])
+        # print(card,'card')
+        for i in range(4):
+            for j in range(13):
+                if ((j in [0,1,2,4,5,6,7] ) and (card[i,j]==1)):
+                    card[i,0] = 1      
+                    break
+            newCard[i] = np.concatenate((np.array([card[i,0]]),np.array([card[i,3]]),card[i,8:] ))
+        newCard = newCard.reshape(-1)
+        newCard = list(newCard)
+       
+        return newCard
+        
     
     def get_state(self, game):
         playerIndex = game.getTurnPlayerIndex()
@@ -42,6 +60,7 @@ class Agent:
         suites = ['Hearts','Diamonds','Clubs','Spades']
         cardInhand = [card.getId() for card in sorted(game.getPlayer(playerIndex).getAllCard())]
         cardInhand = [1 if i in cardInhand else 0 for i in range(52)]
+        cardInhand = self.convert_card_array_size_from_52_to_28(cardInhand)
         cardPlayedEachRound = game.getPlayedCardEachRound()
         IDcardPlayedEachRound  = [ card.getId() for card in cardPlayedEachRound]
         leadingSuite = None
@@ -53,8 +72,24 @@ class Agent:
         trumpSuite[suites.index(game.getTrumpCard()) ]  =  1
         trumpPlayedCard = game.getTrumpPlayedCard()
         cardInField = [1 if i in IDcardPlayedEachRound else 0 for i in range(52)]
+        cardInField = self.convert_card_array_size_from_52_to_28(cardInField)
         playedScoreCard = game.getPlayedScoreCard()
-        state = cardInhand+leadingSuite+trumpSuite+cardInField+trumpPlayedCard+playedScoreCard+turn
+       
+        bidwinnerTeam = game.getBidWinnerTeam()
+        otherTeam = game.getOtherTeam()
+
+     
+
+        buddyCard = [0 for i in range(28)]
+        buddyIndex  = [0 for i in range(4)]
+
+        AgentPlayer = game.getPlayer(playerIndex)
+        if (game.getBidWinnerPosition()!=playerIndex and bidwinnerTeam.isTeamMember(AgentPlayer)) or  game.isFriendReveal():
+            buddyCard = self.buddyCard
+            buddyIndex = [1 if i==self.buddyIndex else 0   for i in range(4)]
+            # print('bid team')
+        
+        state = cardInhand+leadingSuite+trumpSuite+cardInField+trumpPlayedCard+playedScoreCard+turn+buddyCard+buddyIndex
      #   print(state)
         # card in hand , leading suite, trump suite,card in field,trump card,playedScorecard,turn
         # 52,4,4,52,13,12,4
@@ -62,6 +97,8 @@ class Agent:
         done = game.isEndGame()
         return np.array(state, dtype=int),done
 
+    def rememberFriendCard(card):
+        self.friendCard = card
          
 
 
@@ -91,9 +128,7 @@ class Agent:
         return output  
     
     def get_action(self, state,n_largest):
-        
-        
-        self.epsilon = 8000-self.n_games
+        self.epsilon = 80000-self.n_games
         rand = random.randint(0,200)
         card_to_play = self.initOutput()
         # print(rand)
@@ -102,7 +137,7 @@ class Agent:
             #print(action)
             card_to_play[action] = 1
         else:
-            self.get_best_action(state)
+            card_to_play = self.get_best_action(state)
             
         return card_to_play
     def get_best_action(self, state):
@@ -114,6 +149,7 @@ class Agent:
         values, indices = torch.topk(validAction, k=28)
         action = indices[0].item()
         card_to_play[action] = 1
+        # print(card_to_play)
         return card_to_play
 
 
@@ -121,7 +157,7 @@ class Agent:
         return game.getReward()
         
 
-def train(newAgent):
+def train(newAgent,oldAgent):
     plot_scores = []
     plot_mean_scores = []
     total_score = 0
@@ -131,6 +167,8 @@ def train(newAgent):
     p3 = player("p3",2)
     p4 = player("p4",3)
     game = Game(p1,p2,p3,p4)
+    playerList = [p1,p2,p3,p4]
+
     game.setGameScore()
     game.provideCard()
     game.determineBidWinner()
@@ -150,14 +188,29 @@ def train(newAgent):
     train_output = None
     train_reward = None
     train_done = None
-   
-
-    oldAgent = Agent()
-    oldAgent.loadModel('C:\\Users\\User\\Desktop\\friendCardGame\\model\\ez_sixth_gen.pth')
     
-    while not game.isEndGame():
 
+    bidwinnerTeam = game.getBidWinnerTeam()
+    otherTeam = game.getOtherTeam()
+    for i in range(4):
+        if bidwinnerTeam.isTeamMember(playerList[i]):
+            buddy = bidwinnerTeam.getBuddy(playerList[i])
+        else:
+            buddy = otherTeam.getBuddy(playerList[i])
+        if i==0:
+            newAgent.buddyIndex = buddy.getIndex()  
+        else:
+            oldAgent[i-1].buddyIndex =  buddy.getIndex()   
+  
+
+    while not game.isEndGame():
+        newAgent.buddyCard  = [0 for i in range(28)]
+        oldAgent[0].buddyCard  = [0 for i in range(28)]
+        oldAgent[1].buddyCard  = [0 for i in range(28)]
+        oldAgent[2].buddyCard  = [0 for i in range(28)]
+        output_as_state = [o for i in range(28)]
         for i in range(4):
+           
             if game.getTurnPlayerIndex() ==0:
                 state_old,done = newAgent.get_state(game)
                 n_largest = 0
@@ -166,21 +219,24 @@ def train(newAgent):
                 while not playCard(game,output):
                     output = newAgent.get_action(state_old,n_largest)
                     n_largest = (n_largest + 1) % 28
+                output_as_state = output
             else:
                 old_state_old,old_done = oldAgent.get_state(game)
-                old_output = oldAgent.get_best_action(old_state_old)
-                while not playCard(game,old_output):
-                    old_output = oldAgent.get_best_action(old_state_old)
-                    
-            
-            # else:
-            #     while True:
-            #         cardInHand = game.getPlayer(game.getTurnPlayerIndex()).getAllCard()
-            #         rand = random.randint(0,len(cardInHand)-1)
-            #         randCard = cardInHand[rand]
-            #         if game.play_turn(randCard):
-            #             break
+                best_act = oldAgent.get_best_action(old_state_old)
+                output_as_state = best_act
+                playCard(game,best_act)
+                if game.getTurnPlayerIndex() == buddy.getIndex():
+                    newAgent.buddyCard = best_act
+
+            for j in range(3):
+                if oldAgent[j].buddyIndex == game.getTurnPlayerIndex():
+                    oldAgent[j].buddyCard = output_as_state
+
         reward = newAgent.get_reward(game)[order]
+        
+        if (game.getBidWinnerPosition()!=0 and bidwinnerTeam.isTeamMember(p1)) or  game.isFriendReveal():
+            reward = reward * 2
+        
         if  game.isEndGame():
             train_state_new = state_old
             newAgent.remember(train_state_old,train_output, train_reward, train_state_new, train_done)
@@ -188,6 +244,7 @@ def train(newAgent):
 
             train_output = output
             train_state_old = state_old
+            # print('endc')
             train_state_new,train_done =  newAgent.get_state(game)
             train_reward = reward
             newAgent.remember(train_state_old,train_output, train_reward, train_state_new, train_done)
@@ -224,33 +281,40 @@ def play(newAgent):
     reward =  None
     done = None 
     oldAgent = Agent()
-    oldAgent.loadModel('C:\\Users\\User\\Desktop\\friendCardGame\\model\\ez_sixth_gen.pth')
+    oldAgent.loadModel('C:\\Users\\User\\Desktop\\friendCardGame\\teamwork_model\\ez_seventh_gen.pth')
     round = 1
     while not game.isEndGame():
        
         print(round)
         for i in range(4):
+            # output = getOutput()
+            # while not playCard(game,output):
+            #     output = getOutput()
+            
+            
             if game.getTurnPlayerIndex() ==0:
                 state_old,done = newAgent.get_state(game)
                 
                 output = newAgent.get_best_action(state_old)
-                order = i
-                while not playCard(game,output):
-                    output = newAgent.get_best_action(state_old)
+                playCard(game,output)
+                 
             
                 # newAgent.sendToApi(game)
+                # playCard(game,output)
             else:
                 old_state_old,old_done = oldAgent.get_state(game)
                 # oldAgent.sendToApi(game)
                 old_output = oldAgent.get_best_action(old_state_old)
-                while not playCard(game,old_output):
-                    old_output = oldAgent.get_best_action(old_state_old)
+                # playCard(game,old_output)
+                playCard(game,old_output)
+                    
         round+=1
-          
+   
 
-    
-          
-    # game.summaryScore()
+def getOutput():
+    num = int(input('give me output number'))
+    output = [ 1 if i==num else 0 for i in range(28)]
+    return output
 def mapCardToOutPut(card):
     suites = ['Hearts','Diamonds','Clubs','Spades']
     points = [0,5,10,'J','Q','K','A']
@@ -287,19 +351,106 @@ def playCard(game,output):
     card_to_play = mapOutPutToCard(output)
     for i in range(len(card_to_play)) :
         if game.play_turn(card_to_play[i]):
+            # print(card_to_play[i])
+            # print(card_to_play[i].getSuite()=='Diamonds')
             return True
     return False
 
+def testTeamworkBot(newAgent,oldAgent):
+    
+    plot_scores = []
+    plot_mean_scores = []
+    total_score = 0
+    record = 0
+    p1 = player("p1",0)
+    p2 = player("p2",1)
+    p3 = player("p3",2)
+    p4 = player("p4",3)
+    game = Game(p1,p2,p3,p4)
+    playerList = [p1,p2,p3,p4]
+
+    game.setGameScore()
+    game.provideCard()
+    game.determineBidWinner()
+    game.randomTrumpCard()
+    game.setFriendCard()
+    game.identifyTeam()
+    game.reset()
+    state_old = None
+    state_new = None
+    output = None
+    reward =  None
+    done = None
+    order = None
+
+    train_state_old = None
+    train_state_new = None
+    train_output = None
+    train_reward = None
+    train_done = None
+    
+
+    bidwinnerTeam = game.getBidWinnerTeam()
+    otherTeam = game.getOtherTeam()
+    for i in range(4):
+        if bidwinnerTeam.isTeamMember(playerList[i]):
+            buddy = bidwinnerTeam.getBuddy(playerList[i])
+        else:
+            buddy = otherTeam.getBuddy(playerList[i])
+        if i==0:
+            newAgent.buddyIndex = buddy.getIndex()  
+        else:
+            oldAgent[i-1].buddyIndex =  buddy.getIndex()   
+  
+
+    while not game.isEndGame():
+        newAgent.buddyCard  = [0 for i in range(28)]
+        oldAgent[0].buddyCard  = [0 for i in range(28)]
+        oldAgent[1].buddyCard  = [0 for i in range(28)]
+        oldAgent[2].buddyCard  = [0 for i in range(28)]
+        output_as_state = [0 for i in range(28)]
+        for i in range(4):
+            turnPlayerIndex = game.getTurnPlayerIndex()
+            if turnPlayerIndex ==0:
+                state_old,done = newAgent.get_state(game)
+                n_largest = 0
+                output = newAgent.get_best_action(state_old)
+                playCard(game,output)
+                output_as_state = output
+            else:
+                old_state_old,old_done = oldAgent[turnPlayerIndex-1].get_state(game)
+                best_act = oldAgent[turnPlayerIndex-1].get_best_action(old_state_old)
+                output_as_state = best_act
+                playCard(game,best_act)
+                if turnPlayerIndex == buddy.getIndex():
+                    newAgent.buddyCard = best_act
+
+            for j in range(3):
+                if oldAgent[j].buddyIndex == turnPlayerIndex:
+                    oldAgent[j].buddyCard = output_as_state
+    scores = game.summaryScore()
+    return scores
 def main():
-    newAgent = Agent()
-    newAgent.loadModel('C:\\Users\\User\\Desktop\\friendCardGame\\model\\ez_sixth_gen.pth')
-    # for i in range(10000):
-    #     train(newAgent)
-    #     if (i+1) % 1000 ==0:
-    #         newAgent.train_long_memory()
-    #     print('round',i)  
-    # newAgent.model.save('ez_seventh_gen.pth')
-    play(newAgent)
+    oldAgent = []
+    for i in range(3):
+        agent = Agent()
+        agent.loadModel('C:\\Users\\User\\Desktop\\friendCardGame\\teamwork_model\\ez_0_gen.pth')
+        oldAgent.append(agent)
+    newAgent = teamAgent()
+    record = {0:0,1:0,2:0,3:0}
+    newAgent.loadModel('C:\\Users\\User\\Desktop\\friendCardGame\\teamwork_model\\ez_1_gen.pth')
+    for i in range(1000):
+        print('round',i)
+        scores = testTeamworkBot(newAgent,oldAgent)
+        record[scores.index(max(scores))]+=1
+    print(record)
+        # print(scores)  
+        # train(newAgent,oldAgent)
+        # if (i+1) % 1000 ==0:
+        #     newAgent.train_long_memory() 
+    # newAgent.model.save('ez_1_gen.pth')
+    
+    # play(newAgent)
 if __name__ == '__main__':
     main()
 
