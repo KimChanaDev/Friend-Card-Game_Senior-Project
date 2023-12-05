@@ -7,7 +7,7 @@ export class DeckLogic
     private validShapes: ShapeType[];
 	private validColors: ColorType[];
 	private inDeck: CardId[];
-    private numOfDecks: number;
+    private readonly numOfDecks: number;
 
     constructor(numOfDecks: number = 1) {
 		this.validShapes = [...Shapes];
@@ -20,10 +20,11 @@ export class DeckLogic
     public HasColor(color: ColorType): boolean | undefined { return this.inDeck.some(card => CardLogic.IsColor(card, color))}
     public HasCard(cardId: CardId): boolean { return this.inDeck.indexOf(cardId) >= 0; }
     public Remove(cardId: CardId): void { this.inDeck.splice(this.inDeck.indexOf(cardId), 1); }
-	private IsCardValidForDeck(cardId: CardId): boolean { return this.validShapes.includes(cardId[0] as ShapeType) && this.validColors.includes(cardId[1] as ColorType); }
+	public IsCardValidForDeck(cardId: CardId): boolean { return this.validShapes.includes(cardId[0] as ShapeType) && this.validColors.includes(cardId[1] as ColorType); }
+	public IsColorValidForDeck(color: ColorType): boolean { return this.validColors.includes(color); }
 	public GetNumOfCardsInDeck(): number { return this.inDeck.length; }
 	public GetInDeck(): CardId[] { return this.inDeck; }
-	public GetLastInDeck(): CardId { return this.inDeck[this.inDeck.length - 1]; }
+	public GetAllCardsHasColor(color: ColorType): CardId[] { return this.inDeck.filter(card =>  CardLogic.IsColor(card, color)).map(card => card) }
     public Full(): void
     {
 		this.inDeck = [];

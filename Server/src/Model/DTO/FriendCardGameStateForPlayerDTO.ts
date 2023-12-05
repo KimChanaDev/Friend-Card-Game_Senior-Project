@@ -4,8 +4,11 @@ import { ActionsDTO } from "./ActionsDTO.js";
 import { OtherFriendCardGamePlayerDTO } from "./OtherFriendCardGamePlayerDTO.js";
 import { ThisFriendCardGamePlayerDTO } from "./ThisFriendCardGamePlayerDTO.js";
 import {GAME_STATE} from "../../Enum/GameState.js";
+import {BaseResponseDTO} from "./Response/BaseResponseDTO";
+import {CardId} from "../../Enum/CardConstant";
 
 export class FriendCardGameStateForPlayerDTO{
+
 	private constructor(
 		private currentPlayerId: string | undefined,
 		private thisPlayer: ThisFriendCardGamePlayerDTO,
@@ -17,9 +20,11 @@ export class FriendCardGameStateForPlayerDTO{
 		private gameplayState: GAME_STATE,
 		private roundNumber: number,
 		private trickNumber: number,
+		private cardsInField: CardId[],
 		private isFriendAppeared : boolean,
 		private auctionWinnerTeamIds?: string[],
-		private anotherTeamIds?: string[]
+		private anotherTeamIds?: string[],
+		private success: boolean = true
 	) {}
 
 	public static CreateFromFriendCardGameAndPlayer(gameRoom: FriendCardGameRoom, player: FriendCardPlayer): FriendCardGameStateForPlayerDTO
@@ -35,6 +40,7 @@ export class FriendCardGameStateForPlayerDTO{
 			gameRoom.GetCurrentRoundGame().GetGameplayState(),
 			gameRoom.GetCurrentRoundNumber(),
 			gameRoom.GetCurrentRoundGame().GetCurrentTrickNumber(),
+			gameRoom.GetCurrentRoundGame().GetCardsInField(),
 			gameRoom.GetCurrentRoundGame().IsFriendAppeared(),
 			gameRoom.GetCurrentRoundGame().IsFriendAppeared() ? gameRoom.GetCurrentRoundGame().GetAuctionWinnerTeamIds() : undefined,
 			gameRoom.GetCurrentRoundGame().IsFriendAppeared() ? gameRoom.GetCurrentRoundGame().GetAnotherTeamIds() : undefined

@@ -26,7 +26,7 @@ export class FriendCardLogic extends CardLogic
         let totalPoint: number = 0;
         trickCardDetailModel.forEach(a => {
             if(CardLogic.IsShape(a.cardId, "5")) totalPoint+=5;
-            if(CardLogic.IsShape(a.cardId, "T") || CardLogic.IsShape(a.cardId, "K")) totalPoint+10;
+            if(CardLogic.IsShape(a.cardId, "T") || CardLogic.IsShape(a.cardId, "K")) totalPoint+=10;
         });
         return totalPoint; 
     }
