@@ -1,7 +1,22 @@
 import random
 import time
 import requests
+CARD_DICT = {0:['Hearts',2],1:['Hearts',3],2:['Hearts',4],3:['Hearts',5],4:['Hearts',6],
+                    5:['Hearts',7],6:['Hearts',8],7:['Hearts',9],8:['Hearts',10],9:['Hearts','J'],
+                    10:['Hearts','Q'],11:['Hearts','K'],12:['Hearts','A'],
 
+                    13:['Diamonds',2],14:['Diamonds',3],15:['Diamonds',4],16:['Diamonds',5],17:['Diamonds',6],
+                    18:['Diamonds',7],19:['Diamonds',8],20:['Diamonds',9],21:['Diamonds',10],22:['Diamonds','J'],
+                    23:['Diamonds','Q'],24:['Diamonds','K'],25:['Diamonds','A'],
+
+                    26:['Clubs',2],27:['Clubs',3],28:['Clubs',4],29:['Clubs',5],30:['Clubs',6],
+                    31:['Clubs',7],32:['Clubs',8],33:['Clubs',9],34:['Clubs',10],35:['Clubs','J'],
+                    36:['Clubs','Q'],37:['Clubs','K'],38:['Clubs','A'],
+
+                    39:['Spades',2],40:['Spades',3],41:['Spades',4],42:['Spades',5],43:['Spades',6],
+                    44:['Spades',7],45:['Spades',8],46:['Spades',9],47:['Spades',10],48:['Spades','J'],
+                    49:['Spades','Q'],50:['Spades','K'],51:['Spades','A']
+            }
 class player:
     def __init__(self, name,index):
         self.__name = name
@@ -50,22 +65,7 @@ class player:
         if not self.isCardInhand(card):
            # print(4)
             return False
-        CARD_DICT = {0:['Hearts',2],1:['Hearts',3],2:['Hearts',4],3:['Hearts',5],4:['Hearts',6],
-                    5:['Hearts',7],6:['Hearts',8],7:['Hearts',9],8:['Hearts',10],9:['Hearts','J'],
-                    10:['Hearts','Q'],11:['Hearts','K'],12:['Hearts','A'],
-
-                    13:['Diamonds',2],14:['Diamonds',3],15:['Diamonds',4],16:['Diamonds',5],17:['Diamonds',6],
-                    18:['Diamonds',7],19:['Diamonds',8],20:['Diamonds',9],21:['Diamonds',10],22:['Diamonds','J'],
-                    23:['Diamonds','Q'],24:['Diamonds','K'],25:['Diamonds','A'],
-
-                    26:['Clubs',2],27:['Clubs',3],28:['Clubs',4],29:['Clubs',5],30:['Clubs',6],
-                    31:['Clubs',7],32:['Clubs',8],33:['Clubs',9],34:['Clubs',10],35:['Clubs','J'],
-                    36:['Clubs','Q'],37:['Clubs','K'],38:['Clubs','A'],
-
-                    39:['Spades',2],40:['Spades',3],41:['Spades',4],42:['Spades',5],43:['Spades',6],
-                    44:['Spades',7],45:['Spades',8],46:['Spades',9],47:['Spades',10],48:['Spades','J'],
-                    49:['Spades','Q'],50:['Spades','K'],51:['Spades','A']
-            }
+       
         if  CARD_DICT[card.getId()][1]!=card.getActualPoint() or CARD_DICT[card.getId()][0]!=card.getSuite():
             return False
         return True
@@ -159,6 +159,8 @@ class team:
         self.mate2 = mate2
         self.goalScore = goalScore
         self.__win = False
+    def getPlayers(self):
+        return [self.mate1,self.mate2]
     def getScore(self):
         return self.mate1.getGameScore() + self.mate2.getGameScore()
     def getGoalScore(self):
@@ -434,7 +436,7 @@ class Game:
             self.setFriendRevealFlag()
         self.updatePlayedCardEachRound(card)
         self.updateCardInPlayerHand(playerIndex,card)
-        # self.sendToApi()
+        self.sendToApi()
         self.incTurn()
         return True
     def setFriendRevealFlag(self):
@@ -470,13 +472,32 @@ class Game:
         cardInhand = [card.getId() for card in sorted(self.getPlayer(turn).getAllCard())]
         cardPlayedEachRound = self.getPlayedCardEachRound()
         IDcardPlayedEachRound  = [ card.getId() for card in cardPlayedEachRound]
+        
+        bidWinnerIndex = self.getBidWinnerPosition()
+        bidWinnerTeam = self.getBidWinnerTeam()
+        players = bidWinnerTeam.getPlayers()
+        if players[0].getIndex() == bidWinnerIndex:
+            buddy = bidWinnerTeam.getBuddy(players[0])
+        else:
+            buddy = bidWinnerTeam.getBuddy(players[1])
+        buddyIndex = buddy.getIndex()
+        role = [0,0,0,0]
+        role[bidWinnerIndex] = 1
+        if self.isFriendReveal():
+            role[buddyIndex] = 2
+
         Allscore = [ self.getPlayer(i).getGameScore() for i in range(4)]
-        output = {'cardInhand':cardInhand,'cardInfield':IDcardPlayedEachRound,'matchScore':Allscore,
-                  'turn':turnArr,'trumpCard':trumpCard,'friendCard':friendCard
+        # output = {'cardInhand':cardInhand,'cardInfield':IDcardPlayedEachRound,'matchScore':Allscore,
+        #           'turn':turnArr,'trumpCard':trumpCard,'friendCard':friendCard
+        # }
+        output = {'cardInfield':IDcardPlayedEachRound,'matchScore':Allscore,
+                  'turn':turnArr,'trumpCard':trumpCard,'friendCard':friendCard,
+                  'role':role
         }
         # print('yo') 
         # requests.post('http://127.0.0.1:3000/game', json=output)
-        # time.sleep(3)
+        emit('new-message',output,broadcast=True)
+        time.sleep(3)
         
         
     def setEndGameStatus(self,endGameStatus):
@@ -495,10 +516,10 @@ class Game:
     def isEndGame(self):
         return self.__isEndGame
     def showDataWhenGameStart(self):
-        # print("bid winner is player",self.getBidWinnerPosition()+1)
-        # print("trump card is",self.getTrumpCard())
-        # print("friend card is",self.getFriendCard().getActualPoint(),self.getFriendCard().getSuite())
-        # print ("friend is ",self.getFriendPlayer().getName())
+        print("bid winner is player",self.getBidWinnerPosition()+1)
+        print("trump card is",self.getTrumpCard())
+        print("friend card is",self.getFriendCard().getActualPoint(),self.getFriendCard().getSuite())
+        print ("friend is ",self.getFriendPlayer().getName())
         pass
     def setRewardEachRound(self,highestCardIndex,score):
         for i in range(4):
@@ -578,27 +599,89 @@ class Game:
             # print('------------------------------------')
 
   
-        
+from flask import Flask,request
+from flask_socketio import SocketIO,send, emit
+import logging
+count_player = 0
+log = logging.getLogger('werkzeug')
+log.disabled = True
+app = Flask(__name__)
+app.config['SECRET_KEY'] = 'secret!'
+socketio = SocketIO(app,cors_allowed_origins = '*')
+gameRoom = []
+playerInfo = []
+
+
+@socketio.on('connect')
+def handle_my_custom_event():
+    print('request jaja ',request.sid)
+    global count_player
+    global playerInfo
+    c = count_player
+    info = {'player':c,'sid':request.sid}
+    playerInfo.append(info)
+    count_player +=1
+    print(info)
+    if count_player ==4:
+        p1 = player("p1",0)
+        p2 = player("p2",1)
+        p3 = player("p3",2)
+        p4 = player("p4",3)
+        playerList = [p1,p2,p3,p4]
+        game = Game(p1,p2,p3,p4)
+        game.setGameScore()
+        game.provideCard()
+        game.determineBidWinner()
+        game.randomTrumpCard()
+        game.setFriendCard()
+        game.identifyTeam()
+        game.reset()
+        global gameRoom
+        gameRoom.append(game)
+        game.showDataWhenGameStart()
+        for i in range(4):
+            cardInhand = [card.getId() for card in sorted(playerList[i].getAllCard())]
+        # print(playerInfo)
+            emit('init-card',{'cardInhand':cardInhand},to =playerInfo[i]['sid'])
+            # pass
+@socketio.on('sent-card')
+def rcv_card(id):
+    c = card(CARD_DICT[id][0],CARD_DICT[id][1],id)
+    print(id)
+   
+    if gameRoom[0].play_turn(c):
+        emit('legal-move',{'isLegal':True,'id':id})
+        print('yes')
+    else:
+        emit('legal-move',{'isLegal':False,'id':id})
+        print('no')
+
+
+    
 def main():
+    socketio.run(app)  
     # bidding phase
-    p1 = player("p1",0)
-    p2 = player("p2",1)
-    p3 = player("p3",2)
-    p4 = player("p4",3)
-    game = Game(p1,p2,p3,p4)
-    game.setGameScore()
-    game.provideCard()
-    game.determineBidWinner()
-    game.randomTrumpCard()
-    game.setFriendCard()
-    game.identifyTeam()
-    game.reset()
-    game.showDataWhenGameStart()
-    while not game.isEndGame():
-        current_player = game.getPlayer(game.getTurnPlayerIndex())
-        action = current_player.getInputPlayedCard()
-        game.play_turn(action)
-        print('i')
-    game.summaryScore()
+    # p1 = player("p1",0)
+    # p2 = player("p2",1)
+    # p3 = player("p3",2)
+    # p4 = player("p4",3)
+    # game = Game(p1,p2,p3,p4)
+    # game.setGameScore()
+    # game.provideCard()
+    # game.determineBidWinner()
+    # game.randomTrumpCard()
+    # game.setFriendCard()
+    # game.identifyTeam()
+    # game.reset()
+    # gameRoom.append(game)
+    # game.showDataWhenGameStart()
+    
+    # game.showDataWhenGameStart()
+    # while not game.isEndGame():
+    #     current_player = game.getPlayer(game.getTurnPlayerIndex())
+    #     action = current_player.getInputPlayedCard()
+    #     game.play_turn(action)
+    #     print('i')
+    # game.summaryScore()
 if __name__ == "__main__":
     main()

@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import SettingsIcon from '@mui/icons-material/Settings';
-
+import CardInHand from '../component/CardInHannd';
 import PlayerCard from '../component/PlayerCard';
 import FriendCard from '../component/FriendCard';
 import TrumpCard from '../component/TrumpCard';
@@ -9,12 +9,19 @@ import SlideBar from '../component/SlideBar';
 // import TotalScoreBoard from '../component/TotalScoreBoard';
 // import EmojiPanel from '../component/EmojiPanel';
 import './IngameInterface.css'
-
-
-function InGameInterface({cardInhand = [],cardInfield = [],GameScore = [],friendCard,
-                          trumpCard,turn = []
-                        }) 
+import { useEffect } from 'react';
+const URL = process.env.NODE_ENV === 'production' ? undefined : 'http://localhost:5000';
+import { io } from 'socket.io-client'
+const socket = io(URL);
+function InGameInterface() 
   {
+  const [msg, setFooEvents] = useState({});
+  const [cardInhand, setCardInHand] = useState([])
+  const [currentCard,setCurrentCard] = useState(-1)
+  const role = msg['role'] || []
+  const cardInfield= msg['cardInfield'] || []
+  const friendCard= msg['friendCard'] ,trumpCard= msg['trumpCard'], turn=msg['turn'] || []
+  const GameScore= msg['matchScore'] || []
   const dictCard = {
     1:'2_of_hearts.svg',2:'3_of_hearts.svg',3:'4_of_hearts.svg',4:'5_of_hearts.svg',5:'6_of_hearts.svg',
     6:'7_of_hearts.svg',7:'8_of_hearts.svg',8:'9_of_hearts.svg',9:'10_of_hearts.svg',10:'jack_of_hearts.svg',
@@ -37,7 +44,12 @@ function InGameInterface({cardInhand = [],cardInfield = [],GameScore = [],friend
   const n = cardInhand.length
   // const myArray = new Array(n).fill(0);
   const picStyles = { "width": `${Math.min(100 / (n), 100 / 9)}%` }
-  const cardInhand_map = cardInhand.map((e)=>"..\\public\\SVG-cards-1.3\\" + dictCard[e+1])
+  const cardInhand_map = cardInhand.map((e)=> {
+    return  {
+      src:"..\\public\\SVG-cards-1.3\\" + dictCard[e+1],
+      id : e
+    }
+  })
   console.log(cardInfield)
   const cardinfiled_map = cardInfield.map((e)=>"..\\public\\SVG-cards-1.3\\" + dictCard[e+1])
   const friendCard_map = dictCard[friendCard+1]
@@ -45,9 +57,54 @@ function InGameInterface({cardInhand = [],cardInfield = [],GameScore = [],friend
   // const cardName = 'back.svg'
   // const cardPath = "..\\public\\SVG-cards-1.3\\" + cardName
   const offset = 25
-  const dummy  = []
-  for(let i=1;i<53;i++)
-    dummy.push(dictCard[i])
+
+  
+  const [isConnected, setIsConnected] = useState(socket.connetced);
+  useEffect(() => {
+    function onConnect() {
+      setIsConnected(true);
+    }
+    function onDisconnect() {
+      setIsConnected(false);
+    }
+    function onFooEvent(value) {
+      setFooEvents(value);
+     
+      console.log(value)
+      console.log('msg rec')
+    }
+    function moveEvent(res,id) {
+      console.log(currentCard)
+      if (res['isLegal']){
+        setCardInHand((current) => current.filter((card) => card != res['id']))
+      }
+    }
+    function initCardEvent(res){
+      setCardInHand(res['cardInhand'])
+    }
+    
+    socket.on('connect', onConnect);
+    socket.on('disconnect', onDisconnect);
+    socket.on('new-message', onFooEvent);
+    socket.on('init-card', initCardEvent);
+    socket.on('legal-move', moveEvent);
+
+    return () => {
+      socket.off('connect', onConnect);
+      socket.off('disconnect', onDisconnect);
+      socket.off('new-message', onFooEvent);
+      socket.off('legal-move', moveEvent);
+      socket.off('init-card', initCardEvent);
+      
+    };
+  },[socket]);
+
+  const clickCard = (id)=>{
+    alert(id)
+    setCurrentCard(id)
+    socket.emit('sent-card',id)
+  }
+
   return (
     <>
       <div class="background-image">
@@ -64,34 +121,39 @@ function InGameInterface({cardInhand = [],cardInfield = [],GameScore = [],friend
         <section className='left' >
         <PlayerCard name={'khonKohok1'} isLeft={true}
                       bidScore={20} isPlay={turn[0]} isTop={true}
-                      score={GameScore[0]}
+                      score={GameScore[0]} role = {role[0]}
           />
           <PlayerCard name={'khonKohok2'}   isLeft={true}  
                        bidScore={20}  isPlay={turn[1]}
-                       score={GameScore[1]}
+                       score={GameScore[1]} role = {role[1]}
           />
         </section>
         <section className='right'>
         <PlayerCard name={'khonKohok4'} isLeft={false}
                       isPlay={turn[3]}
-                      bidScore={20} score={GameScore[3]}
+                      bidScore={20} score={GameScore[3]} role = {role[3]}
           />
           <PlayerCard name={'khonKohok3'}  isLeft={false} 
                        bidScore={20} 
                        isPlay={turn[2]}
-                       score={GameScore[2]}
+                       score={GameScore[2]} role = {role[2]}
           />
         </section>
 
         <figure className='bot' style={{ paddingInlineStart: `${(n - 1) * offset}px` }}>
           
               
+          {cardInhand_map.map((e, i) => < CardInHand src={e.src} clickFunc={clickCard} 
+                                          styles={{ ...picStyles, "right": i * offset }}  
+                                          id = {e.id}
+                                        />)
           
-          {cardInhand_map.map((e, i) => <img src={e} style={{ ...picStyles, "right": i * offset }} alt="" />)}
+          }
+          {/* {cardInhand_map.map((e, i) => <img src={e} onClick={clickCard} style={{ ...picStyles, "right": i * offset }} alt="" />)} */}
         </figure>
 
         <section className='mid'>
-            {cardinfiled_map.map((e)=><img src={e} alt="" />)}
+            {cardinfiled_map.map((e)=><img src={e}  alt="" />)}
 {/*             
             <img src={cardPath} alt="" />
             <img src={cardPath} alt="" />
