@@ -1,5 +1,5 @@
 import { Socket } from "socket.io";
-import { CardId } from "../Enum/CardConstant.js";
+import {CardId, ColorType} from "../Enum/CardConstant.js";
 import { GAME_STATE } from "../Enum/GameState.js";
 import { FriendCardGameRoom } from "../GameFlow/Game/FriendCardGameRoom.js";
 import { FriendCardPlayer } from "../GameFlow/Player/FriendCardPlayer.js";
@@ -26,6 +26,11 @@ export abstract class HandlerValidation
         if(gameRoom.GetGameRoomState() !== GAME_STATE.STARTED || gameRoom.GetCurrentRoundGame().GetRoundState() !== GAME_STATE.STARTED)
             throw new Error("Game not started");
     }
+    public static IsFriendCardAndTrumpCardValid(gameRoom: FriendCardGameRoom, Friend: CardId, Trump: ColorType): void
+    {
+        if( !gameRoom.GetCurrentRoundGame().deck.IsCardValidForDeck(Friend) || !gameRoom.GetCurrentRoundGame().deck.IsColorValidForDeck(Trump) )
+            throw new Error("Friend or Trump are not valid");
+    }
     public static GameAndRoundAndGameplayStarted(gameRoom: FriendCardGameRoom): void
     {
         if( gameRoom.GetGameRoomState() !== GAME_STATE.STARTED
@@ -33,6 +38,22 @@ export abstract class HandlerValidation
             || gameRoom.GetCurrentRoundGame().GetGameplayState() !== GAME_STATE.STARTED )
             throw new Error("Gameplay not started");
     }
+    public static IsGameRoomNotStartedState(gameRoom: FriendCardGameRoom): void
+    {
+        if(gameRoom.GetGameRoomState() === GAME_STATE.STARTED)
+            throw new Error("Game room is started state");
+    }
+    public static IsGameRoomStartedState(gameRoom: FriendCardGameRoom): void
+    {
+        if(gameRoom.GetGameRoomState() !== GAME_STATE.STARTED)
+            throw new Error("Game room is not started start");
+    }
+    public static IsGamePlayNotStarted(gameRoom: FriendCardGameRoom): void
+    {
+        if( gameRoom.GetCurrentRoundGame().GetGameplayState() === GAME_STATE.STARTED )
+            throw new Error("Gameplay is started");
+    }
+
     public static IsWinnerAuction(gameRoom: FriendCardGameRoom, player: FriendCardPlayer): void
     {
         if(gameRoom.GetCurrentRoundGame().GetHighestAuctionPlayer()?.id !== player.id)
@@ -114,12 +135,17 @@ export abstract class HandlerValidation
         if (!pass && (point % 5 !== 0 || point < 55 || point > 100)) 
             throw new Error("Incorrect auction point");
     }
+    public static FirstPlayerCannotNotPass(gameRoom: FriendCardGameRoom, pass: boolean): void
+    {
+        if (pass && gameRoom.GetCurrentRoundGame().IsFirstAuction())
+            throw new Error("The first player cannot pass");
+    }
     public static AuctionPointGreaterThan(pass: boolean,newPoint: number, previosPoint: number): void
     {
         if(!pass && (newPoint <= previosPoint))
             throw new Error("New auction point less than previos");
     }
-    public static NotHasCardInHand(gameRoom: FriendCardGameRoom, player: FriendCardPlayer, friendCard: CardId): void
+    public static NotHasCardInHand(player: FriendCardPlayer, friendCard: CardId): void
     {
         if (player.GetHandCard().HasCard(friendCard))
             throw new Error("You have this card on your hand");
@@ -128,5 +154,10 @@ export abstract class HandlerValidation
     {
         if(gameRoom.GetCurrentRoundGame().IsTrumpAndFriendNotUndefined())
             throw new Error("Trump and friend already setup");
+    }
+    public static AlreadySetTrumpAndFriend(gameRoom: FriendCardGameRoom)
+    {
+        if(!gameRoom.GetCurrentRoundGame().IsTrumpAndFriendNotUndefined())
+            throw new Error("Trump and friend are not setup");
     }
 }

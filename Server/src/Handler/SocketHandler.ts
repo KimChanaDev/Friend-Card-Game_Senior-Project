@@ -21,25 +21,25 @@ export abstract class SocketHandler
 	protected static io: Server;
 	private static isIoSet: boolean = false;
     protected namespace: Namespace;
-	protected abstract OnConnection(socket: Socket, game: GameRoom, player: Player): void;
-
-    constructor(io: Server, namespaceName: GAME_TYPE) {
+    protected constructor(io: Server, namespaceName: GAME_TYPE) {
 		if (!SocketHandler.isIoSet) {
 			SocketHandler.io = io;
 			SocketHandler.isIoSet = true;
 		}
-		
+
 		const namespace: string = '/' + namespaceName;
 		SocketHandler.InitializeIo(namespace);
 		this.namespace = SocketHandler.io.of(namespace);
 		this.RegisterListeners();
 	}
+
+	protected abstract OnConnection(socket: Socket, game: GameRoom, player: Player): void;
 	protected EmitToRoomAndSender(socket: Socket, event: SOCKET_EVENT, gameId: string, ...args: any[]): void
 	{
 		socket.to(gameId).emit(event, ...args);
 		socket.emit(event, ...args);
 	}
-    private static InitializeIo(namespace: string): void
+	private static InitializeIo(namespace: string): void
     {
 		SocketHandler.io
 			.of(namespace)
@@ -94,10 +94,11 @@ export abstract class SocketHandler
 			);
 			gameRoom!.AddPlayer(newPlayer);
 			socket.join(gameId);
-			socket.to(gameId).emit(SOCKET_GAME_EVENTS.PLAYER_CONNECTED, PlayerDTO.CreateFromPlayer(newPlayer));
+			const playerModel: PlayerDTO = PlayerDTO.CreateFromPlayer(newPlayer);
+			socket.to(gameId).emit(SOCKET_GAME_EVENTS.PLAYER_CONNECTED, playerModel);
 			socket.emit(SOCKET_GAME_EVENTS.PLAYERS_IN_GAME, {
 				players: gameRoom!.GetAllPlayersDTO(),
-				thisPlayer: PlayerDTO.CreateFromPlayer(newPlayer),
+				thisPlayer: playerModel
 			});
 			return next();
 		}

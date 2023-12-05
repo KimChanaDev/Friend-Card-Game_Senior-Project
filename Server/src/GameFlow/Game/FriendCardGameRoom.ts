@@ -2,6 +2,8 @@ import { GameRoom } from "./GameRoom.js";
 import { FriendCardPlayer } from "../Player/FriendCardPlayer.js";
 import { FriendCardGameRound } from "./FriendCardGameRound.js";
 import { GAME_STATE } from "../../Enum/GameState.js";
+import {WinnerRoundResponse} from "../../Model/DTO/Response/WinnerRoundResponse.js";
+import {PlayerPointInfo} from "../../Model/DTO/Response/PlayerPointInfo.js";
 
 export class FriendCardGameRoom extends GameRoom
 {
@@ -24,7 +26,10 @@ export class FriendCardGameRoom extends GameRoom
     }
     public GetCurrentRoundGame(): FriendCardGameRound { return this.roundsInGame[this.currentRoundNumber]; }
     public GetCurrentRoundNumber(): number { return this.currentRoundNumber; }
-    public IsCurrentRoundGameFinished(): boolean { return this.GetCurrentRoundGame().GetRoundState() === GAME_STATE.FINISHED && this.GetCurrentRoundGame().GetGameplayState() === GAME_STATE.FINISHED; }
+    public IsCurrentRoundGameFinished(): boolean {
+        return this.GetCurrentRoundGame().GetRoundState() === GAME_STATE.FINISHED
+            && this.GetCurrentRoundGame().GetGameplayState() === GAME_STATE.FINISHED;
+    }
     public GetAllPlayerAsArray(): FriendCardPlayer[] { return Array.from(this.playersInGame.values()); }
     public GetAllPlayerIdAsArray(): string[]
     {
@@ -40,6 +45,13 @@ export class FriendCardGameRoom extends GameRoom
             this.FinishGame();
         }
         this.GetCurrentRoundGame().StartRoundProcess(this.GetAllPlayerAsArray());
+    }
+    public GetLatestRoundResponse(){
+        const winnerIds: string[] = this.GetCurrentRoundGame().GetRoundWinnerIds();
+        const winnerPoint: number = this.GetCurrentRoundGame().GetRoundWinnerTotalPoint();
+        const roundNumber: number = this.currentRoundNumber;
+        const playersPointInfo: PlayerPointInfo[] = this.GetCurrentRoundGame().CreatePlayerPointInfo()
+        return new WinnerRoundResponse(winnerIds, winnerPoint, roundNumber, playersPointInfo);
     }
     public DisconnectPlayer(player: FriendCardPlayer): void
     {
@@ -74,7 +86,6 @@ export class FriendCardGameRoom extends GameRoom
         this.winner = winnerPlayer;
         this.winnerPoint = winnerPoint;
         this.SetFinishState();
-
         // TODO save stat to database
     }
 }
