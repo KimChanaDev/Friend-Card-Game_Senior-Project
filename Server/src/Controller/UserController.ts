@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from "express";
+import { Request, Response, NextFunction, RequestHandler } from "express";
 import { ValidationMiddleware } from "../Middleware/ValidationMiddleware.js";
 import { UserDTO } from "../Model/DTO/UserDTO.js";
 import { ExpressRouter } from "./ExpressRouter.js";
@@ -8,6 +8,7 @@ import { GenerateNewSaltAndHash, ValidatePassword } from "../GameLogic/Utils/Aut
 import { IssueJWT } from "../GameLogic/Utils/Authorization/JWT.js";
 import { LoginResponseDTO } from "../Model/DTO/Response/LoginResponseDTO.js";
 import { UserResponseDTO } from "../Model/DTO/Response/UserResponseDTO.js";
+import { FirebaseAuthMiddleware } from "../Middleware/FirebaseAuthMiddleware.js";
 
 export class UserController extends ExpressRouter
 {
@@ -16,10 +17,11 @@ export class UserController extends ExpressRouter
         super();
         this.InitializeRoutes();
     }
-    private InitializeRoutes(): void
+    private async InitializeRoutes(): Promise<void>
     {
         this.router.post('/register', ValidationMiddleware(UserDTO), this.RegisterUser);
 		this.router.post('/login', ValidationMiddleware(UserDTO), this.LoginUser);
+		this.router.get('/tasks', await FirebaseAuthMiddleware(UserDTO), this.Task);
     }
     private async RegisterUser(req: Request, res: Response, next: NextFunction): Promise<void>
     {
@@ -49,5 +51,14 @@ export class UserController extends ExpressRouter
 		const token: string = IssueJWT(user);
 		res.json(new LoginResponseDTO(UserResponseDTO.CreateFromUserDocument(user), token));
     }
+	private Task(req: Request, res: Response, next: NextFunction): void
+	{
+		res.json({
+			tasks: [
+				{title: 'Test1'},
+				{title: 'kuyyedheedum'}
+			]
+		})
+	}
 }
 
