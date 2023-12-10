@@ -32,3 +32,8 @@ export class SessionExpiredError extends HttpError {
 		super(440, 'Session expired');
 	}
 }
+export class InternalError extends HttpError {
+	constructor() {
+		super(500, 'Internal Eerror');
+	}
+}

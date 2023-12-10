@@ -11,7 +11,8 @@
 		"experimentalDecorators": true,
 		"removeComments": true,
 		"preserveConstEnums": true,
-		"typeRoots": ["@types", "node_modules/@types"]
+		"typeRoots": ["@types", "node_modules/@types"],
+		"resolveJsonModule": true
 	},
 	"include": ["src/**/*"]
 }
