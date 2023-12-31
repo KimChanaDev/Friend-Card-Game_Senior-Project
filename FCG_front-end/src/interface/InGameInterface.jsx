@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import SettingsIcon from '@mui/icons-material/Settings';
-import CardInHand from '../component/CardInHannd';
+import CardInHand from '../component/CardInHand.jsx';
 import PlayerCard from '../component/PlayerCard';
 import FriendCard from '../component/FriendCard';
 import TrumpCard from '../component/TrumpCard';

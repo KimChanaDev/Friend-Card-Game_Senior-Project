@@ -1,16 +1,16 @@
 import {useEffect} from "react";
 import {useDispatch, useSelector} from "react-redux";
-import SocketStatusEnum from "../enum/SocketStatusEnum.jsx";
+import SOCKET_STATUS from "../enum/SocketStatusEnum.jsx";
 import {SetPage} from "../store/PageStateSlice.jsx";
-import PageStateEnum from "../enum/PageStateEnum.jsx";
+import PAGE_STATE from "../enum/PageStateEnum.jsx";
 
 export default function Loading(){
-    const fetchPlayerBeforeJoinRoomStatus = useSelector(state => state.socketGameListenersStore.playerConnectedStatus)
+    const fetchPlayerBeforeJoinRoomStatus = useSelector(state => state.socketGameListenersStore.playerInGameListenerResponseStatus)
     const dispatch = useDispatch()
 
     useEffect(() => {
-        if (fetchPlayerBeforeJoinRoomStatus === SocketStatusEnum.SUCCESS){
-            dispatch(SetPage({ pageState: PageStateEnum.IN_GAME_INTERFACE }))
+        if (fetchPlayerBeforeJoinRoomStatus === SOCKET_STATUS.SUCCESS){
+            dispatch(SetPage({ pageState: PAGE_STATE.IN_GAME_INTERFACE }))
         }
     }, [fetchPlayerBeforeJoinRoomStatus]);
 

@@ -1,6 +1,8 @@
 export class PlayerPointInfo {
     constructor(
         public playerId: string,
-        public point: number
+        public playerName: string,
+        public cardsPointReceive: number,
+        public gamePointReceive: number
     ){}
 }

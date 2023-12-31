@@ -6,9 +6,9 @@ import {useDispatch} from "react-redux";
 
 PasswordRoomPopup.propTypes = {
     CloseIsShowPasswordPopup: PropTypes.func,
-    roomObjectForConnect: PropTypes.object
+    roomConnectObjectIfPasswordRequire: PropTypes.object
 }
-export default function PasswordRoomPopup({CloseIsShowPasswordPopup, roomObjectForConnect}) {
+export default function PasswordRoomPopup({CloseIsShowPasswordPopup, roomConnectObjectIfPasswordRequire}) {
     const dispatch = useDispatch()
 
     function HandleClose () { CloseIsShowPasswordPopup() }
@@ -20,7 +20,7 @@ export default function PasswordRoomPopup({CloseIsShowPasswordPopup, roomObjectF
         }
         else{
             dispatch(SetJoinRoomDetail({
-                roomDetail: roomObjectForConnect,
+                roomDetail: roomConnectObjectIfPasswordRequire,
                 password: password
             }))
         }

@@ -1,8 +1,9 @@
-import { GAME_STATE } from "../../Enum/GameState.js";
-import { GAME_TYPE } from "../../Enum/GameType.js";
-import { PlayerDTO } from "../../Model/DTO/PlayerDTO.js";
-import { GamesStore } from "./GameStore.js";
-import { Player } from "../Player/Player.js";
+import {GAME_STATE} from "../../Enum/GameState.js";
+import {GAME_TYPE} from "../../Enum/GameType.js";
+import {PlayerDTO} from "../../Model/DTO/PlayerDTO.js";
+import {GamesStore} from "./GameStore.js";
+import {Player} from "../Player/Player.js";
+import {GetRandomKeyFromMap} from "../../GameLogic/Utils/Tools.js";
 
 export abstract class GameRoom
 {
@@ -13,7 +14,7 @@ export abstract class GameRoom
     
     constructor(
         public readonly gameType: GAME_TYPE,
-		public readonly owner: { id: string; username: string },
+		public owner: { id: string; username: string },
 		public readonly maxPlayers: number,
 		public readonly roomName: string,
 		public readonly isPasswordProtected: boolean,
@@ -27,6 +28,10 @@ export abstract class GameRoom
 		this.playersInGame.set(player.id, player);
 		this.StopRemoveFromGameStoreTimeout();
 	}
+    public RestartGameRoom(): void {
+        this.gameState = GAME_STATE.NOT_STARTED
+        this.winner = undefined
+    }
     public GetPlayerById(id: string): Player | undefined { return this.playersInGame.get(id); }
     public GetAllPlayersDTO(): PlayerDTO[] { return Array.from(this.playersInGame.values()).map((player) => PlayerDTO.CreateFromPlayer(player)); }
     public AreAllPlayersReady(): boolean { return Array.from(this.playersInGame.values()).every((player) => player.GetIsReady()); }
@@ -37,18 +42,38 @@ export abstract class GameRoom
     public SetFinishState(): void { this.gameState = GAME_STATE.FINISHED; }
     public GetGameRoomState(): number { return this.gameState }
     public GetWinner(): Player | undefined { return this.winner;}
-    public SetWinner(player: Player): void { this.winner = player;}
     public DisconnectPlayer(player: Player): void
     {
-        if (this.gameState === GAME_STATE.NOT_STARTED) this.playersInGame.delete(player.id);
-        else player.SetDisconnected(true);
+        if (this.gameState === GAME_STATE.STARTED){
+            player.SetDisconnected(true);
+            /// TODO Add bot here
+        }
+        else {
+            this.playersInGame.delete(player.id);
+        }
         if (this.NumConnectedPlayersInGame() <= 0) this.StartRemoveFromGameStoreTimeout();
+    }
+    public SetNewHostOrOwnerRoom(): Player | undefined{
+        const randomPlayerIdKey: string | undefined = GetRandomKeyFromMap(this.playersInGame)
+        if(randomPlayerIdKey){
+            const player: Player | undefined = this.playersInGame.get(randomPlayerIdKey);
+            if(player){
+                this.owner = {
+                    id: player.id,
+                    username: player.username
+                }
+                player.SetIsOwner(true)
+                player.SetIsReady(true)
+                this.playersInGame.set(randomPlayerIdKey, player);
+                return player
+            }
+        }
     }
     private StartRemoveFromGameStoreTimeout(): void
     {
         this.removeFromGameStoreTimeout = setTimeout(() => {
             GamesStore.getInstance.DeleteGameById(this.id);
-        }, 3 * 60000);
+        }, 0);
     }
     private StopRemoveFromGameStoreTimeout(): void 
     {

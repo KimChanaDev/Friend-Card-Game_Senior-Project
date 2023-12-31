@@ -1,8 +1,8 @@
 import { createSlice } from '@reduxjs/toolkit'
-import PageStateEnum from "../enum/PageStateEnum.jsx";
+import PAGE_STATE from "../enum/PageStateEnum.jsx";
 
 const initialState = {
-    pageState: PageStateEnum.MENU
+    pageState: PAGE_STATE.MENU
 }
 
 export const pageStateSlice = createSlice({

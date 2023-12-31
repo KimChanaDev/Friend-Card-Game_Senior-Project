@@ -1,17 +1,20 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import { socketClient} from "../main.jsx";
-import SocketStatusEnum from "../enum/SocketStatusEnum.jsx";
-import {SetPage} from "./PageStateSlice.jsx";
-import PageStateEnum from "../enum/PageStateEnum.jsx";
-import {useDispatch} from "react-redux";
+import SOCKET_STATUS from "../enum/SocketStatusEnum.jsx";
 
 const initialState = {
     connectionStatus: '',
+    gameIdConnected: '',
+    passwordRoomConnected: ''
 };
 
 export const ConnectToSocket = createAsyncThunk(
     'connectToSocket',
-    async ({ token, gameId, password }) => { return await socketClient.Connect(token, gameId, password) }
+    async ({ token, gameId, password }, { getState, dispatch }) => {
+        return await socketClient.Connect(token, gameId, password).then(() => {
+            dispatch({ type: 'socket/SetRoomIdAndPasswordConnected', payload: { gameId, password } })
+        })
+    }
 );
 
 export const DisconnectFromSocket = createAsyncThunk(
@@ -24,25 +27,30 @@ export const DisconnectFromSocket = createAsyncThunk(
 const socketSlice = createSlice({
     name: 'socket',
     initialState,
-    reducers: {},
+    reducers: {
+        SetRoomIdAndPasswordConnected: (state, action) => {
+            state.gameIdConnected = action.payload.gameId
+            state.passwordRoomConnected = action.payload.password
+        }
+    },
     extraReducers: (builder) => {
         builder.addCase(ConnectToSocket.pending, (state) => {
-            state.connectionStatus = SocketStatusEnum.CONNECTING;
+            state.connectionStatus = SOCKET_STATUS.CONNECTING;
         });
         builder.addCase(ConnectToSocket.fulfilled, (state) => {
-            state.connectionStatus = SocketStatusEnum.CONNECTED;
+            state.connectionStatus = SOCKET_STATUS.CONNECTED;
         });
         builder.addCase(ConnectToSocket.rejected, (state) => {
-            state.connectionStatus = SocketStatusEnum.CONNECTION_FAILED;
+            state.connectionStatus = SOCKET_STATUS.CONNECTION_FAILED;
         });
         builder.addCase(DisconnectFromSocket.pending, (state) => {
-            state.connectionStatus = SocketStatusEnum.DISCONNECTING;
+            state.connectionStatus = SOCKET_STATUS.DISCONNECTING;
         });
         builder.addCase(DisconnectFromSocket.fulfilled, (state) => {
-            state.connectionStatus = SocketStatusEnum.DISCONNECTED;
+            state.connectionStatus = SOCKET_STATUS.DISCONNECTED;
         });
         builder.addCase(DisconnectFromSocket.rejected, (state) => {
-            state.connectionStatus = SocketStatusEnum.CONNECTION_FAILED;
+            state.connectionStatus = SOCKET_STATUS.CONNECTION_FAILED;
         });
     },
 });

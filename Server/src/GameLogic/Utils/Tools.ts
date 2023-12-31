@@ -12,3 +12,8 @@ export function ShuffleArray<T>(array: T[]): T[] {
 	}
 	return array;
 }
+export function GetRandomKeyFromMap <K, V>(map: Map<K, V>): K | undefined {
+	const keysArray = Array.from(map.keys());
+	const randomIndex = Math.floor(Math.random() * keysArray.length);
+	return keysArray.at(randomIndex);
+}

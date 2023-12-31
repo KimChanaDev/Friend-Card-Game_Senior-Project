@@ -36,7 +36,7 @@ const cardIds = {
     "8C":'8_of_clubs.svg',
     "9C":'9_of_clubs.svg',
     "TC":'10_of_clubs.svg',
-    'JC':'jack_of_clubs.svg',
+    "JC":'jack_of_clubs.svg',
     "QC":'queen_of_clubs.svg',
     "KC":'king_of_clubs.svg',
     "AC":'ace_of_clubs.svg',
@@ -63,5 +63,5 @@ const suits = {
     'S':'ace_of_spades.svg'
 }
 
-const CardIdFileEnum = { cardIds, suits }
-export default CardIdFileEnum
+const CARD_ID_FILE = { cardIds, suits }
+export default CARD_ID_FILE

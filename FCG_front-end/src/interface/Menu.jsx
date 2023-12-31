@@ -8,7 +8,7 @@ import ProfilePopUp from "../component/ProfilePopup/ProfilePopUp.jsx";
 import {useDispatch, useSelector} from "react-redux";
 import AuthenticationPopup from '../component/Authentication/AuthenticationPopup.jsx'
 import {SetPage} from "../store/PageStateSlice.jsx"
-import PageStateEnum from "../enum/PageStateEnum.jsx";
+import PAGE_STATE from "../enum/PageStateEnum.jsx";
 import PropTypes from "prop-types";
 import LobbyList from "../component/LobbyListPopup/LobbyList.jsx";
 

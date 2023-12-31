@@ -2,7 +2,7 @@ import './ProfilePopUp.css'
 import PropTypes from "prop-types";
 import {Logout} from "../../store/UserSlice.jsx";
 import {useDispatch, useSelector} from "react-redux";
-import CookieNameEnum from "../../enum/CookieNameEnum.jsx";
+import COOKIE from "../../enum/CookieNameEnum.jsx";
 
 ProfilePopUp.propTypes = {
     CloseProfileDetail: PropTypes.func,
@@ -12,7 +12,7 @@ export default function ProfilePopUp({CloseProfileDetail, removeCookie}) {
     const dispatch = useDispatch()
     function HandleLogout(){
         dispatch(Logout())
-        removeCookie(CookieNameEnum.name)
+        removeCookie(COOKIE.name)
         CloseProfileDetail()
     }
 

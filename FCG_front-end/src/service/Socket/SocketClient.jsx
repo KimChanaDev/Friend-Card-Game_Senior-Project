@@ -32,7 +32,7 @@ export default class SocketClient {
         });
     }
 
-    Emit(event, data) {
+    Emit(event, ...data) {
         return new Promise((resolve, reject) => {
             if (!this.socket) return reject('No socket connection.');
             const EmitCallback = (response) => {
@@ -45,7 +45,7 @@ export default class SocketClient {
                 }
             };
             if (data) {
-                this.socket.emit(event, data, EmitCallback);
+                this.socket.emit(event, ...data, EmitCallback);
             } else {
                 this.socket.emit(event, EmitCallback);
             }

@@ -13,20 +13,15 @@ import SearchLobbyPopUp from "../SearchLobbyPopup/SearchLobbyPopup.jsx";
 import {GetRooms} from "../../service/Api/ApiService.jsx";
 import {useDispatch, useSelector} from "react-redux";
 import {SetPage} from "../../store/PageStateSlice.jsx";
-import PageStateEnum from "../../enum/PageStateEnum.jsx";
+import PAGE_STATE from "../../enum/PageStateEnum.jsx";
 import PropTypes from "prop-types";
 import {ConnectToSocket} from "../../store/SocketSlice.jsx";
-import SocketStatusEnum from "../../enum/SocketStatusEnum.jsx";
+import SOCKET_STATUS from "../../enum/SocketStatusEnum.jsx";
 import {SetJoinRoomDetail} from "../../store/GameSlice.jsx";
 import {
-    Auction, CardPlayed,
-    PlayerConnected,
-    PlayerDisconnected,
-    PlayerInGame,
-    PlayerToggleReady, RoundFinished, SelectMainCard,
-    StartGame, TrickFinished
+    Auction, CardPlayed, EmojiReceived, GameFinished, PlayerConnected, PlayerDisconnected,
+    PlayerInGame, PlayerToggleReady, RoundFinished, SelectMainCard, StartGame, TrickFinished
 } from "../../store/SocketGameListenersSlice.jsx";
-// import InGameInterface2 from "../InGameInterface2.jsx";
 
 LobbyList.propTypes = {
     CloseLobbyList: PropTypes.func,
@@ -38,7 +33,7 @@ export default function LobbyList({CloseLobbyList}){
     const [isShowCreateLobbyPopup, setIsShowCreateLobbyPopup] = useState(false)
     const [isShowSearchLobbyPopup, setIsShowSearchLobbyPopup] = useState(false)
     const [isShowPasswordPopup, setIsShowPasswordPopup] = useState(false)
-    const [roomObjectForConnect, setRoomObjectForConnect] = useState(null)
+    const [roomConnectObjectIfPasswordRequire, setRoomConnectObjectIfPasswordRequire] = useState(null)
 
     const token = useSelector(state => state.userStore.token)
     const joinRoomDetail = useSelector(state => state.gameStore.joinRoomDetail)
@@ -65,8 +60,8 @@ export default function LobbyList({CloseLobbyList}){
 
     /// Start Game
     useEffect(() => {
-        if(socketConnectionStatus === SocketStatusEnum.CONNECTED){
-            dispatch(SetPage({ pageState: PageStateEnum.LOADING }))
+        if(socketConnectionStatus === SOCKET_STATUS.CONNECTED){
+            dispatch(SetPage({ pageState: PAGE_STATE.LOADING }))
         }
     }, [socketConnectionStatus]);
 
@@ -81,6 +76,8 @@ export default function LobbyList({CloseLobbyList}){
         dispatch(CardPlayed())
         dispatch(TrickFinished())
         dispatch(RoundFinished())
+        dispatch(GameFinished())
+        dispatch(EmojiReceived())
     }
     async function FetchRoom(){
         try{
@@ -112,7 +109,7 @@ export default function LobbyList({CloseLobbyList}){
     /// join room when selected room from table
     function HandleClickedRowRoom(room){
         if (room.isPasswordProtected){
-            setRoomObjectForConnect(room)
+            setRoomConnectObjectIfPasswordRequire(room)
             OpenIsShowPasswordPopup()
         }else{
             dispatch(SetJoinRoomDetail({
@@ -215,7 +212,7 @@ export default function LobbyList({CloseLobbyList}){
                 { isShowPasswordPopup &&
                     <PasswordRoomPopup
                         CloseIsShowPasswordPopup={CloseIsShowPasswordPopup}
-                        roomObjectForConnect={roomObjectForConnect}
+                        roomConnectObjectIfPasswordRequire={roomConnectObjectIfPasswordRequire}
                     />
                 }
             </>
