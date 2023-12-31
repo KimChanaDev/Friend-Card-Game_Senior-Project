@@ -86,17 +86,17 @@ export default function InGameInterface2()
     useEffect(() => {
         if(roundFinishedResult){
             setIsShowRoundFinishedAlert(true);
-            /// round finished shown 3 sec
+            /// round finished shown 5 sec
             const firstTimeout = setTimeout(() => {
                 setIsShowRoundFinishedAlert(false);
                 setIsShowSummaryScore(true)
-            }, 3000)
+            }, 5000)
             /// summary shown 5 sec
             const secondTimeout  = setTimeout(() => {
                 setIsShowSummaryScore(false);
                 dispatch(ClearStateForNextRound())
                 dispatch(ClearSelectMainCardStatus())
-            }, 13000);
+            }, 10000);
             return () => {
                 clearTimeout(firstTimeout);
                 clearTimeout(secondTimeout);
@@ -118,7 +118,7 @@ export default function InGameInterface2()
             setIsShowFriendAppearedAlert(true);
             const timeoutId = setTimeout(() => {
                 setIsShowFriendAppearedAlert(false);
-            }, 2000); // 2 sec
+            }, 3000); // 3 sec
             return () => clearTimeout(timeoutId);
         }
     }, [isFriendAppeared]);
@@ -130,7 +130,7 @@ export default function InGameInterface2()
             const timeoutId = setTimeout(() => {
                 setIsShowTrickFinishedAlert(false);
                 dispatch(ClearCardInField())
-            }, 1000); // 5 sec
+            }, 3000); // 3 sec
             return () => clearTimeout(timeoutId);
         }
     }, [trickFinishedResult]);
