@@ -1,4 +1,4 @@
-const CookieName = {
+const COOKIE = {
     name: "user"
 }
-export default CookieName
+export default COOKIE

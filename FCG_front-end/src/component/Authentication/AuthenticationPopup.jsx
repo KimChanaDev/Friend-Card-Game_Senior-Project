@@ -3,7 +3,7 @@ import { PostSignIn, PostSignUp } from "../../service/Api/ApiService.jsx";
 import {Login} from "../../store/UserSlice.jsx";
 import {useDispatch} from "react-redux";
 import PropTypes from "prop-types";
-import CookieNameEnum from "../../enum/CookieNameEnum.jsx";
+import COOKIE from "../../enum/CookieNameEnum.jsx";
 
 AuthenticationPopup.propTypes = {
     CloseAuthenticationPopup: PropTypes.func,
@@ -49,7 +49,7 @@ export default function AuthenticationPopup({CloseAuthenticationPopup, setCookie
             token: user.token
         }
         dispatch(Login(userInfo))
-        setCookie(CookieNameEnum.name, userInfo, { path: "/" });
+        setCookie(COOKIE.name, userInfo, { path: "/" });
     }
     function SignInComponent(){
         return (

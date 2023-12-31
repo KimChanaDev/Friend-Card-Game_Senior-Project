@@ -50,10 +50,9 @@ export class FriendCardGameRoundLogic
         if (result >= maxPlayer) result = 0;
         return result;
     }
-    public static PrepareCard(deck: DeckLogic, discarded: DeckLogic, playersInOrder: FriendCardPlayer[]): void
+    public static PrepareCard(deck: DeckLogic, playersInOrder: FriendCardPlayer[]): void
     {
         deck.Full();
-        discarded.Empty();
         playersInOrder.forEach((player: FriendCardPlayer) => {
             player.GetHandCard().Empty();
             player.GetHandCard().Add(deck.PopNumRandomCards(13));
@@ -68,10 +67,10 @@ export class FriendCardGameRoundLogic
         let winnerAuctionTeamTotalPoint: number = 0;
         let anotherTeamTotalPoint: number = 0;
         playersInOrder.filter(player => winnerAuctionTeamIds.some(id => id === player.id)).forEach(player => {
-            winnerAuctionTeamTotalPoint += player.GetRoundPoint(roundNumber) ?? 0;
+            winnerAuctionTeamTotalPoint += player.GetRoundPoint(roundNumber);
         })
         playersInOrder.filter(player => anotherTeamIds.some(id => id === player.id)).forEach(player => {
-            anotherTeamTotalPoint += player.GetRoundPoint(roundNumber) ?? 0;
+            anotherTeamTotalPoint += player.GetRoundPoint(roundNumber);
         })
         return [winnerAuctionTeamTotalPoint, anotherTeamTotalPoint]
     }
@@ -86,8 +85,8 @@ export class FriendCardGameRoundLogic
         auctionPoint: number
     ): [string[], number]
     {
-        let roundWinnerIds: string[] = [];
-        let roundWinnerPoint: number = 0;
+        let roundWinnerIds: string[];
+        let roundWinnerPoint: number;
         const isWinnerAuctionTeamWinTheGame: boolean = winnerAuctionTeamTotalPoint >= auctionPoint;
         if (isWinnerAuctionTeamWinTheGame)
         {
@@ -96,13 +95,13 @@ export class FriendCardGameRoundLogic
             playersInOrder.filter(player => auctionWinnerTeamIds.some(id => id === player.id)).forEach(player => {
                 let gamePoint: number;
                 if(player.id === auctionWinnerPlayerId)
-                    gamePoint = auctionPoint + (player.GetRoundPoint(roundNumber) ?? 0);
+                    gamePoint = auctionPoint + (player.GetRoundPoint(roundNumber));
                 else
-                    gamePoint = (auctionPoint / 2) + (player.GetRoundPoint(roundNumber) ?? 0);
-                player.AddGamePoint(gamePoint);
+                    gamePoint = (auctionPoint / 2) + (player.GetRoundPoint(roundNumber));
+                player.AddGamePoint(roundNumber, gamePoint);
             });
             playersInOrder.filter(player => anotherTeamIds.some(id => id === player.id)).forEach(player => {
-                player.DecreaseGamePoint(100 - auctionPoint);
+                player.DecreaseGamePoint(roundNumber, 100 - auctionPoint);
             });
         }
         else
@@ -112,18 +111,18 @@ export class FriendCardGameRoundLogic
             playersInOrder.filter(player => auctionWinnerTeamIds.some(id => id === player.id)).forEach(player => {
                 if(player.id === auctionWinnerPlayerId)
                 {
-                    player.DecreaseGamePoint(auctionPoint);
+                    player.DecreaseGamePoint(roundNumber, auctionPoint);
                 }
                 else
                 {
-                    let gamePoint: number = (auctionPoint / 2) - (player.GetRoundPoint(roundNumber) ?? 0);
-                    player.DecreaseGamePoint( gamePoint >= 0 ? gamePoint : 0 );
+                    let gamePoint: number = (auctionPoint / 2) - (player.GetRoundPoint(roundNumber));
+                    player.DecreaseGamePoint(roundNumber, gamePoint >= 0 ? gamePoint : 0 );
                 }
             });
 
-            let sumPlayerPoint: number;
-            playersInOrder.filter(player => anotherTeamIds.some(id => id === player.id)).forEach(player => sumPlayerPoint += player.GetRoundPoint(roundNumber) ?? 0 );
-            playersInOrder.filter(player => anotherTeamIds.some(id => id === player.id)).forEach(player => player.AddGamePoint(sumPlayerPoint / 2) );
+            let sumPlayerPoint: number = 0;
+            playersInOrder.filter(player => anotherTeamIds.some(id => id === player.id)).forEach(player => sumPlayerPoint += player.GetRoundPoint(roundNumber));
+            playersInOrder.filter(player => anotherTeamIds.some(id => id === player.id)).forEach(player => player.AddGamePoint(roundNumber, sumPlayerPoint / 2) );
         }
         return[roundWinnerIds, roundWinnerPoint];
     }

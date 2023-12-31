@@ -1,19 +1,25 @@
 import "./WaitingPlayer.css"
 import PropTypes from "prop-types";
-import {useDispatch} from "react-redux";
+import {useDispatch, useSelector} from "react-redux";
 import {DisconnectFromSocket} from "../../store/SocketSlice.jsx";
 import {ResetPlayersInGame} from "../../store/GameSlice.jsx";
 import {ResetAllListenerState} from "../../store/SocketGameListenersSlice.jsx";
 import {SetPage} from "../../store/PageStateSlice.jsx";
-import PageStateEnum from "../../enum/PageStateEnum.jsx";
+import PAGE_STATE from "../../enum/PageStateEnum.jsx";
+import {EmitStartGame} from "../../store/SocketGameEmittersSlice.jsx";
 
 WaitingPlayer.propTypes = {
     isOpen: PropTypes.bool,
 }
 export default function WaitingPlayer({isOpen}){
+    const isOwnerRoom = useSelector(state => state.gameStore.playersInGame?.thisPlayer?.isOwner) ?? false
+    const playersInGame = useSelector(state => state.gameStore.playersInGame)
     const dispatch = useDispatch()
     function AddBot(){
         alert("Add bot clicked")
+    }
+    function StartGame() {
+        dispatch(EmitStartGame())
     }
 
     function QuitLobby(){
@@ -22,7 +28,7 @@ export default function WaitingPlayer({isOpen}){
             dispatch(DisconnectFromSocket())
             dispatch(ResetPlayersInGame())
             dispatch(ResetAllListenerState())
-            dispatch(SetPage({ pageState: PageStateEnum.MENU }))
+            dispatch(SetPage({ pageState: PAGE_STATE.MENU }))
         }
     }
 
@@ -46,10 +52,18 @@ export default function WaitingPlayer({isOpen}){
                         Waiting for Player
                     </p>
                     <br/>
-                    <button
-                        onClick={AddBot}
-                        className="add_bot_button bg-black hover:bg-blue-700 text-white font-bold py-2  border border-blue-700 rounded-2xl"
-                    >Add Bot</button>
+                    {
+                        playersInGame?.players?.length !== 4 && isOwnerRoom && <button
+                            onClick={AddBot}
+                            className="add_bot_button bg-black hover:bg-blue-700 text-white font-bold py-2  border border-blue-700 rounded-2xl"
+                        >Add Bot</button>
+                    }
+                    {
+                        playersInGame?.players?.length === 4 && isOwnerRoom && <button
+                            onClick={StartGame}
+                            className="add_bot_button bg-black hover:bg-blue-700 text-white font-bold py-2  border border-blue-700 rounded-2xl"
+                        >Start</button>
+                    }
                     <br/>
                     <button
                         onClick={QuitLobby}

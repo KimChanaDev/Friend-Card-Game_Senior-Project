@@ -1,4 +1,4 @@
-const SocketStatusEnum = {
+const SOCKET_STATUS = {
     CONNECTING: "connecting",
     CONNECTED: "connected",
     CONNECTION_FAILED: "connection failed",
@@ -11,4 +11,4 @@ const SocketStatusEnum = {
     SUCCESS: "success",
     FAILED: "failed"
 }
-export default SocketStatusEnum
+export default SOCKET_STATUS

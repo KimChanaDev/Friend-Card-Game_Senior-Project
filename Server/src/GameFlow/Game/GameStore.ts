@@ -11,5 +11,7 @@ export class GamesStore
 	public GetGameById(gameId: string): GameRoom | undefined { return this.activeGames.get(gameId); }
 	public DeleteGameById(id: string): void { this.activeGames.delete(id); }
 	public GetAllGamesAsArray(): GameRoom[] { return Array.from(this.activeGames.values()); }
-	public GetAllNotStartedGamesAsArray(): GameRoom[] { return this.GetAllGamesAsArray().filter((game) => game.GetGameRoomState() === GAME_STATE.NOT_STARTED); }
+	public GetAllNotStartedGamesAsArray(): GameRoom[] {
+		return this.GetAllGamesAsArray().filter((game) => game.GetGameRoomState() !== GAME_STATE.STARTED);
+	}
 }

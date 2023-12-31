@@ -2,11 +2,11 @@ export abstract class Player
 {
 	private isReady: boolean = false;
 	private isDisconnected: boolean = false;
-	constructor(
+	protected constructor(
 		public readonly id: string,
 		public readonly username: string,
 		public readonly socketId: string,
-		public readonly isOwner: boolean
+		public isOwner: boolean
 	)
 	{
 		if(isOwner) this.isReady = true;
@@ -14,6 +14,7 @@ export abstract class Player
 
 	public ToggleIsReady(): void { this.isReady = !this.isReady; }
 	public SetIsReady(bool : boolean): void { this.isReady = bool }
+	public SetIsOwner(bool : boolean): void { this.isOwner = bool }
 	public GetIsReady(): boolean { return this.isReady; }
 	public SetDisconnected(bool : boolean): void { this.isDisconnected = bool }
 	public GetIsDisconnected(): boolean { return this.isDisconnected; }
