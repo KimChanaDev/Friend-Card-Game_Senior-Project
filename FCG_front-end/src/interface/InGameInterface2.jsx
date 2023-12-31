@@ -118,7 +118,7 @@ export default function InGameInterface2()
             setIsShowFriendAppearedAlert(true);
             const timeoutId = setTimeout(() => {
                 setIsShowFriendAppearedAlert(false);
-            }, 3000); // 3 sec
+            }, 2000); // 2 sec
             return () => clearTimeout(timeoutId);
         }
     }, [isFriendAppeared]);
@@ -130,7 +130,7 @@ export default function InGameInterface2()
             const timeoutId = setTimeout(() => {
                 setIsShowTrickFinishedAlert(false);
                 dispatch(ClearCardInField())
-            }, 3000); // 3 sec
+            }, 5000); // 5 sec
             return () => clearTimeout(timeoutId);
         }
     }, [trickFinishedResult]);
