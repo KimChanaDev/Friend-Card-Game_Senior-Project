@@ -1,5 +1,5 @@
 import './SummaryScore.css'
-import './IngameInterface.css'
+import './InGameInterface.css'
 import {useEffect, useState} from 'react'
 import {useDispatch, useSelector} from "react-redux";
 import SettingsIcon from '@mui/icons-material/Settings';

@@ -2,6 +2,7 @@ import dotenv from 'dotenv';
 import { App } from './App.js';
 import { GameController } from './Controller/GameController.js';
 import { UserController } from './Controller/UserController.js';
+import { BaseController } from "./Controller/BaseController.js";
 import admin from 'firebase-admin';
 // import serviceAccount from './ServiceAccount.json'
 // const serviceAccount = require('./ServiceAccount.json')
@@ -29,5 +30,5 @@ admin.initializeApp({
     credential: admin.credential.cert(serviceAccount as admin.ServiceAccount)
 })
 
-const app = new App([new GameController, new UserController]);
+const app = new App([new BaseController, new GameController, new UserController]);
 app.listen();
