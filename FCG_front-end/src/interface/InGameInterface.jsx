@@ -8,7 +8,7 @@ import SlideBar from '../component/SlideBar';
 // import CardTable from '../component/CardTable';
 // import TotalScoreBoard from '../component/TotalScoreBoard';
 // import EmojiPanel from '../component/EmojiPanel';
-import './IngameInterface.css'
+import './InGameInterface.css'
 import { useEffect } from 'react';
 const URL = process.env.NODE_ENV === 'production' ? undefined : 'http://localhost:5000';
 import { io } from 'socket.io-client'
