@@ -1,211 +1,108 @@
 import './SelectCard.css'
+import {useState} from "react";
+import {useDispatch, useSelector} from "react-redux";
+import {EmitSelectMainCard} from "../store/SocketGameEmittersSlice.jsx";
+import SOCKET_STATUS from "../enum/SocketStatusEnum.jsx";
 function SelectCard() {
+    const cardValues = ['2', '3', '4', '5', '6', '7', '8', '9', 'J', 'Q', 'K', 'A'];
+    const [friendCardSelected, setFriendCardSelected] = useState("")
+    const [trumpSelected, setTrumpSelected] = useState("")
+    const selectMainCardStatus = useSelector(state => state.socketGameEmittersStore.selectMainCardStatus)
+    const dispatch = useDispatch()
+
+    function RenderCardValueRowNumbers(suit, className){
+        return cardValues.map((value, index) => (
+            <td key={index} className={`${className} ${value === friendCardSelected.charAt(0) && suit === friendCardSelected.charAt(1) ? "selected" : ""} `}>
+                <button onClick={() => HandleCardValueClicked(suit, value)}>{value}</button>
+            </td>
+        ))
+    }
+    function HandleCardValueClicked(suit, value){
+        setFriendCardSelected(value+suit)
+    }
+    function HandleSuitClicked(suit){
+        setTrumpSelected(suit)
+    }
+    function HandleConfirm(){
+        dispatch(EmitSelectMainCard({
+            trumpSuit: trumpSelected,
+            friendCard: friendCardSelected
+        }))
+    }
+
     return (
         <>
-            <div class="relative overflow-x-auto select_table border-double border-4 border-gray-600">
-                <table class="w-full text-sm text-left dark:text-gray-400">
-                    <thead class="text-xs text-white uppercase ">
-                        <tr>
-                            <th scope="col" class="px-6 py-3">
-                                Suite
-                            </th>
-                            <th colSpan={12} scope="col" class="px-6 py-3 text-center text-white">
-                                Select Friend Card Number
-                            </th>
-                            <th colSpan={3} scope="col" class="px-6 py-3 text-center text-white">
-                                Select TRUMP Card Number
-                            </th>
+            {
+                selectMainCardStatus !== SOCKET_STATUS.SUCCESS &&
+                <div className="popup">
+                    <div className="relative overflow-x-auto select_table border-double border-4 border-gray-600">
+                        <table className="w-full text-sm text-left dark:text-gray-400">
+                            <thead className="text-xs text-white uppercase ">
+                            <tr>
+                                <th scope="col" className="px-6 py-3">
+                                    Suite
+                                </th>
+                                <th colSpan={12} scope="col" className="px-6 py-3 text-center text-white">
+                                    Select Friend Card Number
+                                </th>
+                                <th colSpan={3} scope="col" className="px-6 py-3 text-center text-white">
+                                    Select TRUMP Card Number
+                                </th>
 
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr class=" border-b border-black">
-                            <th scope="row" class=" text-4xl px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
-                                ♣️
-                            </th>
-                            <td class="px-6 py-4 text-gray-500">
-                                2
-                            </td>
-                            <td class="px-6 py-4  text-gray-500">
-                                3
-                            </td>
-                            <td class="px-6 py-4 text-gray-500">
-                                4
-                            </td>
-                            <td class="px-6 py-4 text-gray-500">
-                                5
-                            </td>
-                            <td class="px-6 py-4 text-gray-500">
-                                6
-                            </td>
-                            <td class="px-6 py-4 text-gray-500">
-                                7
-                            </td>
-                            <td class="px-6 py-4 text-gray-500">
-                                8
-                            </td>
-                            <td class="px-6 py-4 text-gray-500">
-                                9
-                            </td>
-                            <td class="px-6 py-4 text-gray-500">
-                                J
-                            </td>
-                            <td class="px-6 py-4 text-gray-500">
-                                Q
-                            </td>
-                            <td class="px-6 py-4 text-gray-500">
-                                K
-                            </td>
-                            <td class="px-6 py-4 text-gray-500">
-                                A
-                            </td>
-                            <td colSpan={3} class="px-6 py-4  text-4xl text-center  border-l-2 border-black ">
-                                <button>♣️</button>
-                            </td>
-                        </tr>
-                        <tr class=" border-b  border-black">
-                            <th scope="row" class="text-4xl px-6 py-4 font-medium text-red-600 whitespace-nowrap dark:text-white">
-                                ♥️
-                            </th>
-                            <td class="px-6 py-4">
-                                <button>2</button>
-                            </td>
-                            <td class="px-6 py-4">
-                                <button>3</button>
-                            </td>
-                            <td class="px-6 py-4">
-                                <button>4</button>
-                            </td>
-                            <td class="px-6 py-4">
-                                <button>5</button>
-                            </td>
-                            <td class="px-6 py-4">
-                                <button>6</button>
-                            </td>
-                            <td class="px-6 py-4">
-                                <button>7</button>
-                            </td>
-                            <td class="px-6 py-4">
-                                <button>8</button>
-                            </td>
-                            <td class="px-6 py-4">
-                                <button>9</button>
-                            </td>
-                            <td class="px-6 py-4">
-                                <button>J</button>
-                            </td>
-                            <td class="px-6 py-4">
-                                <button>Q</button>
-                            </td>
-                            <td class="px-6 py-4">
-                                <button>K</button>
-                            </td>
-                            <td class="px-6 py-4">
-                                <button>A</button>
-                            </td>
-                            <td colSpan={3} class="px-6 py-4  text-4xl text-center text-red-600  border-l-2 border-black ">
-                                <button>♥️</button>
-                            </td>
-                        </tr>
-                        <tr class=" border-b border-black">
-                            <th scope="row" class="text-4xl px-6 py-4 font-medium text-red-600 whitespace-nowrap dark:text-white">
-                                ♦️
-                            </th>
-                            <td class="px-6 py-4">
-                                <button>2</button>
-                            </td>
-                            <td class="px-6 py-4">
-                                <button>3</button>
-                            </td>
-                            <td class="px-6 py-4">
-                                <button>4</button>
-                            </td>
-                            <td class="px-6 py-4">
-                                <button>5</button>
-                            </td>
-                            <td class="px-6 py-4">
-                                <button>6</button>
-                            </td>
-                            <td class="px-6 py-4">
-                                <button>7</button>
-                            </td>
-                            <td class="px-6 py-4">
-                                <button>8</button>
-                            </td>
-                            <td class="px-6 py-4">
-                                <button>9</button>
-                            </td>
-                            <td class="px-6 py-4">
-                                <button>J</button>
-                            </td>
-                            <td class="px-6 py-4">
-                                <button>Q</button>
-                            </td>
-                            <td class="px-6 py-4">
-                                <button>K</button>
-                            </td>
-                            <td class="px-6 py-4">
-                                <button>A</button>
-                            </td>
-                            <td colSpan={3} class="px-6 py-4  text-4xl text-center text-red-600  border-l-2 border-black">
-                                <button>♦️</button>
-                            </td>
-                        </tr>
-                        <tr class=" border-b border-black">
-                            <th scope="row" class="text-4xl px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
-                                ♠️
-                            </th>
-                            <td class="px-6 py-4">
-                                <button>2</button>
-                            </td>
-                            <td class="px-6 py-4">
-                                <button>3</button>
-                            </td>
-                            <td class="px-6 py-4">
-                                <button>4</button>
-                            </td>
-                            <td class="px-6 py-4">
-                                <button>5</button>
-                            </td>
-                            <td class="px-6 py-4">
-                                <button>6</button>
-                            </td>
-                            <td class="px-6 py-4">
-                                <button>7</button>
-                            </td>
-                            <td class="px-6 py-4">
-                                <button>8</button>
-                            </td>
-                            <td class="px-6 py-4">
-                                <button>9</button>
-                            </td>
-                            <td class="px-6 py-4">
-                                <button>J</button>
-                            </td>
-                            <td class="px-6 py-4">
-                                <button>Q</button>
-                            </td>
-                            <td class="px-6 py-4">
-                                <button>K</button>
-                            </td>
-                            <td class="px-6 py-4">
-                                <button>A</button>
-                            </td>
-                            <td colSpan={3} class="px-6 py-4  text-4xl text-center border-l-2 border-black  ">
-                                <button>♠️</button>
-                            </td>
-                        </tr>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr className=" border-b border-black">
+                                <th scope="row" className=" text-4xl px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                                    ♣️
+                                </th>
+                                {RenderCardValueRowNumbers("C","px-6 py-4")}
+                                <td colSpan={3} className={`px-6 py-4  text-4xl text-center  border-l-2 border-black ${trumpSelected === "C" && "selected"}`}>
+                                    <button onClick={() => HandleSuitClicked("C")}>♣️</button>
+                                </td>
+                            </tr>
 
-                    </tbody>
-                </table>
-                
-                <button class=" confirm_button bg-black  text-white font-bold py-2 px-4 border  rounded-2xl">
-                    confirm
-                </button>
-            </div>
+                            <tr className=" border-b  border-black">
+                                <th scope="row" className="text-4xl px-6 py-4 font-medium text-red-600 whitespace-nowrap dark:text-white">
+                                    ♥️
+                                </th>
+                                {RenderCardValueRowNumbers("H", "px-6 py-4")}
+                                <td colSpan={3} className={`px-6 py-4  text-4xl text-center text-red-600  border-l-2 border-black ${trumpSelected === "H" && "selected"}`}>
+                                    <button onClick={() => HandleSuitClicked("H")}>♥️</button>
+                                </td>
+                            </tr>
 
+                            <tr className=" border-b border-black">
+                                <th scope="row" className="text-4xl px-6 py-4 font-medium text-red-600 whitespace-nowrap dark:text-white">
+                                    ♦️
+                                </th>
+                                {RenderCardValueRowNumbers("D", "px-6 py-4")}
+                                <td colSpan={3} className={`px-6 py-4  text-4xl text-center text-red-600  border-l-2 border-black ${trumpSelected === "D" && "selected"}`}>
+                                    <button onClick={() => HandleSuitClicked("D")}>♦️</button>
+                                </td>
+                            </tr>
 
+                            <tr className=" border-b border-black">
+                                <th scope="row" className="text-4xl px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                                    ♠️
+                                </th>
+                                {RenderCardValueRowNumbers("S", "px-6 py-4")}
+                                <td colSpan={3} className={`px-6 py-4  text-4xl text-center border-l-2 border-black ${trumpSelected === "S" && "selected"}`}>
+                                    <button onClick={() => HandleSuitClicked("S")}>♠️</button>
+                                </td>
+                            </tr>
 
+                            </tbody>
+                        </table>
+
+                        <button className=" confirm_button bg-black  text-white font-bold py-2 px-4 border  rounded-2xl"
+                                onClick={() => HandleConfirm()}
+                        >
+                            Confirm
+                        </button>
+                    </div>
+                </div>
+            }
         </>
     )
 }

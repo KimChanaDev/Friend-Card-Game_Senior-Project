@@ -8,22 +8,32 @@ import {PlayerPointInfo} from "../../Model/DTO/Response/PlayerPointInfo.js";
 export class FriendCardGameRoom extends GameRoom
 {
     protected winner?: FriendCardPlayer | undefined;
-    protected playersInGame = new Map<string, FriendCardPlayer>();
+    protected playersInGame: Map<string, FriendCardPlayer> = new Map<string, FriendCardPlayer>();
     private winnerPoint: number = 0;
     private roundsInGame: FriendCardGameRound[] = [];
     private currentRoundNumber: number = 0;
     private readonly totalNumberRound: number = 4;
     public StartGameProcess(): void
     {
-        this.InitFourRoundInGame();
+        this.InitRoundInGame();
         super.SetStartState();
         this.GetCurrentRoundGame().StartRoundProcess(this.GetAllPlayerAsArray());
     }
-    private InitFourRoundInGame(): void
+    private InitRoundInGame(): void
     {
-        for (let i = 0; i < this.totalNumberRound; i++) { this.roundsInGame.push(new FriendCardGameRound(i)); }
+        for (let i = 0; i < this.totalNumberRound; i++) {
+            this.roundsInGame.push(new FriendCardGameRound(i));
+        }
         this.currentRoundNumber = 0;
     }
+    public RestartFriendCardGameRoom(): void {
+        super.RestartGameRoom()
+        this.winnerPoint = 0;
+        this.roundsInGame = [];
+        this.currentRoundNumber = 0;
+    }
+    public GetWinner(): FriendCardPlayer | undefined { return this.winner }
+    public GetWinnerPoint(): number { return this.winnerPoint }
     public GetCurrentRoundGame(): FriendCardGameRound { return this.roundsInGame[this.currentRoundNumber]; }
     public GetCurrentRoundNumber(): number { return this.currentRoundNumber; }
     public IsCurrentRoundGameFinished(): boolean {
@@ -40,18 +50,21 @@ export class FriendCardGameRoom extends GameRoom
     public NextRoundProcess(): void
     {
         this.currentRoundNumber++;
-        if (this.currentRoundNumber >= this.totalNumberRound)
-        {
-            this.FinishGame();
-        }
         this.GetCurrentRoundGame().StartRoundProcess(this.GetAllPlayerAsArray());
     }
-    public GetLatestRoundResponse(){
-        const winnerIds: string[] = this.GetCurrentRoundGame().GetRoundWinnerIds();
-        const winnerPoint: number = this.GetCurrentRoundGame().GetRoundWinnerTotalPoint();
-        const roundNumber: number = this.currentRoundNumber;
-        const playersPointInfo: PlayerPointInfo[] = this.GetCurrentRoundGame().CreatePlayerPointInfo()
-        return new WinnerRoundResponse(winnerIds, winnerPoint, roundNumber, playersPointInfo);
+    public CheckGameFinished(): boolean{
+        const nextRoundNumberTemp = this.currentRoundNumber + 1
+        return nextRoundNumberTemp >= this.totalNumberRound;
+    }
+    public GetAllRoundResult(): WinnerRoundResponse[]{
+        const response: WinnerRoundResponse[] = []
+        this.roundsInGame.forEach(round => {
+            const roundFinishedInfo = round.GetRoundFinishedInfo()
+            if (roundFinishedInfo){
+                response.push(roundFinishedInfo)
+            }
+        })
+        return response
     }
     public DisconnectPlayer(player: FriendCardPlayer): void
     {
@@ -72,20 +85,21 @@ export class FriendCardGameRoom extends GameRoom
             }
 		}
     }
-    public FinishGame(): void
+    public FinishGameProcess(): void
     {
         let winnerPoint: number = -500;
         let winnerPlayer: FriendCardPlayer | undefined;
         this.playersInGame.forEach(player => {
-            if(player.GetGamepoint() > winnerPoint)
+            const totalGamePointByPlayer: number = player.GetTotalGamePoint()
+            if(totalGamePointByPlayer > winnerPoint)
             {
-                winnerPoint = player.GetGamepoint();
+                winnerPoint = totalGamePointByPlayer;
                 winnerPlayer = player;
             }
         })
         this.winner = winnerPlayer;
         this.winnerPoint = winnerPoint;
-        this.SetFinishState();
+        super.SetFinishState();
         // TODO save stat to database
     }
 }

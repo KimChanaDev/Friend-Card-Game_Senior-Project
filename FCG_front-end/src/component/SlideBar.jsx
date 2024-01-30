@@ -3,7 +3,7 @@ import { useState } from 'react'
 import ArrowLeftIcon from '@mui/icons-material/ArrowLeft';
 import EmojiPanel from '../component/EmojiPanel';
 
-function SlideBar() {
+export default function SlideBar() {
     const [isEmojiUp, toggleEmoji] = useState(false);
     function handleEmoji() {
         toggleEmoji(s => !s)
@@ -22,5 +22,3 @@ function SlideBar() {
     )
 
 }
-
-export default SlideBar

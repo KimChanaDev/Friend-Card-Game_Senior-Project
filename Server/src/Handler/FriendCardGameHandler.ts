@@ -15,8 +15,11 @@ import { HandlerValidation } from "./HandlerValidation.js";
 import { PlayerDTO } from "../Model/DTO/PlayerDTO.js";
 import { GameRoom } from "../GameFlow/Game/GameRoom.js";
 import { Player } from "../GameFlow/Player/Player.js";
-import {WinnerTrickResponse} from "../Model/DTO/Response/WinnerTrickResponse";
-import {WinnerRoundResponse} from "../Model/DTO/Response/WinnerRoundResponse";
+import {WinnerTrickResponse} from "../Model/DTO/Response/WinnerTrickResponse.js";
+import {WinnerRoundResponse} from "../Model/DTO/Response/WinnerRoundResponse.js";
+import {EMOJI} from "../Enum/Emoji.js";
+import {GAME_STATE} from "../Enum/GameState.js";
+import {GameFinishedDTO} from "../Model/DTO/GameFinishedDTO.js";
 
 export class FriendCardGameHandler extends SocketHandler
 {
@@ -39,6 +42,7 @@ export class FriendCardGameHandler extends SocketHandler
                 HandlerValidation.IsOwnerRoom(gameRoom, player);
                 HandlerValidation.PlayerGreaterThanFour(gameRoom);
                 HandlerValidation.AreAllPlayersReady(gameRoom);
+                gameRoom.RestartFriendCardGameRoom()
                 gameRoom.StartGameProcess();
                 super.EmitToRoomAndSender(socket, SOCKET_GAME_EVENTS.START_GAME, gameRoom.id);
                 callback({ success: true } as BaseResponseDTO);
@@ -62,20 +66,15 @@ export class FriendCardGameHandler extends SocketHandler
                 const auctionPointDTO: AuctionPointDTO = {
                     playerId: player.id,
                     isPass: auctionPass,
+                    auctionPoint: !auctionPass ? auctionPoint : undefined,
                     nextPlayerId: nextPlayerId,
-                    HighestAuctionPlayerId: highestAuctionPlayerId ?? "",
-                    HighestAuctionPoint: currentAuctionPoint,
-                    gameplayState: gameplayState
+                    highestAuctionPlayerId: highestAuctionPlayerId ?? "",
+                    highestAuctionPoint: currentAuctionPoint,
                 };
-                socket.to(gameRoom.id).emit(SOCKET_GAME_EVENTS.AUCTION, auctionPointDTO);
+                super.EmitToRoomAndSender(socket, SOCKET_GAME_EVENTS.AUCTION, gameRoom.id, auctionPointDTO);
                 callback({
                     success: true,
-                    isPass: auctionPass,
-                    nextPlayerId: nextPlayerId,
-                    HighestAuctionPlayerId: highestAuctionPlayerId,
-                    HighestAuctionPoint: currentAuctionPoint,
-                    gameplayState: gameplayState
-                } as AuctionPointResponseDTO);
+                })
             }
             catch(ex: any)
             {
@@ -96,12 +95,10 @@ export class FriendCardGameHandler extends SocketHandler
                     trumpColor: trumpColor,
                     friendCard: friendCard
                 };
-                socket.to(gameRoom.id).emit(SOCKET_GAME_EVENTS.SELECT_MAIN_CARD, trumpAndFriendDTO);
+                super.EmitToRoomAndSender(socket, SOCKET_GAME_EVENTS.SELECT_MAIN_CARD, gameRoom.id, trumpAndFriendDTO);
                 callback({
-                    success: true,
-                    trumpColor: trumpColor,
-                    friendCard: friendCard
-                } as TrumpAndFriendDTO);
+                    success: true
+                } as BaseResponseDTO);
             }
             catch(error: any)
             {
@@ -116,28 +113,46 @@ export class FriendCardGameHandler extends SocketHandler
                 HandlerValidation.IsPlayerTurn(gameRoom, player);
                 HandlerValidation.HasCardOnHand(gameRoom, player, cardId);
                 const playedCard: CardId = gameRoom.GetCurrentRoundGame().PlayCardProcess(cardId, player.id);
-                if (gameRoom.IsCurrentRoundGameFinished())
+
+                if(gameRoom.IsCurrentRoundGameFinished() && gameRoom.CheckGameFinished()){
+                    console.log("in game finished")
+                    gameRoom.FinishGameProcess()
+                    const winner: FriendCardPlayer | undefined = gameRoom.GetWinner()
+                    if(winner){
+                        const winnerResponse: GameFinishedDTO = {
+                            winnerId: winner.id,
+                            winnerName: winner.username,
+                            winnerPoint: gameRoom.GetWinnerPoint(),
+                            roundsFinishedDetail: gameRoom.GetAllRoundResult()
+                        }
+                        super.EmitToRoomAndSender(socket, SOCKET_GAME_EVENTS.GAME_FINISHED, gameRoom.id, winnerResponse);
+                        // gameRoom.RestartFriendCardGameRoom()
+                    }
+                    else{
+                        console.log("Winner not found")
+                    }
+                }
+                else if (gameRoom.IsCurrentRoundGameFinished())
                 {
-                    const winnerRoundResponse: WinnerRoundResponse = gameRoom.GetLatestRoundResponse()
+                    console.log("in round finished")
+                    const roundFinishedResponse: WinnerRoundResponse[] = gameRoom.GetAllRoundResult()
                     gameRoom.NextRoundProcess();
-                    super.EmitToRoomAndSender(socket, SOCKET_GAME_EVENTS.ROUND_FINISHED, gameRoom.id, winnerRoundResponse);
+                    super.EmitToRoomAndSender(socket, SOCKET_GAME_EVENTS.ROUND_FINISHED, gameRoom.id, roundFinishedResponse);
                 }
                 else if (gameRoom.GetCurrentRoundGame().IsEndOfTrick())
                 {
+                    console.log("in trick finished")
                     const winnerTrickModel: WinnerTrickResponse | undefined = gameRoom.GetCurrentRoundGame().GetLatestWinnerTrickResponse();
                     super.EmitToRoomAndSender(socket, SOCKET_GAME_EVENTS.TRICK_FINISHED, gameRoom.id, winnerTrickModel);
                 }
-
                 const cardPlayedDTO: CardPlayedDTO = {
                     playerId: player.id,
                     cardId: playedCard
                 };
-                socket.to(gameRoom.id).emit(SOCKET_GAME_EVENTS.CARD_PLAYED, cardPlayedDTO);
+                super.EmitToRoomAndSender(socket, SOCKET_GAME_EVENTS.CARD_PLAYED, gameRoom.id, cardPlayedDTO);
                 callback({
-                    success: true,
-                    actions: gameRoom.GetCurrentRoundGame().GetActionsDTOForPlayer(player),
-                    cardId: playedCard
-                } as CardPlayedResponseDTO);
+                    success: true
+                } as BaseResponseDTO);
             }
             catch (error: any)
             {
@@ -147,8 +162,33 @@ export class FriendCardGameHandler extends SocketHandler
         socket.on(SOCKET_GAME_EVENTS.GET_GAME_STATE, (callback: (friendCardGameStateForPlayer: FriendCardGameStateForPlayerDTO | BaseResponseDTO) => void) => {
             try
             {
-                HandlerValidation.GameAndRoundStarted(gameRoom);
+                HandlerValidation.GameAndRoundNotNotStarted(gameRoom);
                 callback(FriendCardGameStateForPlayerDTO.CreateFromFriendCardGameAndPlayer(gameRoom, player));
+            }catch (error: any)
+            {
+                callback({ success: false, error: error?.message } as BaseResponseDTO);
+            }
+        });
+        socket.on(SOCKET_GAME_EVENTS.GET_SCORE_CARD, (playerId: string, callback: (friendCardGameStateForPlayer: CardId[] | BaseResponseDTO) => void) => {
+            try
+            {
+                HandlerValidation.GameAndRoundStarted(gameRoom);
+                const scoreCardIds: CardId[] = gameRoom.GetCurrentRoundGame().GetScoreCard(playerId)
+                callback(scoreCardIds);
+            }catch (error: any)
+            {
+                callback({ success: false, error: error?.message } as BaseResponseDTO);
+            }
+        });
+        socket.on(SOCKET_GAME_EVENTS.EMOJI, (emoji: EMOJI, callback: (result: BaseResponseDTO) => void) => {
+            try
+            {
+                const response = {
+                    playerId: player.id,
+                    emoji: emoji
+                }
+                super.EmitToRoomAndSender(socket, SOCKET_GAME_EVENTS.EMOJI, gameRoom.id, response);
+                callback({ success: true } as BaseResponseDTO);
             }catch (error: any)
             {
                 callback({ success: false, error: error?.message } as BaseResponseDTO);

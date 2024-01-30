@@ -26,6 +26,11 @@ export abstract class HandlerValidation
         if(gameRoom.GetGameRoomState() !== GAME_STATE.STARTED || gameRoom.GetCurrentRoundGame().GetRoundState() !== GAME_STATE.STARTED)
             throw new Error("Game not started");
     }
+    public static GameAndRoundNotNotStarted(gameRoom: FriendCardGameRoom): void
+    {
+        if(gameRoom.GetGameRoomState() === GAME_STATE.NOT_STARTED || gameRoom.GetCurrentRoundGame().GetRoundState() === GAME_STATE.NOT_STARTED)
+            throw new Error("Game not started");
+    }
     public static IsFriendCardAndTrumpCardValid(gameRoom: FriendCardGameRoom, Friend: CardId, Trump: ColorType): void
     {
         if( !gameRoom.GetCurrentRoundGame().deck.IsCardValidForDeck(Friend) || !gameRoom.GetCurrentRoundGame().deck.IsColorValidForDeck(Trump) )
@@ -46,7 +51,7 @@ export abstract class HandlerValidation
     public static IsGameRoomStartedState(gameRoom: FriendCardGameRoom): void
     {
         if(gameRoom.GetGameRoomState() !== GAME_STATE.STARTED)
-            throw new Error("Game room is not started start");
+            throw new Error("Game room is not started state");
     }
     public static IsGamePlayNotStarted(gameRoom: FriendCardGameRoom): void
     {
@@ -86,7 +91,7 @@ export abstract class HandlerValidation
     }
     public static GameRoomNotStarted(gameRoom: GameRoom): void
     {
-        if (gameRoom.GetGameRoomState() !== GAME_STATE.NOT_STARTED)
+        if (gameRoom.GetGameRoomState() === GAME_STATE.STARTED)
             throw new SocketGameAlreadyStartedError();
     }
     public static CorrectGameRoomPasswordIfExist(socket: Socket, gameRoom: GameRoom): void

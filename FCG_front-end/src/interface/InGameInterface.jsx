@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import SettingsIcon from '@mui/icons-material/Settings';
-import CardInHand from '../component/CardInHannd';
+import CardInHand from '../component/CardInHand.jsx';
 import PlayerCard from '../component/PlayerCard';
 import FriendCard from '../component/FriendCard';
 import TrumpCard from '../component/TrumpCard';
@@ -8,7 +8,7 @@ import SlideBar from '../component/SlideBar';
 // import CardTable from '../component/CardTable';
 // import TotalScoreBoard from '../component/TotalScoreBoard';
 // import EmojiPanel from '../component/EmojiPanel';
-import './IngameInterface.css'
+import './InGameInterface.css'
 import { useEffect } from 'react';
 const URL = process.env.NODE_ENV === 'production' ? undefined : 'http://localhost:5000';
 import { io } from 'socket.io-client'

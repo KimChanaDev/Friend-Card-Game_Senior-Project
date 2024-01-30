@@ -9,11 +9,11 @@ import {ShuffleArray} from "../../GameLogic/Utils/Tools.js";
 import {FriendCardGameRoundLogic} from "../../GameLogic/Game/FriendCardGameRoundLogic.js";
 import {WinnerTrickResponse} from "../../Model/DTO/Response/WinnerTrickResponse.js";
 import {PlayerPointInfo} from "../../Model/DTO/Response/PlayerPointInfo.js";
+import {WinnerRoundResponse} from "../../Model/DTO/Response/WinnerRoundResponse.js";
 
 export class FriendCardGameRound
 {
     public readonly deck = new DeckLogic();
-    private readonly discarded = new DeckLogic();
     private readonly totalTrickNumber: number = 13;
     private roundState: GAME_STATE = GAME_STATE.NOT_STARTED;
     private gameplayState: GAME_STATE = GAME_STATE.NOT_STARTED;
@@ -41,7 +41,7 @@ export class FriendCardGameRound
         if (initialPlayers.length !== 4) throw new Error("Players are not equal to 4");
         this.playersInOrder = ShuffleArray(Array.from(initialPlayers.values()));
         this.currentPlayerNumber = 0;
-        FriendCardGameRoundLogic.PrepareCard(this.deck, this.discarded, this.playersInOrder);
+        FriendCardGameRoundLogic.PrepareCard(this.deck, this.playersInOrder);
         this.roundState = GAME_STATE.STARTED
     }
     public AuctionProcess(auctionPass: boolean, newAuctionPoint: number): void
@@ -63,6 +63,21 @@ export class FriendCardGameRound
         }
         this.currentPlayerNumber = FriendCardGameRoundLogic.NextPlayer(this.currentPlayerNumber, this.playersInOrder.length);
     }
+    public GetScoreCard(playerId: string): CardId[]{
+        const result: CardId[] = []
+        const TrickNumberArrayFromBeginning: number[] = Array.from({length: this.totalTrickNumber}, (_, index) => index);
+        TrickNumberArrayFromBeginning.forEach(trickNumber => {
+            const trickCard = this.trickCardMap.get(trickNumber);
+            if(trickCard && trickCard.winnerId === playerId){
+                trickCard.detail.forEach(trickCardDetailModel => {
+                    if (trickCardDetailModel.cardId.charAt(0) === "5" || trickCardDetailModel.cardId.charAt(0) === "T" || trickCardDetailModel.cardId.charAt(0) === "K"){
+                        result.push(trickCardDetailModel.cardId)
+                    }
+                })
+            }
+        })
+        return result
+    }
     public IsFirstAuction(): boolean { return this.auctionPoint === 50; }
     public SetTrumpAndFriendProcess(trumpColor: ColorType, friendCard: CardId, player: FriendCardPlayer): void
     {
@@ -71,7 +86,7 @@ export class FriendCardGameRound
         const highestAuctionPlayer : FriendCardPlayer | undefined= this.GetHighestAuctionPlayer();
         const friendPlayer: FriendCardPlayer | undefined  = this.GetFriendPlayer();
         FriendCardGameRoundLogic.InitializeTeam(highestAuctionPlayer, friendPlayer, this.playersInOrder, this.auctionWinnerTeamIds, this.anotherTeamIds);
-        FriendCardGameRoundLogic.InitializeTrick(13, this.trickCardMap);
+        FriendCardGameRoundLogic.InitializeTrick(this.totalTrickNumber, this.trickCardMap);
         this.currentPlayerNumber = this.playersInOrder.findIndex(p => p.id === player.id);
         this.currentTrickNumber = 0;
     }
@@ -89,7 +104,7 @@ export class FriendCardGameRound
             }
             else
             {
-                throw new Error("Your card are not follow leader or trump card");
+                throw new Error("Your card are not follow leader");
             }
         }
         else
@@ -99,24 +114,30 @@ export class FriendCardGameRound
         this.GetCurrentPlayer().GetHandCard().Remove(removeCard);
         const currentTrickCardModel: TrickCardModel | undefined = this.trickCardMap.get(this.currentTrickNumber);
         currentTrickCardModel?.AddCardDetail(playerId, removeCard);
-        if (this.friendCard === removeCard) { this.isFriendAppeared = true; }
+        this.CheckFriendAppeared(removeCard);
         this.currentPlayerNumber = FriendCardGameRoundLogic.NextPlayer(this.currentPlayerNumber, this.playersInOrder.length);
-        const isFinishedTrick: boolean | undefined = leaderColor && currentTrickCardModel?.detail.length === 4;
-        if (isFinishedTrick)
-        {
-            this.currentPlayerNumber =  FriendCardGameRoundLogic.CalculateWinnerTrickSetNextLeader(
-                                        this.trumpColor!, 
-                                        leaderColor!, 
-                                        currentTrickCardModel!,
-                                        this.playersInOrder,
-                                        this.roundNumber);
-            this.currentTrickNumber++;
-            this.endTrickFlag = true;
-            if(this.currentTrickNumber >= this.totalTrickNumber) { this.FinishRound() }
-        }
+        this.CheckTrickFinished(leaderColor, currentTrickCardModel)
         return removeCard;
     }
-    
+    private CheckTrickFinished(leaderColor: ColorType | undefined, currentTrickCardModel: TrickCardModel | undefined) {
+        if (leaderColor && currentTrickCardModel?.detail.length === 4)
+        {
+            this.currentPlayerNumber =  FriendCardGameRoundLogic.CalculateWinnerTrickSetNextLeader(
+                this.trumpColor!,
+                leaderColor,
+                currentTrickCardModel,
+                this.playersInOrder,
+                this.roundNumber);
+            this.currentTrickNumber++;
+            this.endTrickFlag = true;
+            if(this.currentTrickNumber >= this.totalTrickNumber) {
+                this.FinishRound()
+            }
+        }
+    }
+    private CheckFriendAppeared(removeCard: CardId){
+        if (this.friendCard === removeCard) { this.isFriendAppeared = true; }
+    }
     public FinishRound(): void
     {
         const [winnerTeamPoint, anotherTeamPoint] = FriendCardGameRoundLogic.CalculateTotalTeamPoint(this.auctionWinnerTeamIds, this.anotherTeamIds, this.playersInOrder, this.roundNumber);
@@ -137,8 +158,6 @@ export class FriendCardGameRound
         this.gameplayState = GAME_STATE.FINISHED;
         this.roundState = GAME_STATE.FINISHED;
     }
-    public GetRoundWinnerIds(): string[] { return this.roundWinnerIds; }
-    public GetRoundWinnerTotalPoint(): number { return this.roundWinnerPoint; }
     public IsFriendAppeared(): boolean { return this.isFriendAppeared; }
     public GetAuctionWinnerTeamIds(): string[] { return this.auctionWinnerTeamIds; }
     public GetAnotherTeamIds(): string[] { return this.anotherTeamIds; }
@@ -152,6 +171,18 @@ export class FriendCardGameRound
             })
         }
         return friendPlayer;
+    }
+    public GetRoundFinishedInfo(): WinnerRoundResponse | undefined {
+        if (this.gameplayState === GAME_STATE.FINISHED && this.roundState === GAME_STATE.FINISHED){
+            const winnerIds: string[] = this.roundWinnerIds;
+            const winnerPoint: number = this.roundWinnerPoint;
+            const roundNumber: number = this.roundNumber;
+            const playersPointInfo: PlayerPointInfo[] = this.CreatePlayerPointInfo()
+            return new WinnerRoundResponse(winnerIds, winnerPoint, roundNumber, playersPointInfo);
+        }
+        else {
+            return undefined
+        }
     }
     public IsTrumpAndFriendNotUndefined(): boolean { return this.trumpColor !== undefined && this.auctionPoint !== undefined; }
     public GetPlayerInOrder(): FriendCardPlayer[] { return this.playersInOrder; }
@@ -183,7 +214,13 @@ export class FriendCardGameRound
         }
     }
     public CreatePlayerPointInfo(): PlayerPointInfo[] {
-        return this.playersInOrder.map(a => new PlayerPointInfo(a.id, a.GetRoundPoint(this.roundNumber) ?? 0))
+        return this.playersInOrder.map(a => {
+            const playerId: string = a.id;
+            const playerName: string = a.username;
+            const cardsPointReceive: number = a.GetRoundPoint(this.roundNumber);
+            const gamePointReceive: number = a.GetGamePoint(this.roundNumber);
+            return new PlayerPointInfo(playerId, playerName, cardsPointReceive, gamePointReceive)
+        })
     }
     public GetGameplayState(): GAME_STATE { return this.gameplayState; }
     public GetAuctionPoint() : number { return this.auctionPoint; }

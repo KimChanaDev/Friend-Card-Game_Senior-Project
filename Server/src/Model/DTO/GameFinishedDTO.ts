@@ -1,3 +1,8 @@
+import {WinnerRoundResponse} from "./Response/WinnerRoundResponse";
+
 export type GameFinishedDTO = {
-	winnerUsername: string;
+	winnerId: string;
+	winnerName: string;
+	winnerPoint: number;
+	roundsFinishedDetail: WinnerRoundResponse[]
 };

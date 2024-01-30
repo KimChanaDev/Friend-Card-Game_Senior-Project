@@ -4,17 +4,30 @@ import { Player } from "./Player.js";
 export class FriendCardPlayer extends Player
 {
 	private handCard: DeckLogic = new DeckLogic();
-	private gamePoint: number = 0;
+	private gamePoint: Map<number, number> = new Map<number, number>();
 	private roundPoint = new Map<number, number>();
 	constructor(id: string, username: string, socketId: string, isOwner: boolean)
     {
 		super(id, username, socketId, isOwner);
 	}
-	public GetGamepoint(): number { return this.gamePoint; }
-	public SetGamePoint(point: number): void { this.gamePoint = point; }
-	public AddGamePoint(point: number): void { this.gamePoint += point; }
-	public DecreaseGamePoint(point: number): void { this.gamePoint -= point; }
-	public ClearGamePoint(): void { this.gamePoint = 0; }
+	public GetTotalGamePoint(): number {
+		const valuesArray: number[] = Array.from(this.gamePoint.values());
+		return valuesArray.reduce((accumulator, currentValue) => {
+			return accumulator + currentValue;
+		}, 0);
+	}
+	public GetGamePoint(roundNumber: number): number {
+		return this.gamePoint.get(roundNumber) ?? 0
+	}
+	public AddGamePoint(roundNumber: number, point: number): void {
+		this.gamePoint.set(roundNumber, point)
+	}
+	public DecreaseGamePoint(roundNumber: number, point: number): void {
+		this.gamePoint.set(roundNumber, -point)
+	}
+	public ClearGamePoint(): void {
+		this.gamePoint = new Map<number, number>();
+	}
 
 	public SetRoundPoint(round: number, point: number): void { this.roundPoint.set(round, point); }
 	public AddRoundPoint(round: number, addPoint: number): void
@@ -25,7 +38,7 @@ export class FriendCardPlayer extends Player
 		this.roundPoint.delete(round);
 		this.roundPoint.set(round, newPoint);
 	}
-	public GetRoundPoint(round: number): number | undefined { return this.roundPoint.get(round); }
+	public GetRoundPoint(round: number): number { return this.roundPoint.get(round) ?? 0; }
 	public ClearRoundPoint(): void { this.roundPoint.clear() }
 
 	public IsActive(): boolean { return !this.GetIsDisconnected()} // && this.numTurnsToWait <= 0; 

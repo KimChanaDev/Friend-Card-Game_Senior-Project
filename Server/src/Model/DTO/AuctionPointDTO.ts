@@ -3,10 +3,10 @@ import { BaseResponseDTO } from "./Response/BaseResponseDTO.js";
 export type AuctionPointDTO = {
     playerId?: string;
     isPass: boolean;
+    auctionPoint?: number;
     nextPlayerId: string;
-    HighestAuctionPlayerId: string;
-    HighestAuctionPoint: number;
-    gameplayState: GAME_STATE
+    highestAuctionPlayerId: string;
+    highestAuctionPoint: number;
 };
 
 export type AuctionPointResponseDTO = BaseResponseDTO & AuctionPointDTO;
