@@ -1,0 +1,1 @@
+export const serverPort='http://friendcardgame.online:3001'
