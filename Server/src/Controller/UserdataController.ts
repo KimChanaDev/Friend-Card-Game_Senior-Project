@@ -8,7 +8,7 @@ import { GenerateNewSaltAndHash, ValidatePassword } from "../GameLogic/Utils/Aut
 import { IssueJWTwithEmail, ValidateJWT } from "../GameLogic/Utils/Authorization/JWT.js";
 import { HistoryResponseDTO, LoginWithEmailResponseDTO, ProfileResponseDTO } from "../Model/DTO/Response/LoginWithEmailResponseDTO.js";
 import { FirebaseAuthMiddleware, newFirebaseAuthMiddleware } from "../Middleware/FirebaseAuthMiddleware.js";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import { IsEmail, isEmail } from "class-validator";
 import { JwtAuthMiddleware } from "../Middleware/JwtAuthMiddleware.js";
 import { JwtPayload } from "jsonwebtoken";
@@ -106,7 +106,12 @@ export class UserdataController extends ExpressRouter {
             }
             res.json(new LoginWithEmailResponseDTO(result))
         } catch (err) {
-            res.json(err)
+            if (axios.isAxiosError(err)) {
+                const axiosError = err as AxiosError;
+                res.status(400).json(axiosError.message);
+            } else {
+                res.json(err);
+            }
         }
     }
     private async LoginUser(req: Request, res: Response, next: NextFunction): Promise<void> {
@@ -160,7 +165,12 @@ export class UserdataController extends ExpressRouter {
                 res.json(new LoginWithEmailResponseDTO(result))
             }
         } catch (err) {
-            res.json(err)
+            if (axios.isAxiosError(err)) {
+                const axiosError = err as AxiosError;
+                res.status(400).json(axiosError.message);
+            } else {
+                res.json(err);
+            }
         }
     }
     private async Profile(req: Request, res: Response, next: NextFunction): Promise<void> {
@@ -216,6 +226,7 @@ export class UserdataController extends ExpressRouter {
             res.json(err)
         }
     }
+    // this method take idToken that you will get from login though firebase and return friendJWT
     private async FirebaseAuth(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
             const firebasePayload: string | DecodedIdToken | undefined = req.firebase
