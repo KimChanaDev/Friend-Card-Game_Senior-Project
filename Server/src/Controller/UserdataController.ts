@@ -114,7 +114,7 @@ export class UserdataController extends ExpressRouter {
             const newUserData: LoginDTO = req.body;
             if (!isEmail(newUserData.username)) {
                 const user = await UserDataModel.findOne({
-                    $or: [
+                    $and: [
                         { username: newUserData.username },
                         { provider: "password" }
                     ]
