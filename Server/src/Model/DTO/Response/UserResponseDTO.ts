@@ -3,7 +3,10 @@ import { Document, Types } from 'mongoose';
 import { UserDocument } from "../../Entity/UserEntity.js";
 export class UserResponseDTO
 {
-	constructor(private id: string, private username: string) {}
+	constructor(
+		private id: string,
+		private username: string
+	) {}
 
 	public static CreateFromUserDocument(
 		savedUser: Document<unknown, {}, UserDocument> & UserDocument & {

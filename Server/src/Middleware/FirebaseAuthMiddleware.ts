@@ -15,9 +15,25 @@ export async function FirebaseAuthMiddleware(type: ClassConstructor<object>): Pr
                 console.log(decodeValue)
                 return next()
             }
+
         } catch (e) {
-            // return next(new InternalError());
+            console.log(e)
             return next(new UnauthorizedError());
         }
+    }
+}
+
+export async function newFirebaseAuthMiddleware(req: Request, res: Response, next: NextFunction): Promise<void> {
+    if (!req.headers.authorization) return next(new UnauthorizedError());
+    const token = req.headers.authorization
+    try {
+        const decodeValue = await admin.auth().verifyIdToken(token)
+        if (decodeValue) {
+            req.firebase = decodeValue
+            return next();
+        }
+        return next(new UnauthorizedError());
+    } catch (e) {
+        return next(e);
     }
 }

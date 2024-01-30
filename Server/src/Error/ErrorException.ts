@@ -21,10 +21,14 @@ export class ResourceNotFoundError extends HttpError {
 		super(404, `${resource} with ${id} not found`);
 	}
 }
-export class UserExistsError extends HttpError
-{
+export class UserExistsError extends HttpError {
 	constructor(username: string) {
 		super(409, `User with ${username} already exists`);
+	}
+}
+export class PasswordMismatchError extends HttpError {
+	constructor() {
+		super(418, `Password and confirm password are mismatch`);
 	}
 }
 export class SessionExpiredError extends HttpError {

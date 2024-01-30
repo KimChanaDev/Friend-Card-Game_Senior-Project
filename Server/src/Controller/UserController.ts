@@ -1,14 +1,17 @@
 import { Request, Response, NextFunction, RequestHandler } from "express";
 import { ValidationMiddleware } from "../Middleware/ValidationMiddleware.js";
 import { UserDTO } from "../Model/DTO/UserDTO.js";
+import { UserDataDTO } from "../Model/DTO/UserDataDTO.js";
 import { ExpressRouter } from "./ExpressRouter.js";
 import { UserModel } from "../Model/Entity/UserEntity.js";
+import { UserDataModel } from "../Model/Entity/UserData.js";
 import { InvalidCredentialsError, UserExistsError } from "../Error/ErrorException.js";
 import { GenerateNewSaltAndHash, ValidatePassword } from "../GameLogic/Utils/Authorization/Password.js";
 import { IssueJWT } from "../GameLogic/Utils/Authorization/JWT.js";
 import { LoginResponseDTO } from "../Model/DTO/Response/LoginResponseDTO.js";
 import { UserResponseDTO } from "../Model/DTO/Response/UserResponseDTO.js";
 import { FirebaseAuthMiddleware } from "../Middleware/FirebaseAuthMiddleware.js";
+import axios from "axios";
 
 export class UserController extends ExpressRouter
 {
@@ -22,6 +25,7 @@ export class UserController extends ExpressRouter
         this.router.post('/register', ValidationMiddleware(UserDTO), this.RegisterUser);
 		this.router.post('/login', ValidationMiddleware(UserDTO), this.LoginUser);
 		this.router.get('/tasks', await FirebaseAuthMiddleware(UserDTO), this.Task);
+		// this.router.post('/firebaseRegister', ValidationMiddleware(UserDataDTO),this.firebaseRegister);
     }
     private async RegisterUser(req: Request, res: Response, next: NextFunction): Promise<void>
     {
@@ -60,5 +64,33 @@ export class UserController extends ExpressRouter
 			]
 		})
 	}
+	
+	// private async firebaseRegister(req: Request, res: Response, next: NextFunction): Promise<void>
+	// {
+	// 	const newUserData: UserDataDTO = req.body;
+	// 	const user = await UserModel.findOne({ username: newUserData.username });
+	// 	if (user) return next(new UserExistsError(newUserData.username));
+
+	// 	try {
+	// 		const { data: response } = await axios.post('https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=AIzaSyBCNyyTwo_RLCHrJD_xNnYHy8G67DDeKbw', {
+	// 			email: newUserData.email,
+	// 			password: newUserData.password,
+	// 			returnSecureToken: true,
+	// 		})
+	// 		console.log('User signed up successfully:', response.data);
+	// 		const { salt, hash } = GenerateNewSaltAndHash(newUserData.password);
+	// 		const createdUser = new UserModel({
+	// 			username: newUserData.username,
+	// 			hash: hash,
+	// 			salt: salt,
+	// 		});
+	// 		const savedUser = await createdUser.save();
+	// 		const token: string = IssueJWT(savedUser);
+	// 		res.json(new LoginResponseDTO(UserResponseDTO.CreateFromUserDocument(savedUser), token));
+	// 	} catch (err) {
+	// 		console.log(err);
+	// 		res.json(err);
+	// 	}
+	// }
 }
 
