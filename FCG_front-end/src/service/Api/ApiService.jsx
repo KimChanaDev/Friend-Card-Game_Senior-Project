@@ -1,7 +1,8 @@
 import axios from "axios";
-const serverPort = process.env.REACT_APP_SERVER_PORT
+import {serverPort} from "../../config/server-config.jsx";
 
 export async function PostSignIn (username, password){
+    console.log('sent to ' + serverPort)
     const response = await axios.post(`${serverPort}/users/login`, {
         username: username,
         password: password
@@ -10,6 +11,7 @@ export async function PostSignIn (username, password){
 }
 
 export async function PostSignUp (username, password){
+    console.log('sent to ' + serverPort)
     const response = await axios.post(`${serverPort}/users/register`, {
         username: username,
         password: password
