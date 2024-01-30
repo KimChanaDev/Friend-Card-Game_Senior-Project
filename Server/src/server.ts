@@ -3,6 +3,7 @@ import { App } from './App.js';
 import { GameController } from './Controller/GameController.js';
 import { UserController } from './Controller/UserController.js';
 import admin from 'firebase-admin';
+import { UserdataController } from './Controller/UserdataController.js';
 // import serviceAccount from './ServiceAccount.json'
 // const serviceAccount = require('./ServiceAccount.json')
 // import serviceAccount from './ServiceAccount.json'
@@ -23,11 +24,11 @@ const serviceAccount = {
     "universe_domain": process.env.UNIVERSE_DOMAIN
 }
 
-console.log(serviceAccount)
+// console.log(serviceAccount)
 
 admin.initializeApp({
     credential: admin.credential.cert(serviceAccount as admin.ServiceAccount)
 })
 
-const app = new App([new GameController, new UserController]);
+const app = new App([new GameController, new UserController, new UserdataController]);
 app.listen();

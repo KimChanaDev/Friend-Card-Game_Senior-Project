@@ -15,6 +15,7 @@ function FirebaseInterface() {
                 const credential = GoogleAuthProvider.credentialFromResult(result)
                 const token = credential.accessToken
                 const user = result.user
+                console.log(result)
                 if (user) {
                     user.getIdToken().then((tkn) => {
                         sessionStorage.setItem("accessToken", tkn)
@@ -58,6 +59,8 @@ function FirebaseInterface() {
             <h1 style={{ fontWeight: 'bold' }}>Tasks</h1>
             <Task token={sessionStorage.getItem("accessToken")} />
             <hr />
+
+            
         </>
     )
 }

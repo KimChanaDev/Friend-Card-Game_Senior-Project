@@ -5,6 +5,7 @@ const { sign, verify } = pkg;
 import { readFileSync } from 'fs';
 import { PRIVATE_KEY_PATH, PUBLIC_KEY_PATH } from "../../../Configuration/GameConfiguration.js";
 import { JwtValidationError } from "../../../Enum/JwtValidationError.js";
+import { UserDataDocument } from "../../../Model/Entity/UserData.js";
 
 let PRIVATE_KEY: string;
 let PUBLIC_KEY: string;
@@ -23,6 +24,27 @@ export function IssueJWT(user: UserDocument): string {
 		sub: user.id,
 		iat: issuedAtInSec,
 		exp: expiresOn,
+	};
+	const signedToken = sign(payload, PRIVATE_KEY, {
+		algorithm: 'RS256',
+	});
+	return signedToken;
+}
+export function IssueJWTwithEmail(user: UserDataDocument): string {
+	const expiresInSec: number = 86400; //24h
+	const issuedAtInSec: number = Math.round(Date.now() / 1000);
+	const expiresOn: number = issuedAtInSec + expiresInSec;
+	const payload = {
+		// sub: user.id,
+		iat: issuedAtInSec,
+		exp: expiresOn,
+		// displayName: user.displayName,
+		// imagePath: user.imagePath,
+		// UID: user.UID,
+		// username: user.username,
+		// email: user.email,
+		// provider: user.provider,
+		firebaseId: user.firebaseId
 	};
 	const signedToken = sign(payload, PRIVATE_KEY, {
 		algorithm: 'RS256',
