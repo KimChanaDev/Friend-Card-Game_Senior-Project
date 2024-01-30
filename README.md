@@ -20,15 +20,10 @@
         CLIENT_X509_CERT_URL=  
         UNIVERSE_DOMAIN=
 
-2. create .env file in the FCG_front-end folder  
-   client environment requirement in .env file is
-
-        REACT_APP_SERVER_PORT=  
-
-3. run docker docker container
+2. run docker docker container
 
         docker-compose up --build -d
 
-4. access web app on
+3. access web app on
 
         http://localhost:8080/
