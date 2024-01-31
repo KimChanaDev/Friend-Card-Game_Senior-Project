@@ -15,7 +15,5 @@ services:
       dockerfile: Dockerfile
     ports:
       - "8080:8080"
-    env_file:
-      - ./FCG_front-end/.env
     depends_on:
     - backend
