@@ -1,9 +1,10 @@
 import { io } from 'socket.io-client';
+import {serverPort} from "../../config/server-config.jsx";
 
 export default class SocketClient {
     socket;
     Connect(token, gameId, password) {
-        this.socket = io.connect(`${process.env.REACT_APP_SERVER_PORT}/FRIENDCARDGAME`, {
+        this.socket = io.connect(`${serverPort}/FRIENDCARDGAME`, {
             query: {
                 token: token,
                 gameId: gameId,
