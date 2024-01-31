@@ -8,10 +8,5 @@ Currently, two official plugins are available:
 - [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
 
 
-1. create .env file same layer as src  
-   requirement in .env file is
-
-        REACT_APP_SERVER_PORT=  
-
-2. run command "npm install" for install package
-3. run command "npm run dev"
+1. run command "npm install" for install package
+2. run command "npm run dev"
