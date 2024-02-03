@@ -31,6 +31,8 @@ export class UserdataController extends ExpressRouter {
         // this.router.patch('/history', JwtAuthMiddleware, this.SaveHistory);
     }
     private async RegisterUser(req: Request, res: Response, next: NextFunction): Promise<void> {
+        let firebaseTokenId: string | null = null;
+
         try {
             console.log('RegisterUser: ' + req);
             const newUserData: UserDataDTO = req.body;
@@ -46,6 +48,8 @@ export class UserdataController extends ExpressRouter {
                 password: newUserData.password,
                 returnSecureToken: true,
             })
+
+            firebaseTokenId = response.idToken;
 
             const jsonRes = JSON.parse(Buffer.from(response.idToken.split('.')[1], 'base64').toString());
 
@@ -151,6 +155,16 @@ export class UserdataController extends ExpressRouter {
                 // Handle non-Axios errors or log the entire error for debugging
                 console.error('Unexpected Error:', err);
                 res.status(500).json({ error: 'Internal Server Error' });
+            }
+            //if firebase user exists, remove firebase user if the register operation fail. (ex. register to firebase success but fail to save object to mongoDB)
+            if (firebaseTokenId) {
+                try {
+                    await axios.post('https://identitytoolkit.googleapis.com/v1/accounts:delete?key=AIzaSyBCNyyTwo_RLCHrJD_xNnYHy8G67DDeKbw', {
+                        idToken: firebaseTokenId,
+                    });
+                } catch (deleteError) {
+                    console.error('Error deleing user from Firebase', deleteError);
+                }
             }
         }
     }
