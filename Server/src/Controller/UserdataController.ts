@@ -24,18 +24,22 @@ export class UserdataController extends ExpressRouter {
     private async InitializeRoutes(): Promise<void> {
         this.router.post('/register', ValidationMiddleware(UserDataDTO), this.RegisterUser);
         this.router.post('/login', ValidationMiddleware(LoginDTO), this.LoginUser);
+        this.router.post('/firebase-auth', newFirebaseAuthMiddleware, this.FirebaseAuth);
         this.router.get('/profile', JwtAuthMiddleware, this.Profile);
         this.router.get('/history', JwtAuthMiddleware, this.History);
-        this.router.post('/firebase-auth', newFirebaseAuthMiddleware, this.FirebaseAuth);
+        this.router.patch('/profile', JwtAuthMiddleware, this.UpdateProfile);
+        this.router.patch('/history', JwtAuthMiddleware, this.SaveHistory);
     }
     private async RegisterUser(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
+            console.log('RegisterUser: ' + req);
             const newUserData: UserDataDTO = req.body;
             if (newUserData.password !== newUserData.confirmPassword) {
                 return next(new PasswordMismatchError());
             }
             const user = await UserDataModel.findOne({ username: newUserData.username });
-            if (user) return next(new UserExistsError(newUserData.username));
+            // if (user) return next(new UserExistsError(newUserData.username));
+            if (user) throw new Error('UserExistsError');
 
             const { data: response } = await axios.post('https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=AIzaSyBCNyyTwo_RLCHrJD_xNnYHy8G67DDeKbw', {
                 email: newUserData.email,
@@ -44,6 +48,26 @@ export class UserdataController extends ExpressRouter {
             })
 
             const jsonRes = JSON.parse(Buffer.from(response.idToken.split('.')[1], 'base64').toString());
+
+            const getNextUID = async () => {
+                // Find the latest user with a valid UID
+                const lastUser = await UserDataModel.findOne({ UID: { $exists: true, $type: 2 } }, {}, { sort: { UID: -1 } });
+            
+                if (lastUser && lastUser.UID) {
+                    const lastUID = lastUser.UID;
+                    const lastNumber = parseInt(lastUID.slice(7), 10);
+
+                    if (!isNaN(lastNumber)) {
+                        const nextNumber = lastNumber + 1;
+                        return `800000${nextNumber.toString().padStart(2, '0')}`;
+                    }
+                }
+            
+                // If there are no users yet or if there's an issue, start from "80000001"
+                return '80000001';
+            };
+
+            const uid = await getNextUID();
 
             // const { salt, hash } = GenerateNewSaltAndHash(newUserData.password);
             const createdUser = new UserDataModel({
@@ -55,35 +79,35 @@ export class UserdataController extends ExpressRouter {
                 displayName: newUserData.username,
                 provider: jsonRes.firebase.sign_in_provider,
                 firebaseId: jsonRes.user_id,
-                win: 0,
-                match: 0,
-                lastestMatch: [
-                    // {
-                    //     matchId: 11,
-                    //     score: 999,
-                    // },
-                    // {
-                    //     matchId: 22,
-                    //     score: 888,
-                    // },
-                    // {
-                    //     matchId: 33,
-                    //     score: 777,
-                    // },
-                    // {
-                    //     matchId: 44,
-                    //     score: 666,
-                    // },
-                    // {
-                    //     matchId: 55,
-                    //     score: 555,
-                    // },
-                    // {
-                    //     matchId: 66,
-                    //     score: 444,
-                    // },
-                ],
-                // uid: 
+                // win: 0,
+                // match: 0,
+                // lastestMatch: [
+                //     {
+                //         matchId: 11,
+                //         score: 999,
+                //     },
+                //     {
+                //         matchId: 22,
+                //         score: 888,
+                //     },
+                //     {
+                //         matchId: 33,
+                //         score: 777,
+                //     },
+                //     {
+                //         matchId: 44,
+                //         score: 666,
+                //     },
+                //     {
+                //         matchId: 55,
+                //         score: 555,
+                //     },
+                //     {
+                //         matchId: 66,
+                //         score: 444,
+                //     },
+                // ],
+                UID: uid
             });
             const savedUser = await createdUser.save();
             const createdMatch = new MatchModel({
@@ -105,17 +129,34 @@ export class UserdataController extends ExpressRouter {
                 }
             }
             res.json(new LoginWithEmailResponseDTO(result))
-        } catch (err) {
+        } catch (err : any) {
             if (axios.isAxiosError(err)) {
-                const axiosError = err as AxiosError;
-                res.status(400).json(axiosError.message);
+                const errorMessage = err.response?.data?.error?.message;
+                console.error(errorMessage);
+                if (errorMessage === 'EMAIL_EXISTS') {
+                    res.status(400).json({ error: 'This email is already in use.' });
+                } else if (errorMessage === 'OPERATION_NOT_ALLOWED') {
+                    res.status(400).json({ error: 'This operation is not allowed.' });
+                } else if (errorMessage === 'TOO_MANY_ATTEMPTS_TRY_LATER') {
+                    res.status(400).json({ error: 'Too many attempts. Please try again later.' });
+                } else {
+                    // Handle other Firebase errors or log the entire error for debugging
+                    console.error('Firebase Authentication Error:', err.response?.data);
+                    res.status(500).json({ error: 'Internal Server Error' });
+                }
+            } else if (err.message === 'UserExistsError') {
+                console.error(err.message);
+                res.status(409).json({ error: 'This username already exists.' });
             } else {
-                res.json(err);
+                // Handle non-Axios errors or log the entire error for debugging
+                console.error('Unexpected Error:', err);
+                res.status(500).json({ error: 'Internal Server Error' });
             }
         }
     }
     private async LoginUser(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
+            console.log('LoginUser: ' + req);
             const newUserData: LoginDTO = req.body;
             if (!isEmail(newUserData.username)) {
                 const user = await UserDataModel.findOne({
@@ -124,7 +165,8 @@ export class UserdataController extends ExpressRouter {
                         { provider: "password" }
                     ]
                 });
-                if (!user) return next(new InvalidCredentialsError());
+                // if (!user) return next(new InvalidCredentialsError());
+                if (!user) throw new Error('InvalidCredentialsError');
                 const { data: response } = await axios.post('https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=AIzaSyBCNyyTwo_RLCHrJD_xNnYHy8G67DDeKbw', {
                     email: user.email,
                     password: newUserData.password,
@@ -164,17 +206,36 @@ export class UserdataController extends ExpressRouter {
                 }
                 res.json(new LoginWithEmailResponseDTO(result))
             }
-        } catch (err) {
+        } catch (err : any) {
             if (axios.isAxiosError(err)) {
-                const axiosError = err as AxiosError;
-                res.status(400).json(axiosError.message);
+                const errorMessage = err.response?.data?.error?.message;
+                console.error(errorMessage);
+                if (errorMessage === 'INVALID_LOGIN_CREDENTIALS') {
+                    res.status(401).json({ error: 'Invalid login credentials.' });
+                } else if (errorMessage === 'EMAIL_NOT_FOUND') {
+                    res.status(404).json({ error: 'Email not found.' });
+                } else if (errorMessage === 'INVALID_PASSWORD') {
+                    res.status(401).json({ error: 'Invalid username or password.' });
+                } else if (errorMessage === 'USER_DISABLED') {
+                    res.status(403).json({ error: 'This account has been disabled by an administrator.' });
+                } else {
+                    // Handle other Firebase errors or log the entire error for debugging
+                    console.error('Firebase Authentication Error:', err.response?.data);
+                    res.status(500).json({ error: 'Internal Server Error' });
+                }
+            } else if (err.message === 'InvalidCredentialsError') {
+                console.error(err.message);
+                res.status(401).json({ error: 'Invalid login credentials' });
             } else {
-                res.json(err);
+                // Handle non-Axios errors or log the entire error for debugging
+                console.error('Unexpected Error:', err);
+                res.status(500).json({ error: 'Internal Server Error' });
             }
-        }
+        }        
     }
     private async Profile(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
+            console.log('Profile: ' + req);
             const jwtPayload: string | JwtPayload | undefined = req.jwt;
             if (jwtPayload && typeof jwtPayload === 'object') {
                 const user = await UserDataModel.findOne({
@@ -191,14 +252,54 @@ export class UserdataController extends ExpressRouter {
                 }
                 res.json(new ProfileResponseDTO(result))
             } else {
+                console.log('Internal Error')
                 return next(new InternalError());
             }
         } catch (err) {
-            res.json(err)
+            console.error(err);
+            res.status(500).json({ error: 'Internal Server Error' });
+        }
+    }
+    private async UpdateProfile(req: Request, res: Response, next: NextFunction): Promise<void> {
+        try {
+            console.log('UpdateProfile: ' + req);
+            const jwtPayload: string | JwtPayload | undefined = req.jwt;
+            if (jwtPayload && typeof jwtPayload === 'object') {
+                const user = await UserDataModel.findOne({
+                    firebaseId: jwtPayload.firebaseId,
+                });
+                if (!user) return next(new InvalidCredentialsError());
+                const updatedUser = await UserDataModel.updateOne(
+                    { firebaseId: user.firebaseId },
+                    {
+                        $set: {
+                            displayName: req.body.displayName,
+                            imagePath: req.body.imagePath,
+                        },
+                    }
+                );
+                if (updatedUser.modifiedCount > 0) {
+                    const result = {
+                        message: 'success',
+                        data: {
+                            displayName: req.body.displayName,
+                            UID: user.id,
+                            imagePath: req.body.imagePath,
+                        }
+                    }
+                    res.json(new ProfileResponseDTO(result))
+                } else {
+                    res.status(500).json({ error: 'Failed to update profile.' });
+                }
+            }
+        } catch (err) {
+            console.error(err);
+            res.status(500).json({ error: 'Internal Server Error' });
         }
     }
     private async History(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
+            console.log('History: ' + req);
             const jwtPayload: string | JwtPayload | undefined = req.jwt;
             if (jwtPayload && typeof jwtPayload === 'object') {
                 const matches = await MatchModel.findOne(
@@ -220,15 +321,76 @@ export class UserdataController extends ExpressRouter {
                 }
                 res.json(new HistoryResponseDTO(result))
             } else {
+                console.log('Internal Error')
                 return next(new InternalError());
             }
         } catch (err) {
-            res.json(err)
+            console.error(err);
+            res.status(500).json({ error: 'Internal Server Error' });
+        }
+    }
+    private async SaveHistory(req: Request, res: Response, next: NextFunction): Promise<void> {
+        try {
+            console.log('SaveHistory: ' + req);
+            const jwtPayload: string | JwtPayload | undefined = req.jwt;
+            if (jwtPayload && typeof jwtPayload === 'object') {
+                const matches = await MatchModel.findOne(
+                    {
+                        firebaseId: jwtPayload.firebaseId,
+                    },
+                );
+                if (!matches) return next(new InternalError());
+                const updatedMatch = await MatchModel.updateOne(
+                    {
+                        firebaseId: jwtPayload.firebaseId,
+                    },
+                    {
+                        $push: {
+                            lastestMatch: {
+                                id: req.body.id,
+                                score: req.body.score,
+                                place: req.body.place
+                            }
+                        },
+                        $inc: {
+                            match: 1,
+                            win: req.body.win ? 1 : 0
+                        },
+                    }
+                )
+                if (updatedMatch.modifiedCount > 0) {
+                    const matches = await MatchModel.findOne(
+                        {
+                            firebaseId: jwtPayload.firebaseId,
+                        },
+                    );
+                    if (!matches) return next(new InternalError());
+                    const result = {
+                        message: 'success',
+                        data: {
+                            win: matches.win,
+                            match: matches.match,
+                            lastestMatch: matches.lastestMatch,
+                        }
+                    }
+
+                    res.json(new HistoryResponseDTO(result))
+                } else {
+                    res.status(500).json({ error: 'Failed to update profile.' });
+                }
+            } else {
+                console.log('Internal Error')
+                return next(new InternalError());
+            }
+        } catch (err) {
+            console.error(err);
+            res.status(500).json({ error: 'Internal Server Error' });
         }
     }
     // this method take idToken that you will get from login though firebase and return friendJWT
     private async FirebaseAuth(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
+            console.log('FirebaseAuth: ' + req);
             const firebasePayload: string | DecodedIdToken | undefined = req.firebase
             if (firebasePayload && typeof firebasePayload === 'object') {
                 const user = await UserDataModel.findOne({
@@ -277,9 +439,11 @@ export class UserdataController extends ExpressRouter {
                     res.json(new LoginWithEmailResponseDTO(result));
                 }
             } else {
+                console.log('Internal Error')
                 res.json(new InternalError());
             }
         } catch (err) {
+            console.error(err)
             res.json(err)
         }
     }

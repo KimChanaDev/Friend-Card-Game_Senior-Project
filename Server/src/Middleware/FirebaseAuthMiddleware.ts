@@ -24,7 +24,11 @@ export async function FirebaseAuthMiddleware(type: ClassConstructor<object>): Pr
 }
 
 export async function newFirebaseAuthMiddleware(req: Request, res: Response, next: NextFunction): Promise<void> {
-    if (!req.headers.authorization) return next(new UnauthorizedError());
+    // if (!req.headers.authorization) return next(new UnauthorizedError());
+    if (!req.headers.authorization) {
+        res.status(401).json({ error: 'Unauthorized.' });
+        return;
+    }
     const token = req.headers.authorization
     try {
         const decodeValue = await admin.auth().verifyIdToken(token)
@@ -32,8 +36,11 @@ export async function newFirebaseAuthMiddleware(req: Request, res: Response, nex
             req.firebase = decodeValue
             return next();
         }
-        return next(new UnauthorizedError());
+        // return next(new UnauthorizedError());
+        res.status(401).json({ error: 'Unauthorized.' });
     } catch (e) {
-        return next(e);
+        console.log(e)
+        // return next(e);
+        return next('failed to verify IdToken')
     }
 }
