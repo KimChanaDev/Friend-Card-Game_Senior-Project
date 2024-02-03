@@ -28,7 +28,7 @@ export class UserdataController extends ExpressRouter {
         this.router.get('/profile', JwtAuthMiddleware, this.Profile);
         this.router.get('/history', JwtAuthMiddleware, this.History);
         this.router.patch('/profile', JwtAuthMiddleware, this.UpdateProfile);
-        this.router.patch('/history', JwtAuthMiddleware, this.SaveHistory);
+        // this.router.patch('/history', JwtAuthMiddleware, this.SaveHistory);
     }
     private async RegisterUser(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
@@ -332,17 +332,19 @@ export class UserdataController extends ExpressRouter {
     private async SaveHistory(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
             console.log('SaveHistory: ' + req);
-            const jwtPayload: string | JwtPayload | undefined = req.jwt;
-            if (jwtPayload && typeof jwtPayload === 'object') {
+            // const jwtPayload: string | JwtPayload | undefined = req.jwt;
+            // if (jwtPayload && typeof jwtPayload === 'object') {
                 const matches = await MatchModel.findOne(
                     {
-                        firebaseId: jwtPayload.firebaseId,
+                        // firebaseId: jwtPayload.firebaseId,
+                        UID: req.body.uid,
                     },
                 );
                 if (!matches) return next(new InternalError());
                 const updatedMatch = await MatchModel.updateOne(
                     {
-                        firebaseId: jwtPayload.firebaseId,
+                        // firebaseId: jwtPayload.firebaseId,
+                        UID: req.body.uid,
                     },
                     {
                         $push: {
@@ -361,7 +363,8 @@ export class UserdataController extends ExpressRouter {
                 if (updatedMatch.modifiedCount > 0) {
                     const matches = await MatchModel.findOne(
                         {
-                            firebaseId: jwtPayload.firebaseId,
+                            // firebaseId: jwtPayload.firebaseId,
+                            UID: req.body.uid,
                         },
                     );
                     if (!matches) return next(new InternalError());
@@ -378,10 +381,10 @@ export class UserdataController extends ExpressRouter {
                 } else {
                     res.status(500).json({ error: 'Failed to update profile.' });
                 }
-            } else {
-                console.log('Internal Error')
-                return next(new InternalError());
-            }
+            // } else {
+            //     console.log('Internal Error')
+            //     return next(new InternalError());
+            // }
         } catch (err) {
             console.error(err);
             res.status(500).json({ error: 'Internal Server Error' });
