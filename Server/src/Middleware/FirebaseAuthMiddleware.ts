@@ -1,6 +1,6 @@
 // import admin from '../Configuration/firebase-config'
 import { NextFunction, Request, RequestHandler, Response } from 'express'
-import { UnauthorizedError, InternalError } from '../Error/ErrorException.js'
+import { UnauthorizedError } from '../Error/ErrorException.js'
 import { ClassConstructor } from 'class-transformer'
 import admin from 'firebase-admin'
 
@@ -41,6 +41,7 @@ export async function newFirebaseAuthMiddleware(req: Request, res: Response, nex
     } catch (e) {
         console.log(e)
         // return next(e);
-        return next('failed to verify IdToken')
+        // return next('failed to verify IdToken')
+        res.status(400).json({ error: 'Failed to verify IdToken' })
     }
 }

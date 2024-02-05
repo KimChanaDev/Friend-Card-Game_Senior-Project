@@ -1,15 +1,15 @@
 import { Request, Response, NextFunction, RequestHandler } from "express";
 import { ValidationMiddleware } from "../Middleware/ValidationMiddleware.js";
-import { LoginDTO, ProfileDTO, UserDataDTO } from "../Model/DTO/UserDataDTO.js";
+import { LoginDTO, UserDataDTO } from "../Model/DTO/UserDataDTO.js";
 import { ExpressRouter } from "./ExpressRouter.js";
 import { UserDataModel } from "../Model/Entity/UserData.js";
-import { InvalidCredentialsError, PasswordMismatchError, UserExistsError, InternalError, ResourceNotFoundError } from "../Error/ErrorException.js";
-import { GenerateNewSaltAndHash, ValidatePassword } from "../GameLogic/Utils/Authorization/Password.js";
-import { IssueJWTwithEmail, ValidateJWT } from "../GameLogic/Utils/Authorization/JWT.js";
+// import { InvalidCredentialsError, PasswordMismatchError, UserExistsError, InternalError, ResourceNotFoundError } from "../Error/ErrorException.js";
+// import { GenerateNewSaltAndHash, ValidatePassword } from "../GameLogic/Utils/Authorization/Password.js";
+import { IssueJWTwithEmail } from "../GameLogic/Utils/Authorization/JWT.js";
 import { HistoryResponseDTO, LoginWithEmailResponseDTO, ProfileResponseDTO } from "../Model/DTO/Response/LoginWithEmailResponseDTO.js";
-import { FirebaseAuthMiddleware, newFirebaseAuthMiddleware } from "../Middleware/FirebaseAuthMiddleware.js";
-import axios, { AxiosError } from "axios";
-import { IsEmail, isEmail } from "class-validator";
+import { newFirebaseAuthMiddleware } from "../Middleware/FirebaseAuthMiddleware.js";
+import axios from "axios";
+import { isEmail } from "class-validator";
 import { JwtAuthMiddleware } from "../Middleware/JwtAuthMiddleware.js";
 import { JwtPayload } from "jsonwebtoken";
 import { DecodedIdToken } from "firebase-admin/lib/auth/token-verifier.js";
@@ -37,7 +37,8 @@ export class UserdataController extends ExpressRouter {
             console.log('RegisterUser: ' + req);
             const newUserData: UserDataDTO = req.body;
             if (newUserData.password !== newUserData.confirmPassword) {
-                return next(new PasswordMismatchError());
+                // return next(new PasswordMismatchError());
+                throw new Error('PasswordMismatch')
             }
             const user = await UserDataModel.findOne({ username: newUserData.username });
             // if (user) return next(new UserExistsError(newUserData.username));
@@ -118,7 +119,7 @@ export class UserdataController extends ExpressRouter {
                 firebaseId: createdUser.firebaseId,
                 win: 0,
                 match: 0,
-                lastestMatch: [],
+                latestMatch: [],
             })
             await createdMatch.save();
             const token: string = IssueJWTwithEmail(savedUser);
@@ -128,7 +129,7 @@ export class UserdataController extends ExpressRouter {
                 data: {
                     jwt: token,
                     displayName: savedUser.username,
-                    UID: savedUser.id,
+                    UID: savedUser.UID,
                     imagePath: savedUser.imagePath,
                 }
             }
@@ -148,6 +149,9 @@ export class UserdataController extends ExpressRouter {
                     console.error('Firebase Authentication Error:', err.response?.data);
                     res.status(500).json({ error: 'Internal Server Error' });
                 }
+            } else if (err.message === 'PasswordMismatch') {
+                console.error(err.message);
+                res.status(418).json({ error: 'Password doesn\'t match with confirm password.' });
             } else if (err.message === 'UserExistsError') {
                 console.error(err.message);
                 res.status(409).json({ error: 'This username already exists.' });
@@ -192,7 +196,7 @@ export class UserdataController extends ExpressRouter {
                     data: {
                         jwt: token,
                         displayName: user.displayName,
-                        UID: user.id,
+                        UID: user.UID,
                         imagePath: user.imagePath,
                     }
                 }
@@ -207,14 +211,15 @@ export class UserdataController extends ExpressRouter {
                 const user = await UserDataModel.findOne({
                     firebaseId: jsonRes.user_id
                 });
-                if (!user) return next(new InvalidCredentialsError());
+                // if (!user) return next(new InvalidCredentialsError());
+                if (!user) throw new Error('InvalidCredentialsError');
                 const token: string = IssueJWTwithEmail(user);
                 const result = {
                     message: 'success',
                     data: {
                         jwt: token,
                         displayName: user.displayName,
-                        UID: user.id,
+                        UID: user.UID,
                         imagePath: user.imagePath,
                     }
                 }
@@ -255,23 +260,30 @@ export class UserdataController extends ExpressRouter {
                 const user = await UserDataModel.findOne({
                     firebaseId: jwtPayload.firebaseId,
                 });
-                if (!user) return next(new InvalidCredentialsError());
+                // if (!user) return next(new InvalidCredentialsError());
+                if (!user) throw new Error('InvalidCredentialsError');
                 const result = {
                     message: 'success',
                     data: {
                         displayName: user.displayName,
-                        UID: user.id,
+                        UID: user.UID,
                         imagePath: user.imagePath,
                     }
                 }
                 res.json(new ProfileResponseDTO(result))
             } else {
                 console.log('Internal Error')
-                return next(new InternalError());
+                // return next(new InternalError());
+                throw new Error('InternalError')
             }
-        } catch (err) {
-            console.error(err);
-            res.status(500).json({ error: 'Internal Server Error' });
+        } catch (err : any) {
+            if (err.message === 'InvalidCredentialsError') {
+                console.error(err.message);
+                res.status(401).json({ error: 'Invalid login credentials' });
+            } else {
+                console.error(err);
+                res.status(500).json({ error: 'Internal Server Error' });
+            }
         }
     }
     private async UpdateProfile(req: Request, res: Response, next: NextFunction): Promise<void> {
@@ -282,7 +294,18 @@ export class UserdataController extends ExpressRouter {
                 const user = await UserDataModel.findOne({
                     firebaseId: jwtPayload.firebaseId,
                 });
-                if (!user) return next(new InvalidCredentialsError());
+                // if (!user) return next(new InvalidCredentialsError());
+                if (!user) throw new Error('InvalidCredentialsError');
+                if (req.body.displayName === user.displayName && req.body.imagePath === user.imagePath) {
+                    const result = {
+                        message: 'success',
+                        data: {
+                            displayName: req.body.displayName,
+                            UID: user.UID,
+                            imagePath: req.body.imagePath,
+                        }
+                    }
+                }
                 const updatedUser = await UserDataModel.updateOne(
                     { firebaseId: user.firebaseId },
                     {
@@ -297,7 +320,7 @@ export class UserdataController extends ExpressRouter {
                         message: 'success',
                         data: {
                             displayName: req.body.displayName,
-                            UID: user.id,
+                            UID: user.UID,
                             imagePath: req.body.imagePath,
                         }
                     }
@@ -321,22 +344,24 @@ export class UserdataController extends ExpressRouter {
                         firebaseId: jwtPayload.firebaseId,
                     },
                     {
-                        lastestMatch: { $slice: -5 }
+                        latestMatch: { $slice: -5 }
                     }
                 );
-                if (!matches) return next(new InternalError());
+                // if (!matches) return next(new InternalError());
+                if (!matches) throw new Error('InternalError')
                 const result = {
                     message: 'success',
                     data: {
                         win: matches.win,
                         match: matches.match,
-                        lastestMatch: matches.lastestMatch,
+                        latestMatch: matches.latestMatch,
                     }
                 }
                 res.json(new HistoryResponseDTO(result))
             } else {
                 console.log('Internal Error')
-                return next(new InternalError());
+                // return next(new InternalError());
+                throw new Error('InternalError')
             }
         } catch (err) {
             console.error(err);
@@ -354,7 +379,8 @@ export class UserdataController extends ExpressRouter {
                         UID: req.body.uid,
                     },
                 );
-                if (!matches) return next(new InternalError());
+                // if (!matches) return next(new InternalError());
+                if (!matches) throw new Error('InternalError')
                 const updatedMatch = await MatchModel.updateOne(
                     {
                         // firebaseId: jwtPayload.firebaseId,
@@ -362,7 +388,7 @@ export class UserdataController extends ExpressRouter {
                     },
                     {
                         $push: {
-                            lastestMatch: {
+                            latestMatch: {
                                 id: req.body.id,
                                 score: req.body.score,
                                 place: req.body.place
@@ -381,13 +407,14 @@ export class UserdataController extends ExpressRouter {
                             UID: req.body.uid,
                         },
                     );
-                    if (!matches) return next(new InternalError());
+                    // if (!matches) return next(new InternalError());
+                    if (!matches) throw new Error('InternalError')
                     const result = {
                         message: 'success',
                         data: {
                             win: matches.win,
                             match: matches.match,
-                            lastestMatch: matches.lastestMatch,
+                            latestMatch: matches.latestMatch,
                         }
                     }
 
@@ -405,6 +432,7 @@ export class UserdataController extends ExpressRouter {
         }
     }
     // this method take idToken that you will get from login though firebase and return friendJWT
+    // broken idToken doesnt contain name, picture, etc. (idk why)
     private async FirebaseAuth(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
             console.log('FirebaseAuth: ' + req);
@@ -413,9 +441,28 @@ export class UserdataController extends ExpressRouter {
                 const user = await UserDataModel.findOne({
                     firebaseId: firebasePayload.user_id
                 })
+                console.log(firebasePayload)
                 if (!user) {
-                    // console.log(firebasePayload)
-                    // res.json(firebasePayload)
+                    const getNextUID = async () => {
+                        // Find the latest user with a valid UID
+                        const lastUser = await UserDataModel.findOne({ UID: { $exists: true, $type: 2 } }, {}, { sort: { UID: -1 } });
+                    
+                        if (lastUser && lastUser.UID) {
+                            const lastUID = lastUser.UID;
+                            const lastNumber = parseInt(lastUID.slice(7), 10);
+        
+                            if (!isNaN(lastNumber)) {
+                                const nextNumber = lastNumber + 1;
+                                return `800000${nextNumber.toString().padStart(2, '0')}`;
+                            }
+                        }
+                    
+                        // If there are no users yet or if there's an issue, start from "80000001"
+                        return '80000001';
+                    };
+        
+                    const uid = await getNextUID();
+
                     const createdUser = new UserDataModel({
                         username: firebasePayload.name,
                         email: "noemail@gmail.com",
@@ -423,12 +470,12 @@ export class UserdataController extends ExpressRouter {
                         // confirmPassword: newUserData.confirmPassword,
                         imagePath: firebasePayload.picture,
                         displayName: firebasePayload.name,
-                        provider: firebasePayload.firebase.firebase.sign_in_provider,
+                        provider: firebasePayload.firebase.sign_in_provider,
                         firebaseId: firebasePayload.user_id,
-                        win: 0,
-                        match: 0,
-                        lastestMatch: [],
-                        // uid: 
+                        // win: 0,
+                        // match: 0,
+                        // latestMatch: [],
+                        UID: uid
                     });
                     const savedUser = await createdUser.save();
                     const token: string = IssueJWTwithEmail(savedUser);
@@ -437,7 +484,7 @@ export class UserdataController extends ExpressRouter {
                         data: {
                             jwt: token,
                             displayName: savedUser.username,
-                            UID: savedUser.id,
+                            UID: savedUser.UID,
                             imagePath: savedUser.imagePath,
                         }
                     }
@@ -449,19 +496,20 @@ export class UserdataController extends ExpressRouter {
                         data: {
                             jwt: token,
                             displayName: user.username,
-                            UID: user.id,
+                            UID: user.UID,
                             imagePath: user.imagePath,
                         }
                     }
                     res.json(new LoginWithEmailResponseDTO(result));
                 }
             } else {
-                console.log('Internal Error')
-                res.json(new InternalError());
+                console.log('Internal Server Error')
+                // res.json(new InternalError());
+                throw new Error('InternalError')
             }
         } catch (err) {
-            console.error(err)
-            res.json(err)
+            console.error(err);
+            res.status(500).json({ error: 'Internal Server Error' });
         }
     }
 }

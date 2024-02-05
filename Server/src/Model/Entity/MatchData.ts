@@ -9,7 +9,7 @@ export interface MatchDataDocument extends Document {
     firebaseId: string;
     win: number;
     match: number;
-    lastestMatch: matchObject[];
+    latestMatch: matchObject[];
 }
 
 const matchSchema = new Schema<MatchDataDocument>({
@@ -25,7 +25,7 @@ const matchSchema = new Schema<MatchDataDocument>({
         type: Number,
         required: true,
     },
-    lastestMatch: {
+    latestMatch: {
         type: [],
         require: true,
     },
