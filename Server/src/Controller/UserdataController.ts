@@ -61,14 +61,14 @@ export class UserdataController extends ExpressRouter {
                 if (lastUser && lastUser.UID) {
                     const lastUID = lastUser.UID;
                     const lastNumber = parseInt(lastUID.slice(7), 10);
-
+            
                     if (!isNaN(lastNumber)) {
                         const nextNumber = lastNumber + 1;
-                        return `800000${nextNumber.toString().padStart(2, '0')}`;
+                        const nextUID = 80000000 + nextNumber;
+                        return nextUID.toString();
                     }
                 }
-            
-                // If there are no users yet or if there's an issue, start from "80000001"
+                // If there are no users yet or if there's an issue, start from 80000001
                 return '80000001';
             };
 
@@ -445,23 +445,24 @@ export class UserdataController extends ExpressRouter {
                 const user = await UserDataModel.findOne({
                     firebaseId: firebasePayload.user_id
                 })
-                console.log(firebasePayload)
+                // console.log(firebasePayload)
                 if (!user) {
                     const getNextUID = async () => {
                         // Find the latest user with a valid UID
                         const lastUser = await UserDataModel.findOne({ UID: { $exists: true, $type: 2 } }, {}, { sort: { UID: -1 } });
-                    
+
                         if (lastUser && lastUser.UID) {
                             const lastUID = lastUser.UID;
                             const lastNumber = parseInt(lastUID.slice(7), 10);
-        
+
                             if (!isNaN(lastNumber)) {
                                 const nextNumber = lastNumber + 1;
-                                return `800000${nextNumber.toString().padStart(2, '0')}`;
+                                const nextUID = 80000000 + nextNumber;
+                                return nextUID.toString();
                             }
                         }
-                    
-                        // If there are no users yet or if there's an issue, start from "80000001"
+
+                        // If there are no users yet or if there's an issue, start from 80000001
                         return '80000001';
                     };
         
