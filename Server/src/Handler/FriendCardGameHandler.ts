@@ -18,8 +18,8 @@ import { Player } from "../GameFlow/Player/Player.js";
 import {WinnerTrickResponse} from "../Model/DTO/Response/WinnerTrickResponse.js";
 import {WinnerRoundResponse} from "../Model/DTO/Response/WinnerRoundResponse.js";
 import {EMOJI} from "../Enum/Emoji.js";
-import {GAME_STATE} from "../Enum/GameState.js";
 import {GameFinishedDTO} from "../Model/DTO/GameFinishedDTO.js";
+import {TimerResponseDTO} from "../Model/DTO/Response/TImerResponseDTO.js";
 
 export class FriendCardGameHandler extends SocketHandler
 {
@@ -43,7 +43,7 @@ export class FriendCardGameHandler extends SocketHandler
                 HandlerValidation.PlayerGreaterThanFour(gameRoom);
                 HandlerValidation.AreAllPlayersReady(gameRoom);
                 gameRoom.RestartFriendCardGameRoom()
-                gameRoom.StartGameProcess();
+                gameRoom.StartGameProcess(socket);
                 super.EmitToRoomAndSender(socket, SOCKET_GAME_EVENTS.START_GAME, gameRoom.id);
                 callback({ success: true } as BaseResponseDTO);
             }
@@ -61,10 +61,16 @@ export class FriendCardGameHandler extends SocketHandler
                 HandlerValidation.AcceptableAuctionPoint(auctionPass, auctionPoint);
                 HandlerValidation.FirstPlayerCannotNotPass(gameRoom, auctionPass);
                 HandlerValidation.AuctionPointGreaterThan(auctionPass, auctionPoint, gameRoom.GetCurrentRoundGame().GetAuctionPoint());
-                gameRoom.GetCurrentRoundGame().AuctionProcess(auctionPass, auctionPoint);
+                gameRoom.GetCurrentRoundGame().AuctionProcess(
+                    auctionPass
+                    , auctionPoint
+                    , socket
+                    , () => gameRoom.AuctionTimeOutCallback(socket)
+                    , () => gameRoom.SelectMainCardTimeOutCallback(socket)
+                );
                 const [nextPlayerId, highestAuctionPlayerId, currentAuctionPoint, gameplayState] = gameRoom.GetCurrentRoundGame().GetInfoForAuctionPointResponse();
                 const auctionPointDTO: AuctionPointDTO = {
-                    playerId: player.id,
+                    playerId: player.UID,
                     isPass: auctionPass,
                     auctionPoint: !auctionPass ? auctionPoint : undefined,
                     nextPlayerId: nextPlayerId,
@@ -89,9 +95,9 @@ export class FriendCardGameHandler extends SocketHandler
                 HandlerValidation.IsFriendCardAndTrumpCardValid(gameRoom, friendCard, trumpColor);
                 HandlerValidation.NotHasCardInHand(player, friendCard);
                 HandlerValidation.NotAlreadySetTrumpAndFriend(gameRoom);
-                gameRoom.GetCurrentRoundGame().SetTrumpAndFriendProcess(trumpColor, friendCard, player);
+                gameRoom.GetCurrentRoundGame().SetTrumpAndFriendProcess(trumpColor, friendCard, player, socket, () => gameRoom.PlayCardTimeOutCallback(socket));
                 const trumpAndFriendDTO :TrumpAndFriendDTO = {
-                    playerId: player.id,
+                    playerId: player.UID,
                     trumpColor: trumpColor,
                     friendCard: friendCard
                 };
@@ -112,21 +118,21 @@ export class FriendCardGameHandler extends SocketHandler
                 HandlerValidation.IsGameRoomStartedState(gameRoom);
                 HandlerValidation.IsPlayerTurn(gameRoom, player);
                 HandlerValidation.HasCardOnHand(gameRoom, player, cardId);
-                const playedCard: CardId = gameRoom.GetCurrentRoundGame().PlayCardProcess(cardId, player.id);
+                const playedCard: CardId = gameRoom.GetCurrentRoundGame().PlayCardProcess(cardId, player.UID, socket, () => gameRoom.PlayCardTimeOutCallback(socket));
 
                 if(gameRoom.IsCurrentRoundGameFinished() && gameRoom.CheckGameFinished()){
                     console.log("in game finished")
+                    gameRoom.GetCurrentRoundGame().GetCurrentPlayer().ClearTimer()
                     gameRoom.FinishGameProcess()
                     const winner: FriendCardPlayer | undefined = gameRoom.GetWinner()
                     if(winner){
                         const winnerResponse: GameFinishedDTO = {
-                            winnerId: winner.id,
+                            winnerId: winner.UID,
                             winnerName: winner.username,
                             winnerPoint: gameRoom.GetWinnerPoint(),
                             roundsFinishedDetail: gameRoom.GetAllRoundResult()
                         }
                         super.EmitToRoomAndSender(socket, SOCKET_GAME_EVENTS.GAME_FINISHED, gameRoom.id, winnerResponse);
-                        // gameRoom.RestartFriendCardGameRoom()
                     }
                     else{
                         console.log("Winner not found")
@@ -135,8 +141,9 @@ export class FriendCardGameHandler extends SocketHandler
                 else if (gameRoom.IsCurrentRoundGameFinished())
                 {
                     console.log("in round finished")
+                    gameRoom.GetCurrentRoundGame().GetCurrentPlayer().ClearTimer()
                     const roundFinishedResponse: WinnerRoundResponse[] = gameRoom.GetAllRoundResult()
-                    gameRoom.NextRoundProcess();
+                    gameRoom.NextRoundProcess(socket);
                     super.EmitToRoomAndSender(socket, SOCKET_GAME_EVENTS.ROUND_FINISHED, gameRoom.id, roundFinishedResponse);
                 }
                 else if (gameRoom.GetCurrentRoundGame().IsEndOfTrick())
@@ -146,7 +153,7 @@ export class FriendCardGameHandler extends SocketHandler
                     super.EmitToRoomAndSender(socket, SOCKET_GAME_EVENTS.TRICK_FINISHED, gameRoom.id, winnerTrickModel);
                 }
                 const cardPlayedDTO: CardPlayedDTO = {
-                    playerId: player.id,
+                    playerId: player.UID,
                     cardId: playedCard
                 };
                 super.EmitToRoomAndSender(socket, SOCKET_GAME_EVENTS.CARD_PLAYED, gameRoom.id, cardPlayedDTO);
@@ -184,11 +191,44 @@ export class FriendCardGameHandler extends SocketHandler
             try
             {
                 const response = {
-                    playerId: player.id,
+                    playerId: player.UID,
                     emoji: emoji
                 }
                 super.EmitToRoomAndSender(socket, SOCKET_GAME_EVENTS.EMOJI, gameRoom.id, response);
                 callback({ success: true } as BaseResponseDTO);
+            }catch (error: any)
+            {
+                callback({ success: false, error: error?.message } as BaseResponseDTO);
+            }
+        });
+        socket.on(SOCKET_GAME_EVENTS.KICK_PLAYER, (userId: string, callback: (result: BaseResponseDTO) => void) => {
+            try
+            {
+                HandlerValidation.IsOwnerRoom(gameRoom, player);
+                const disconnectPlayer: Player | undefined = gameRoom.GetPlayerByUID(userId) as Player;
+                HandlerValidation.HasPlayerInGameRoom(disconnectPlayer);
+                super.DisconnectedPlayer(gameRoom, disconnectPlayer, "kicked from host", socket)
+
+                callback({ success: true } as BaseResponseDTO);
+            }catch (error: any)
+            {
+                callback({ success: false, error: error?.message } as BaseResponseDTO);
+            }
+        });
+        socket.on(SOCKET_GAME_EVENTS.GET_TIMEOUT, (callback: (result: TimerResponseDTO | BaseResponseDTO) => void) => {
+            try
+            {
+                HandlerValidation.GameAndRoundNotNotStarted(gameRoom);
+                const currentPlayer: FriendCardPlayer = gameRoom.GetCurrentRoundGame().GetCurrentPlayer()
+                const timer: number | undefined = currentPlayer.GetTimeRemaining()
+                if(timer) {
+                    callback({
+                        playerId: currentPlayer.UID,
+                        timer: timer
+                    } as TimerResponseDTO);
+                }else{
+                    throw new Error("Timer not found")
+                }
             }catch (error: any)
             {
                 callback({ success: false, error: error?.message } as BaseResponseDTO);

@@ -1,6 +1,6 @@
 import { model, Schema } from 'mongoose';
 
-interface matchObject {
+export interface matchObject {
     id: string;
     score: number;
     place: number;

@@ -15,7 +15,22 @@ export class DeckLogic
         this.numOfDecks = numOfDecks;
         this.inDeck = [];
 	}
-
+	public RandomCardNotValidInHand(): CardId {
+		const allCards: CardId[] = this.validShapes.flatMap((shape) =>
+			this.validColors.map((color) => (shape + color) as CardId)
+		);
+		let randomCard: CardId = RandomArrayElement(allCards);
+		while (this.HasCard(randomCard)){
+			randomCard = RandomArrayElement(allCards);
+		}
+		return randomCard
+	}
+	public RandomCardValidInHand(): CardId {
+		return RandomArrayElement(this.inDeck);
+	}
+	public RandomColor(): ColorType {
+		return RandomArrayElement(this.validColors);
+	}
     public Empty(): void { this.inDeck = []; }
     public HasColor(color: ColorType): boolean | undefined { return this.inDeck.some(card => CardLogic.IsColor(card, color))}
     public HasCard(cardId: CardId): boolean { return this.inDeck.indexOf(cardId) >= 0; }
@@ -66,7 +81,6 @@ export class DeckLogic
 			cardIds = [...this.inDeck];
 			this.Empty();
 		}
-
 		return cardIds;
 	}
 }

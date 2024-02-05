@@ -5,15 +5,16 @@ import { FriendCardGameRoom } from "../GameFlow/Game/FriendCardGameRoom.js";
 import { FriendCardPlayer } from "../GameFlow/Player/FriendCardPlayer.js";
 import { SocketBadConnectionError, SocketGameAlreadyStartedError, SocketGameNotExistError, SocketRoomFullError, SocketSessionExpiredError, SocketUnauthorizedError, SocketWrongRoomPasswordError } from "../Error/SocketErrorException.js";
 import { GameRoom } from "../GameFlow/Game/GameRoom.js";
-import { IJwtValidation } from "../GameLogic/Utils/Authorization/JWT.js";
+import {IJwtValidation, JWTPayLoadInterface} from "../GameLogic/Utils/Authorization/JWT.js";
 import { JwtValidationError } from "../Enum/JwtValidationError.js";
 import { Player } from "../GameFlow/Player/Player.js";
+import {JwtPayload} from "jsonwebtoken";
 
 export abstract class HandlerValidation
 {
     public static IsPlayerTurn(gameRoom: FriendCardGameRoom, player: FriendCardPlayer): void
     {
-        if(!gameRoom.GetCurrentRoundGame().IsPlayerTurn(player.id))
+        if(!gameRoom.GetCurrentRoundGame().IsPlayerTurn(player.UID))
             throw new Error("Not your turn");
     }
     public static HasCardOnHand(gameRoom: FriendCardGameRoom, player: FriendCardPlayer, cardId: CardId): void
@@ -61,12 +62,12 @@ export abstract class HandlerValidation
 
     public static IsWinnerAuction(gameRoom: FriendCardGameRoom, player: FriendCardPlayer): void
     {
-        if(gameRoom.GetCurrentRoundGame().GetHighestAuctionPlayer()?.id !== player.id)
+        if(gameRoom.GetCurrentRoundGame().GetHighestAuctionPlayer()?.UID !== player.UID)
             throw new Error("You are not the winning auction");
     }
     public static IsOwnerRoom(gameRoom: FriendCardGameRoom, player: FriendCardPlayer): void
     {
-        if(player.id !== gameRoom.owner.id)
+        if(player.UID !== gameRoom.owner.UID)
             throw new Error("You are not Owner");
     }
     public static HandshakeHasGameIdAndMiddlewareHasJWT(socket: Socket): void
@@ -164,5 +165,10 @@ export abstract class HandlerValidation
     {
         if(!gameRoom.GetCurrentRoundGame().IsTrumpAndFriendNotUndefined())
             throw new Error("Trump and friend are not setup");
+    }
+    public static HasJWT(jwtPayload: JWTPayLoadInterface | JwtPayload | undefined)
+    {
+        if(!jwtPayload || typeof jwtPayload !== 'object' || !jwtPayload.firebaseId || !jwtPayload.UID)
+            throw new Error("No JWT");
     }
 }
