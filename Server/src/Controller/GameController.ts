@@ -52,8 +52,9 @@ export class GameController extends ExpressRouter
 		if (!req.jwt)
 			return next(new BadRequestError());
 		const jwtPayload: JWTPayLoadInterface | JwtPayload | undefined = req.jwt;
-		if (jwtPayload && typeof jwtPayload === 'object' && jwtPayload.firebaseId && jwtPayload.UID)
+		if (!jwtPayload && typeof jwtPayload !== 'object'){
 			return next(new InternalError());
+		}
 		const userModel = await UserDataModel.findOne({
 			firebaseId: jwtPayload.firebaseId,
 		});

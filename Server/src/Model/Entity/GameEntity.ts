@@ -18,8 +18,8 @@ const gameSchema = new Schema<GameDocument>({
 		required: true,
 	},
 	ownerUID: {
-		type: Schema.Types.ObjectId,
-		ref: 'User',
+		type: String,
+		// ref: 'User',
 		required: true,
 	},
 	maxPlayers: {
