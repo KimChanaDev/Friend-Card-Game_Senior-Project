@@ -28,7 +28,7 @@ export class UserdataController extends ExpressRouter {
         this.router.get('/profile', JwtAuthMiddleware, this.Profile);
         this.router.get('/history', JwtAuthMiddleware, this.History);
         this.router.patch('/profile', JwtAuthMiddleware, this.UpdateProfile);
-        // this.router.patch('/history', JwtAuthMiddleware, this.SaveHistory);
+        // this.router.patch('/history', this.SaveHistory); //For testing
     }
     private async RegisterUser(req: Request, res: Response, next: NextFunction): Promise<void> {
         let firebaseTokenId: string | null = null;
@@ -376,7 +376,8 @@ export class UserdataController extends ExpressRouter {
                 const matches = await MatchModel.findOne(
                     {
                         // firebaseId: jwtPayload.firebaseId,
-                        UID: req.body.uid,
+                        // UID: req.body.uid,
+                        firebaseId: req.body.firebaseId,
                     },
                 );
                 // if (!matches) return next(new InternalError());
@@ -384,14 +385,16 @@ export class UserdataController extends ExpressRouter {
                 const updatedMatch = await MatchModel.updateOne(
                     {
                         // firebaseId: jwtPayload.firebaseId,
-                        UID: req.body.uid,
+                        // UID: req.body.uid,
+                        firebaseId: req.body.firebaseId,
                     },
                     {
                         $push: {
                             latestMatch: {
                                 id: req.body.id,
                                 score: req.body.score,
-                                place: req.body.place
+                                place: req.body.place,
+                                win: req.body.win
                             }
                         },
                         $inc: {
@@ -404,7 +407,8 @@ export class UserdataController extends ExpressRouter {
                     const matches = await MatchModel.findOne(
                         {
                             // firebaseId: jwtPayload.firebaseId,
-                            UID: req.body.uid,
+                            // UID: req.body.uid,
+                            firebaseId: req.body.firebaseId,
                         },
                     );
                     // if (!matches) return next(new InternalError());

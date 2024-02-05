@@ -1,8 +1,10 @@
 import { model, Schema } from 'mongoose';
 
 interface matchObject {
-    matchId: string;
+    id: string;
     score: number;
+    place: number;
+    win: boolean;
 }
 
 export interface MatchDataDocument extends Document {
