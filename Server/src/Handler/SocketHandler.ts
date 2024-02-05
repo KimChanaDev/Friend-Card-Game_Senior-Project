@@ -96,7 +96,8 @@ export abstract class SocketHandler
 				user.UID,
 				user.username,
 				socket.id,
-				gameRoom!.owner.UID === user.UID
+				gameRoom!.owner.UID === user.UID,
+				jwtPayload!.firebaseId,
 			);
 			gameRoom!.AddPlayer(newPlayer);
 			socket.join(gameId);

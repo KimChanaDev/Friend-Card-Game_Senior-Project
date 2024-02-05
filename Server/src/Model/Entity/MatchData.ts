@@ -5,6 +5,7 @@ export interface matchObject {
     score: number;
     place: number;
     win: boolean;
+    createdAt: Date
 }
 
 export interface MatchDataDocument extends Document {

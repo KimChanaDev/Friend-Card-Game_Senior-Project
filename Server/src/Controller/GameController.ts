@@ -17,7 +17,7 @@ import {
 } from "../Error/ErrorException.js";
 import {JwtPayload} from "jsonwebtoken";
 import {UserDataModel} from "../Model/Entity/UserData.js";
-import {JWTPayLoadInterface} from "../GameLogic/Utils/Authorization/JWT";
+import {JWTPayLoadInterface} from "../GameLogic/Utils/Authorization/JWT.js";
 
 export class GameController extends ExpressRouter
 {

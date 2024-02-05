@@ -6,7 +6,8 @@ export abstract class Player
 		public readonly UID: string,
 		public readonly username: string,
 		public readonly socketId: string,
-		public isOwner: boolean
+		public isOwner: boolean,
+		public readonly firebaseId: string
 	)
 	{
 		if(isOwner) this.isReady = true;
