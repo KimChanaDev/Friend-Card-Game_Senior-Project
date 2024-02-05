@@ -1,0 +1,111 @@
+/* Navbar.css */
+.navbar {
+    /* background-color: aqua; */
+    display: flex;
+    justify-content: space-between;
+    height: 25px;
+    align-items: center;
+    padding-top: 80px;
+    /* padding-bottom: -50px; */
+    /* background-color: #8d5555; */
+    margin :2% 2% -3% 2% ;
+    color: white;
+  }
+  
+  .left {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+  }
+  .user-profile{
+    display: flex;
+    /* align-items: center; */
+    width: 290px;
+    height: 90px;
+    background-color: rgba(241, 236, 236, 0.50);
+    border-radius: 90px;
+    /* fill: rgba(241, 236, 236, 0.50); */
+  }
+  .user-profile img {
+    width: 90px;
+    height: 90px;
+    border-radius: 90px;
+    
+    overflow: hidden;
+    text-align: center;
+    object-fit: cover;
+    background-color: rgba(124, 124, 124, 0.925);
+    /* align-items: center */
+  }
+  .user-info {
+    padding-top: 10px;
+    margin-left: -10px;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  width: 200px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  }
+  .user-info span {
+    padding-top: 5px;
+    margin-bottom: 10px;
+  }
+
+  .username {
+    color: #000;
+  font-family: Inter;
+  font-size: 20px;
+  font-style: normal;
+  font-weight: 700;
+  line-height: normal;
+  }
+  .userid {
+    color: #00000099;
+  font-family: Inter;
+  font-size: 15px;
+  font-style: normal;
+  font-weight: 700;
+  line-height: normal;
+  }
+  
+  .right{
+    /* background-color: #4CAF50; */
+    color: white;
+    /* border: none; */
+    /* border-radius: 4px; */
+    cursor: pointer;
+  }
+  .setting{
+    width: 90px;
+    height: 90px;
+    /* background-color: rgba(241, 236, 236, 0.50); */
+    border-radius: 90px;
+  }
+  .setting img {
+    width: 90px;
+    height: 90px;
+    border-radius: 90px;
+    margin-right: 20px;
+    overflow: hidden;
+    text-align: center;
+    object-fit: cover;
+    /* align-items: center */
+  }
+
+  .setting-text {
+    padding-top: 10%;
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+  }
+  
+  .setting-text span{
+    color: #000;
+    font-family: Inter;
+    font-size: 100%;
+    font-style: normal;
+    font-weight: 500;
+    line-height: normal;
+  }
