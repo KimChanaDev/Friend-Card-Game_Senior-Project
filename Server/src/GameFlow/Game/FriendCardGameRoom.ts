@@ -12,6 +12,8 @@ import {CardPlayedDTO} from "../../Model/DTO/CardPlayedDTO.js";
 import {TrumpAndFriendDTO} from "../../Model/DTO/TrumpAndFriendDTO.js";
 import {AuctionPointDTO} from "../../Model/DTO/AuctionPointDTO.js";
 import {RandomArrayElement} from "../../GameLogic/Utils/Tools.js";
+import {MatchModel, matchObject} from "../../Model/Entity/MatchData.js";
+import { UserDataModel } from "../../Model/Entity/UserData.js";
 
 export class FriendCardGameRoom extends GameRoom
 {
@@ -108,7 +110,31 @@ export class FriendCardGameRoom extends GameRoom
         this.winner = winnerPlayer;
         this.winnerPoint = winnerPoint;
         super.SetFinishState();
-        // TODO save stat to database
+        this.SaveMatchHistory(winnerPlayer?.UID);
+    }
+    public SaveMatchHistory(winnerPlayerUID: string | undefined): void{
+        const userPlaces: FriendCardPlayer[] = Array.from(this.playersInGame.values());
+        userPlaces.sort((playerA, playerB) => playerB.GetTotalGamePoint() - playerA.GetTotalGamePoint())
+        let placeNumber: number = 1;
+        let previousPoint: number | undefined = undefined;
+        userPlaces.forEach((player, index) => {
+            const matchModel: matchObject = {
+                id: this.id,
+                score: player.GetTotalGamePoint(),
+                place: !previousPoint || previousPoint === player.GetTotalGamePoint() ? placeNumber : ++placeNumber,
+                win: winnerPlayerUID === player.UID,
+                createdAt: new Date(Date.now()),
+            };
+            previousPoint = player.GetTotalGamePoint()
+            MatchModel.updateOne(
+                { firebaseId: player.firebaseId },
+            { $push: { latestMatch: matchModel } }
+            ).then(() => {
+                console.log(`save database success. firebaseId: ${player.firebaseId}`)
+            }).catch(() => {
+                console.error(`save database failed. firebaseId: ${player.firebaseId} match: ${JSON.stringify(matchModel)}`)
+            });
+        })
     }
     public AuctionTimeOutCallback(socket: Socket): void{
         console.log("Auto auction")
