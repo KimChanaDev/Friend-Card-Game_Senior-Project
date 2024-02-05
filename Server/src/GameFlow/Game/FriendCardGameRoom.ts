@@ -118,17 +118,23 @@ export class FriendCardGameRoom extends GameRoom
         let placeNumber: number = 1;
         let previousPoint: number | undefined = undefined;
         userPlaces.forEach((player, index) => {
+            const isWinner: boolean = winnerPlayerUID === player.UID
             const matchModel: matchObject = {
                 id: this.id,
                 score: player.GetTotalGamePoint(),
                 place: !previousPoint || previousPoint === player.GetTotalGamePoint() ? placeNumber : ++placeNumber,
-                win: winnerPlayerUID === player.UID,
+                win: isWinner,
                 createdAt: new Date(Date.now()),
             };
             previousPoint = player.GetTotalGamePoint()
-            MatchModel.updateOne(
-                { firebaseId: player.firebaseId },
-            { $push: { latestMatch: matchModel } }
+            MatchModel.updateOne({ firebaseId: player.firebaseId },
+            {
+                $push: { latestMatch: matchModel },
+                $inc: {
+                    match: 1,
+                    win: isWinner ? 1 : 0
+                },
+            }
             ).then(() => {
                 console.log(`save database success. firebaseId: ${player.firebaseId}`)
             }).catch(() => {
