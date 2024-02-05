@@ -58,6 +58,10 @@ const userSchema = new Schema<UserDataDocument>({
         type: String,
         required: true,
     },
+    UID: {
+        type: String,
+        required: true,
+    }
     // win: {
     //     type: Number,
     //     required: true,

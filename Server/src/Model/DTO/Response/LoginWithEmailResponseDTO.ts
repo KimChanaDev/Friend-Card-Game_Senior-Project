@@ -32,7 +32,7 @@ export class HistoryResponseDTO {
             data: {
                 win: number,
                 match: number,
-                lastestMatch: object[]
+                latestMatch: object[]
             }
         }
     ) {}

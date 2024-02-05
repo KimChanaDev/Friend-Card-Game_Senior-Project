@@ -13,8 +13,10 @@ export function JwtAuthMiddleware(req: Request, res: Response, next: NextFunctio
 		return next();
 	} else if (validationResult.error === JwtValidationError.EXPIRED) {
 		console.log(validationResult.error);
-		return next(new SessionExpiredError());
+		// return next(new SessionExpiredError());
+		res.status(401).json({ error: 'Session expired.' });
 	} else {
-		return next(new UnauthorizedError());
+		// return next(new UnauthorizedError());
+		res.status(401).json({ error: 'Unauthorized.' });
 	}
 }
