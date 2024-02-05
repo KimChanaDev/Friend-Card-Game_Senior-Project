@@ -4,7 +4,7 @@ import { JwtPayload } from 'jsonwebtoken';
 declare global {
 	namespace Express {
 		interface Request {
-			jwt?: string | JwtPayload;
+			jwt?: JwtPayload;
 			firebase?: string | DecodedIdToken;
 		}
 	}

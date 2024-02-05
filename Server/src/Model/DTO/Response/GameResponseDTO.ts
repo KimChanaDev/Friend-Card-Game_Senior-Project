@@ -17,7 +17,7 @@ export class GameResponseDTO
 	public static CreateFromGame(game: GameRoom): GameResponseDTO {
 		return new GameResponseDTO(
 			game.gameType,
-			new UserResponseDTO(game.owner.id, game.owner.username),
+			new UserResponseDTO(game.owner.UID, game.owner.username),
 			game.maxPlayers,
 			game.roomName,
 			game.isPasswordProtected,

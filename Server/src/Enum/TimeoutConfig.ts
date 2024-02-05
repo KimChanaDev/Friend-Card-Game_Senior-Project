@@ -1,0 +1,9 @@
+export enum FRIEND_TIMEOUT_CONFIG
+{
+    AUCTION_IN_SEC = 10,
+    SELECT_MAIN_CARD_IN_SEC = 30,
+    PLAY_CARD_IN_SEC = 30,
+    PLAY_CARD_WITH_TRICK_FINISH_POPUP_IN_SEC = 35, // PLAY_CARD_IN_SEC + trick finished popup(current=5)
+    PLAY_CARD_WITH_ONLY_FRIEND_APPEAR_POPUP_IN_SEC = 32, // PLAY_CARD_IN_SEC + friend appear popup
+    AUCTION_WITH_ROUND_FINISH_IN_SEC = 20, // AUCTION_IN_SEC + round popup delay(current=10)
+}

@@ -9,8 +9,15 @@ import { CreateGameDTO } from "../Model/DTO/CreateGameDTO.js";
 import { DB_RESOURCES } from "../Enum/DatabaseResource.js";
 import { GameModel } from "../Model/Entity/GameEntity.js";
 import { GameFactory } from "../GameFlow/Game/GameFactory.js";
-import { UserModel } from "../Model/Entity/UserEntity.js";
-import { BadRequestError, ResourceNotFoundError } from "../Error/ErrorException.js";
+import {
+	BadRequestError,
+	InternalError,
+	InvalidCredentialsError,
+	ResourceNotFoundError
+} from "../Error/ErrorException.js";
+import {JwtPayload} from "jsonwebtoken";
+import {UserDataModel} from "../Model/Entity/UserData.js";
+import {JWTPayLoadInterface} from "../GameLogic/Utils/Authorization/JWT";
 
 export class GameController extends ExpressRouter
 {
@@ -42,13 +49,20 @@ export class GameController extends ExpressRouter
     private async AddGame(req: Request, res: Response, next: NextFunction): Promise<void>
     {
         const newGameData: CreateGameDTO = req.body;
-		if (!req.jwt) return next(new BadRequestError());
-		const userId = req.jwt.sub as string;
-		const owner = await UserModel.findById(userId);
-		if (!owner) return next(new ResourceNotFoundError(DB_RESOURCES.USER, userId));
+		if (!req.jwt)
+			return next(new BadRequestError());
+		const jwtPayload: JWTPayLoadInterface | JwtPayload | undefined = req.jwt;
+		if (jwtPayload && typeof jwtPayload === 'object' && jwtPayload.firebaseId && jwtPayload.UID)
+			return next(new InternalError());
+		const userModel = await UserDataModel.findOne({
+			firebaseId: jwtPayload.firebaseId,
+		});
+
+		if (!userModel)
+			return next(new InvalidCredentialsError());
 		const createdGame = new GameModel({
 			gameType: newGameData.gameType,
-			ownerId: owner._id,
+			ownerUID: userModel.UID,
 			maxPlayers: newGameData.maxPlayers,
 			roomName: newGameData.roomName,
 			createdAt: new Date(Date.now()),
@@ -57,7 +71,7 @@ export class GameController extends ExpressRouter
 		const savedGame = await createdGame.save();
 		const gameRoom: GameRoom = GameFactory.CreateGame(
 			savedGame.gameType,
-			{ id: owner.id, username: owner.username },
+			{ UID: userModel.UID, username: userModel.username },
 			savedGame.maxPlayers,
 			savedGame.roomName,
 			savedGame.isPasswordProtected,

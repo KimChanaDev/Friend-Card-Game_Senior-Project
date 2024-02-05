@@ -185,7 +185,7 @@ export class UserdataController extends ExpressRouter {
                     message: 'success',
                     data: {
                         displayName: user.displayName,
-                        UID: user.id,
+                            UID: user.id,
                         imagePath: user.imagePath,
                     }
                 }

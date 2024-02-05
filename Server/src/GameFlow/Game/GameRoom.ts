@@ -14,7 +14,7 @@ export abstract class GameRoom
     
     constructor(
         public readonly gameType: GAME_TYPE,
-		public owner: { id: string; username: string },
+		public owner: { UID: string; username: string },
 		public readonly maxPlayers: number,
 		public readonly roomName: string,
 		public readonly isPasswordProtected: boolean,
@@ -25,14 +25,14 @@ export abstract class GameRoom
     }
     public AddPlayer(player: Player): void
     {
-		this.playersInGame.set(player.id, player);
+		this.playersInGame.set(player.UID, player);
 		this.StopRemoveFromGameStoreTimeout();
 	}
     public RestartGameRoom(): void {
         this.gameState = GAME_STATE.NOT_STARTED
         this.winner = undefined
     }
-    public GetPlayerById(id: string): Player | undefined { return this.playersInGame.get(id); }
+    public GetPlayerByUID(UID: string): Player | undefined { return this.playersInGame.get(UID); }
     public GetAllPlayersDTO(): PlayerDTO[] { return Array.from(this.playersInGame.values()).map((player) => PlayerDTO.CreateFromPlayer(player)); }
     public AreAllPlayersReady(): boolean { return Array.from(this.playersInGame.values()).every((player) => player.GetIsReady()); }
     public NumPlayersInGame(): number { return this.playersInGame.size; }
@@ -49,7 +49,7 @@ export abstract class GameRoom
             /// TODO Add bot here
         }
         else {
-            this.playersInGame.delete(player.id);
+            this.playersInGame.delete(player.UID);
         }
         if (this.NumConnectedPlayersInGame() <= 0) this.StartRemoveFromGameStoreTimeout();
     }
@@ -59,7 +59,7 @@ export abstract class GameRoom
             const player: Player | undefined = this.playersInGame.get(randomPlayerIdKey);
             if(player){
                 this.owner = {
-                    id: player.id,
+                    UID: player.UID,
                     username: player.username
                 }
                 player.SetIsOwner(true)

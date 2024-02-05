@@ -30,17 +30,23 @@ export function IssueJWT(user: UserDocument): string {
 	});
 	return signedToken;
 }
+export interface JWTPayLoadInterface {
+	iat: number,
+	exp: number,
+	UID: string,
+	firebaseId: string
+}
 export function IssueJWTwithEmail(user: UserDataDocument): string {
 	const expiresInSec: number = 86400; //24h
 	const issuedAtInSec: number = Math.round(Date.now() / 1000);
 	const expiresOn: number = issuedAtInSec + expiresInSec;
-	const payload = {
+	const payload: JWTPayLoadInterface = {
 		// sub: user.id,
 		iat: issuedAtInSec,
 		exp: expiresOn,
 		// displayName: user.displayName,
 		// imagePath: user.imagePath,
-		// UID: user.UID,
+		UID: user.UID,
 		// username: user.username,
 		// email: user.email,
 		// provider: user.provider,

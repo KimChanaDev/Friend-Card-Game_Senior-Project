@@ -11,6 +11,7 @@ export class FriendCardGameStateForPlayerDTO{
 
 	private constructor(
 		private currentPlayerId: string | undefined,
+		private currentPlayerTimeout: number | undefined,
 		private thisPlayer: ThisFriendCardGamePlayerDTO,
 		private otherPlayer: OtherFriendCardGamePlayerDTO[],
 		private playersInOrderIds: string[],
@@ -30,10 +31,11 @@ export class FriendCardGameStateForPlayerDTO{
 	public static CreateFromFriendCardGameAndPlayer(gameRoom: FriendCardGameRoom, player: FriendCardPlayer): FriendCardGameStateForPlayerDTO
     {
 		return new FriendCardGameStateForPlayerDTO(
-			gameRoom.GetCurrentRoundGame()?.GetCurrentPlayer().id,
+			gameRoom.GetCurrentRoundGame()?.GetCurrentPlayer().UID,
+			gameRoom.GetCurrentRoundGame()?.GetCurrentPlayer().GetTimeRemaining(),
 			ThisFriendCardGamePlayerDTO.CreateFromFriendCardGamePlayer(player),
-			gameRoom.GetAllPlayerAsArray().filter((p: FriendCardPlayer) => !p.GetIsDisconnected() && p.id !== player.id).map((p: FriendCardPlayer) => OtherFriendCardGamePlayerDTO.CreateFromFriendCardGamePlayer(p)),
-			gameRoom.GetCurrentRoundGame().GetPlayerInOrder().map(player => player.id),
+			gameRoom.GetAllPlayerAsArray().filter((p: FriendCardPlayer) => !p.GetIsDisconnected() && p.UID !== player.UID).map((p: FriendCardPlayer) => OtherFriendCardGamePlayerDTO.CreateFromFriendCardGamePlayer(p)),
+			gameRoom.GetCurrentRoundGame().GetPlayerInOrder().map(player => player.UID),
 			gameRoom.GetCurrentRoundGame().GetActionsDTOForPlayer(player),
 			gameRoom.GetGameRoomState(),
 			gameRoom.GetCurrentRoundGame().GetRoundState(),

@@ -46,7 +46,7 @@ export class App
 		});
         const io = new Server(listener, {
 			cors: {
-				origin: [process.env.CLIENT_URL as string],
+				origin: process.env.CLIENT_URL as string,
 			},
 		});
         new FriendCardGameHandler(io);
