@@ -23,7 +23,7 @@ class easyAgent:
     minimumBidWhenBigAndShort: int = 60
     minimumBidWhenSmallAndLong: int = 60
     minimumBidWhenSmallAndShort: int = 60
-    probWhenCurrentBiddingExceedMinumum : int = 0.80
+    probToContinueBidWhenCurrentBiddingExceedMinumum : int = 0.80
     fileName : str = 'easy_bot' 
 
 @dataclass
@@ -32,7 +32,7 @@ class mediumAgent:
     minimumBidWhenBigAndShort: int = 60
     minimumBidWhenSmallAndLong: int = 70
     minimumBidWhenSmallAndShort: int = 60
-    probWhenCurrentBiddingExceedMinumum: int = 0.60
+    probToContinueBidWhenCurrentBiddingExceedMinumum: int = 0.60
     probSelectBestTrump: int = 0.6
     fileName : str = 'medium_bot' 
 
@@ -42,7 +42,7 @@ class hardAgent:
     minimumBidWhenBigAndShort: int = 55
     minimumBidWhenSmallAndLong: int = 70
     minimumBidWhenSmallAndShort: int = 55
-    probWhenCurrentBiddingExceedMinumum: int = 0.50
+    probToContinueBidWhenCurrentBiddingExceedMinumum: int = 0.50
     probSelectBestTrump: int = 1
     fileName : str = 'hard_bot' 
 
@@ -94,7 +94,7 @@ def bidding(card_ids,current_bid,difficulty):
     
     rand = random.random()
 
-    if rand > bot.probWhenCurrentBiddingExceedMinumum and current_bid > maxBidding:
+    if rand > bot.probToContinueBidWhenCurrentBiddingExceedMinumum and current_bid > maxBidding:
         return 0
     else:
         return current_bid + 5
