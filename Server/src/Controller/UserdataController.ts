@@ -28,7 +28,7 @@ export class UserdataController extends ExpressRouter {
         this.router.get('/profile', JwtAuthMiddleware, this.Profile);
         this.router.get('/history', JwtAuthMiddleware, this.History);
         this.router.patch('/profile', JwtAuthMiddleware, this.UpdateProfile);
-        // this.router.patch('/history', this.SaveHistory); //For testing
+        // this.router.patch('/history', this.UpdateHistory); //For testing
     }
     private async RegisterUser(req: Request, res: Response, next: NextFunction): Promise<void> {
         let firebaseTokenId: string | null = null;
@@ -55,20 +55,12 @@ export class UserdataController extends ExpressRouter {
             const jsonRes = JSON.parse(Buffer.from(response.idToken.split('.')[1], 'base64').toString());
 
             const getNextUID = async () => {
-                // Find the latest user with a valid UID
                 const lastUser = await UserDataModel.findOne({ UID: { $exists: true, $type: 2 } }, {}, { sort: { UID: -1 } });
-            
                 if (lastUser && lastUser.UID) {
                     const lastUID = lastUser.UID;
-                    const lastNumber = parseInt(lastUID.slice(7), 10);
-            
-                    if (!isNaN(lastNumber)) {
-                        const nextNumber = lastNumber + 1;
-                        const nextUID = 80000000 + nextNumber;
-                        return nextUID.toString();
-                    }
+                        const nextNumber = parseInt(lastUID) + 1;
+                        return nextNumber.toString();
                 }
-                // If there are no users yet or if there's an issue, start from 80000001
                 return '80000001';
             };
 
@@ -368,9 +360,9 @@ export class UserdataController extends ExpressRouter {
             res.status(500).json({ error: 'Internal Server Error' });
         }
     }
-    private async SaveHistory(req: Request, res: Response, next: NextFunction): Promise<void> {
+    private async UpdateHistory(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
-            console.log('SaveHistory: ' + req);
+            console.log('UpdateHistory: ' + req);
             // const jwtPayload: string | JwtPayload | undefined = req.jwt;
             // if (jwtPayload && typeof jwtPayload === 'object') {
                 const matches = await MatchModel.findOne(
@@ -445,27 +437,18 @@ export class UserdataController extends ExpressRouter {
                 const user = await UserDataModel.findOne({
                     firebaseId: firebasePayload.user_id
                 })
-                // console.log(firebasePayload)
+                console.log(firebasePayload)
                 if (!user) {
                     const getNextUID = async () => {
-                        // Find the latest user with a valid UID
                         const lastUser = await UserDataModel.findOne({ UID: { $exists: true, $type: 2 } }, {}, { sort: { UID: -1 } });
-
                         if (lastUser && lastUser.UID) {
                             const lastUID = lastUser.UID;
-                            const lastNumber = parseInt(lastUID.slice(7), 10);
-
-                            if (!isNaN(lastNumber)) {
-                                const nextNumber = lastNumber + 1;
-                                const nextUID = 80000000 + nextNumber;
-                                return nextUID.toString();
-                            }
+                                const nextNumber = parseInt(lastUID) + 1;
+                                return nextNumber.toString();
                         }
-
-                        // If there are no users yet or if there's an issue, start from 80000001
                         return '80000001';
                     };
-        
+                    
                     const uid = await getNextUID();
 
                     const createdUser = new UserDataModel({
