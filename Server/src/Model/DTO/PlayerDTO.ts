@@ -9,6 +9,6 @@ export class PlayerDTO {
 	) {}
 
 	public static CreateFromPlayer(player: Player): PlayerDTO {
-		return new PlayerDTO(player.id, player.username, player.GetIsReady(), player.isOwner);
+		return new PlayerDTO(player.UID, player.username, player.GetIsReady(), player.isOwner);
 	}
 }

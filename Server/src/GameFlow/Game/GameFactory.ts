@@ -7,7 +7,7 @@ export class GameFactory
 {
 	public static CreateGame(
 		gameType: GAME_TYPE,
-		owner: { id: string; username: string },
+		owner: { UID: string; username: string },
 		maxPlayers: number,
 		roomName: string,
 		isPasswordProtected: boolean,

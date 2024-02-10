@@ -19,6 +19,6 @@ export class UserResponseDTO
 
     public static CreateFromPlayer(player: Player): UserResponseDTO
     {
-		return new UserResponseDTO(player.id, player.username);
+		return new UserResponseDTO(player.UID, player.username);
 	}
 }

@@ -6,9 +6,41 @@ export class FriendCardPlayer extends Player
 	private handCard: DeckLogic = new DeckLogic();
 	private gamePoint: Map<number, number> = new Map<number, number>();
 	private roundPoint = new Map<number, number>();
-	constructor(id: string, username: string, socketId: string, isOwner: boolean)
+	private timer: NodeJS.Timeout | null = null;
+	private startTime: number | null = null;
+	private totalTimeInSec: number | null = null;
+
+	constructor(id: string, username: string, socketId: string, isOwner: boolean, firebaseId: string)
     {
-		super(id, username, socketId, isOwner);
+		super(id, username, socketId, isOwner, firebaseId);
+	}
+	public StartTimer(secTimeInTimer: number, callback: () => void): void {
+		this.ClearTimer()
+		if (!this.timer) {
+			this.totalTimeInSec = secTimeInTimer
+			this.startTime = Date.now();
+			this.timer = setTimeout(() => {
+				console.log("Timer expired!");
+				this.timer = null;
+				callback()
+			}, this.totalTimeInSec * 1000 );
+		}
+	}
+	public ClearTimer() {
+		if (this.timer) {
+			clearTimeout(this.timer);
+			this.timer = null;
+			this.startTime = null;
+			this.totalTimeInSec = null;
+		}
+	}
+	public GetTimeRemaining(): number | undefined {
+		if (this.startTime && this.timer && this.totalTimeInSec) {
+			const currentTime = Date.now();
+			const elapsedTime = currentTime - this.startTime;
+			return Math.max(0, Math.ceil(((this.totalTimeInSec * 1000) - elapsedTime)/1000));
+		}
+		return undefined;
 	}
 	public GetTotalGamePoint(): number {
 		const valuesArray: number[] = Array.from(this.gamePoint.values());

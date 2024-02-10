@@ -1,3 +1,4 @@
+import {Socket} from "socket.io";
 import {CardId, ColorType} from "../../Enum/CardConstant.js";
 import {GAME_STATE} from "../../Enum/GameState.js";
 import {ActionsDTO} from "../../Model/DTO/ActionsDTO.js";
@@ -10,6 +11,7 @@ import {FriendCardGameRoundLogic} from "../../GameLogic/Game/FriendCardGameRound
 import {WinnerTrickResponse} from "../../Model/DTO/Response/WinnerTrickResponse.js";
 import {PlayerPointInfo} from "../../Model/DTO/Response/PlayerPointInfo.js";
 import {WinnerRoundResponse} from "../../Model/DTO/Response/WinnerRoundResponse.js";
+import {FRIEND_TIMEOUT_CONFIG} from "../../Enum/TimeoutConfig.js";
 
 export class FriendCardGameRound
 {
@@ -35,17 +37,30 @@ export class FriendCardGameRound
     private isFriendAppeared: boolean = false;
     private endTrickFlag: boolean = false;
     private readonly roundNumber: number;
-    constructor(roundNumber: number) { this.roundNumber = roundNumber; };
-    public StartRoundProcess(initialPlayers : FriendCardPlayer[]): void
+    private readonly gameId: string;
+
+    constructor(roundNumber: number, gameId: string) {
+        this.roundNumber = roundNumber;
+        this.gameId = gameId;
+    };
+    public StartRoundProcess(isFromNextRoundProcess: boolean, initialPlayers : FriendCardPlayer[], socket: Socket, AuctionTimeOutCallback: (socket: Socket) => void): void
     {
         if (initialPlayers.length !== 4) throw new Error("Players are not equal to 4");
         this.playersInOrder = ShuffleArray(Array.from(initialPlayers.values()));
         this.currentPlayerNumber = 0;
         FriendCardGameRoundLogic.PrepareCard(this.deck, this.playersInOrder);
         this.roundState = GAME_STATE.STARTED
+        const timeout: number = isFromNextRoundProcess ? FRIEND_TIMEOUT_CONFIG.AUCTION_WITH_ROUND_FINISH_IN_SEC : FRIEND_TIMEOUT_CONFIG.AUCTION_IN_SEC
+        this.GetCurrentPlayer().StartTimer(timeout, () => AuctionTimeOutCallback(socket))
     }
-    public AuctionProcess(auctionPass: boolean, newAuctionPoint: number): void
+    public AuctionProcess(auctionPass: boolean
+                          , newAuctionPoint: number
+                          , socket: Socket
+                          , AuctionTimeOutCallback: (socket: Socket) => void
+                          , SelectMainCardTimeOutCallback: (socket: Socket) => void
+    ): void
     {
+        this.GetCurrentPlayer().ClearTimer()
         if (auctionPass)
         {
             this.stackPass++;
@@ -53,15 +68,18 @@ export class FriendCardGameRound
         else
         {
             this.auctionPoint = newAuctionPoint;
-            this.highestAuctionId = this.GetCurrentPlayer().id;
+            this.highestAuctionId = this.GetCurrentPlayer().UID;
             this.stackPass = 0;
         }
         if(this.stackPass === 3 || this.auctionPoint === 100)
         {
             this.gameplayState = GAME_STATE.STARTED;
-            return;
+            this.currentPlayerNumber = this.GetHighestAuctionPlayerIndex()
+            this.GetCurrentPlayer().StartTimer(FRIEND_TIMEOUT_CONFIG.SELECT_MAIN_CARD_IN_SEC, () => SelectMainCardTimeOutCallback(socket))
+        }else{
+            this.currentPlayerNumber = FriendCardGameRoundLogic.NextPlayer(this.currentPlayerNumber, this.playersInOrder.length);
+            this.GetCurrentPlayer().StartTimer(FRIEND_TIMEOUT_CONFIG.AUCTION_IN_SEC, () => AuctionTimeOutCallback(socket))
         }
-        this.currentPlayerNumber = FriendCardGameRoundLogic.NextPlayer(this.currentPlayerNumber, this.playersInOrder.length);
     }
     public GetScoreCard(playerId: string): CardId[]{
         const result: CardId[] = []
@@ -79,7 +97,7 @@ export class FriendCardGameRound
         return result
     }
     public IsFirstAuction(): boolean { return this.auctionPoint === 50; }
-    public SetTrumpAndFriendProcess(trumpColor: ColorType, friendCard: CardId, player: FriendCardPlayer): void
+    public SetTrumpAndFriendProcess(trumpColor: ColorType, friendCard: CardId, player: FriendCardPlayer, socket:Socket, PlayCardTimeOutCallback: (socket: Socket) => void): void
     {
         this.trumpColor = trumpColor;
         this.friendCard = friendCard;
@@ -87,11 +105,13 @@ export class FriendCardGameRound
         const friendPlayer: FriendCardPlayer | undefined  = this.GetFriendPlayer();
         FriendCardGameRoundLogic.InitializeTeam(highestAuctionPlayer, friendPlayer, this.playersInOrder, this.auctionWinnerTeamIds, this.anotherTeamIds);
         FriendCardGameRoundLogic.InitializeTrick(this.totalTrickNumber, this.trickCardMap);
-        this.currentPlayerNumber = this.playersInOrder.findIndex(p => p.id === player.id);
+        this.GetCurrentPlayer().ClearTimer()
+        this.currentPlayerNumber = this.playersInOrder.findIndex(p => p.UID === player.UID);
+        this.GetCurrentPlayer().StartTimer(FRIEND_TIMEOUT_CONFIG.PLAY_CARD_IN_SEC, () => PlayCardTimeOutCallback(socket))
         this.currentTrickNumber = 0;
     }
     
-    public PlayCardProcess(cardId: CardId, playerId: string): CardId
+    public PlayCardProcess(cardId: CardId, playerId: string, socket: Socket, PlayCardTimeOutCallback: (socket: Socket) => void): CardId
     {
         let removeCard: CardId;
         const leaderCardId: CardId | undefined  = this.trickCardMap.get(this.currentTrickNumber)?.detail.at(0)?.cardId;
@@ -114,29 +134,47 @@ export class FriendCardGameRound
         this.GetCurrentPlayer().GetHandCard().Remove(removeCard);
         const currentTrickCardModel: TrickCardModel | undefined = this.trickCardMap.get(this.currentTrickNumber);
         currentTrickCardModel?.AddCardDetail(playerId, removeCard);
-        this.CheckFriendAppeared(removeCard);
-        this.currentPlayerNumber = FriendCardGameRoundLogic.NextPlayer(this.currentPlayerNumber, this.playersInOrder.length);
-        this.CheckTrickFinished(leaderColor, currentTrickCardModel)
+        let firstTimeFriendAppear: boolean = false
+        if (this.friendCard === removeCard) {
+            firstTimeFriendAppear = true;
+            this.isFriendAppeared = true;
+        }
+        if(this.IsFinishedTrick(leaderColor, currentTrickCardModel)){
+            this.TrickFinishedProcess(leaderColor!, currentTrickCardModel!, () => PlayCardTimeOutCallback(socket), socket)
+        }
+        else{
+            this.GetCurrentPlayer().ClearTimer()
+            this.currentPlayerNumber = FriendCardGameRoundLogic.NextPlayer(this.currentPlayerNumber, this.playersInOrder.length);
+            const timeout: number = firstTimeFriendAppear ? FRIEND_TIMEOUT_CONFIG.PLAY_CARD_WITH_ONLY_FRIEND_APPEAR_POPUP_IN_SEC : FRIEND_TIMEOUT_CONFIG.PLAY_CARD_IN_SEC
+            this.GetCurrentPlayer().StartTimer(timeout, () => PlayCardTimeOutCallback(socket))
+        }
         return removeCard;
     }
-    private CheckTrickFinished(leaderColor: ColorType | undefined, currentTrickCardModel: TrickCardModel | undefined) {
-        if (leaderColor && currentTrickCardModel?.detail.length === 4)
-        {
-            this.currentPlayerNumber =  FriendCardGameRoundLogic.CalculateWinnerTrickSetNextLeader(
-                this.trumpColor!,
-                leaderColor,
-                currentTrickCardModel,
-                this.playersInOrder,
-                this.roundNumber);
-            this.currentTrickNumber++;
-            this.endTrickFlag = true;
-            if(this.currentTrickNumber >= this.totalTrickNumber) {
-                this.FinishRound()
-            }
-        }
+    private IsFinishedTrick(leaderColor: ColorType | undefined, currentTrickCardModel: TrickCardModel | undefined ): boolean {
+        return (leaderColor && currentTrickCardModel?.detail.length === 4) ?? false
     }
-    private CheckFriendAppeared(removeCard: CardId){
-        if (this.friendCard === removeCard) { this.isFriendAppeared = true; }
+    private TrickFinishedProcess(
+        leaderColor: ColorType
+        , currentTrickCardModel: TrickCardModel
+        , PlayCardTimeOutCallback: (socket: Socket) => void
+        , socket: Socket
+    ): void
+    {
+        this.GetCurrentPlayer().ClearTimer()
+        this.currentPlayerNumber =  FriendCardGameRoundLogic.CalculateWinnerTrickSetNextLeader(
+            this.trumpColor!,
+            leaderColor,
+            currentTrickCardModel,
+            this.playersInOrder,
+            this.roundNumber
+        );
+        this.currentTrickNumber++;
+        this.endTrickFlag = true;
+        if(this.currentTrickNumber >= this.totalTrickNumber) {
+            this.FinishRound()
+        }else{
+            this.GetCurrentPlayer().StartTimer(FRIEND_TIMEOUT_CONFIG.PLAY_CARD_WITH_TRICK_FINISH_POPUP_IN_SEC, () => PlayCardTimeOutCallback(socket))
+        }
     }
     public FinishRound(): void
     {
@@ -188,8 +226,9 @@ export class FriendCardGameRound
     public GetPlayerInOrder(): FriendCardPlayer[] { return this.playersInOrder; }
     public GetCurrentTrickNumber(): number { return this.currentTrickNumber; }
     public GetCurrentPlayer(): FriendCardPlayer { return this.playersInOrder[this.currentPlayerNumber]; }
-    public GetHighestAuctionPlayer(): FriendCardPlayer | undefined { return this.playersInOrder.find(a => a.id === this.highestAuctionId); }
-    public IsPlayerTurn(playerId: string) : boolean { return this.GetCurrentPlayer()?.id === playerId; }
+    public GetHighestAuctionPlayer(): FriendCardPlayer | undefined { return this.playersInOrder.find(a => a.UID === this.highestAuctionId); }
+    public GetHighestAuctionPlayerIndex(): number { return this.playersInOrder.findIndex(a => a.UID === this.highestAuctionId); }
+    public IsPlayerTurn(playerId: string) : boolean { return this.GetCurrentPlayer()?.UID === playerId; }
     public IsEndOfTrick(): boolean{
         let result: boolean = false;
         if (this.endTrickFlag){
@@ -215,7 +254,7 @@ export class FriendCardGameRound
     }
     public CreatePlayerPointInfo(): PlayerPointInfo[] {
         return this.playersInOrder.map(a => {
-            const playerId: string = a.id;
+            const playerId: string = a.UID;
             const playerName: string = a.username;
             const cardsPointReceive: number = a.GetRoundPoint(this.roundNumber);
             const gamePointReceive: number = a.GetGamePoint(this.roundNumber);
@@ -225,7 +264,7 @@ export class FriendCardGameRound
     public GetGameplayState(): GAME_STATE { return this.gameplayState; }
     public GetAuctionPoint() : number { return this.auctionPoint; }
     public GetInfoForAuctionPointResponse(): [string, string | undefined, number, number] {
-        return [this.GetCurrentPlayer().id, this.GetHighestAuctionPlayer()?.id, this.auctionPoint, this.gameplayState];
+        return [this.GetCurrentPlayer().UID, this.GetHighestAuctionPlayer()?.UID, this.auctionPoint, this.gameplayState];
     }
     public GetRoundState(): GAME_STATE { return this.roundState; }
     public GetCardsInField(): CardId[] {
@@ -234,11 +273,11 @@ export class FriendCardGameRound
     }
     public GetActionsDTOForPlayer(player: FriendCardPlayer): ActionsDTO {
         return {
-			isPlayerTurn: this.IsPlayerTurn(player.id),
-            cardsPlayerCanPlay: this.IsPlayerTurn(player.id) ? this.CardsCanPlay(player) : []
+			isPlayerTurn: this.IsPlayerTurn(player.UID),
+            cardsPlayerCanPlay: this.IsPlayerTurn(player.UID) ? this.CardsCanPlay(player) : []
 		};
 	}
-    private CardsCanPlay(player: FriendCardPlayer): CardId[]{
+    public CardsCanPlay(player: FriendCardPlayer): CardId[]{
         let result: CardId[];
         const leaderCardId: CardId | undefined  = this.trickCardMap.get(this.currentTrickNumber)?.detail.at(0)?.cardId;
         const leaderColor: ColorType | undefined = leaderCardId ? CardLogic.GetColor(leaderCardId) : undefined;

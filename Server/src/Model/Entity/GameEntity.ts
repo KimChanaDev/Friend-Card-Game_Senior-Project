@@ -3,7 +3,7 @@ import { GAME_TYPE } from '../../Enum/GameType.js';
 
 export interface GameDocument extends Document {
 	gameType: GAME_TYPE;
-	ownerId: ObjectId;
+	ownerUID: ObjectId;
 	maxPlayers: number;
 	roomName: string;
 	createdAt: Date;
@@ -17,9 +17,9 @@ const gameSchema = new Schema<GameDocument>({
 		enum: Object.values(GAME_TYPE),
 		required: true,
 	},
-	ownerId: {
-		type: Schema.Types.ObjectId,
-		ref: 'User',
+	ownerUID: {
+		type: String,
+		// ref: 'User',
 		required: true,
 	},
 	maxPlayers: {

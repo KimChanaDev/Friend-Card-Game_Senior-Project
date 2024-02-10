@@ -8,12 +8,14 @@ import { GAME_STATE } from '../Enum/GameState.js';
 import { PlayerFactory } from '../GameFlow/Player/PlayerFactory.js';
 import { PlayerDTO } from '../Model/DTO/PlayerDTO.js';
 import { BUILD_IN_SOCKET_GAME_EVENTS, SOCKET_EVENT, SOCKET_GAME_EVENTS } from '../Enum/SocketEvents.js';
-import { GameFinishedDTO } from '../Model/DTO/GameFinishedDTO.js';
 import { UserModel } from '../Model/Entity/UserEntity.js';
 import { SocketBadConnectionError, SocketGameAlreadyStartedError, SocketGameNotExistError, SocketRoomFullError, SocketSessionExpiredError, SocketUnauthorizedError, SocketWrongRoomPasswordError } from '../Error/SocketErrorException.js';
-import { IJwtValidation, ValidateJWT } from '../GameLogic/Utils/Authorization/JWT.js';
+import {IJwtValidation, JWTPayLoadInterface, ValidateJWT} from '../GameLogic/Utils/Authorization/JWT.js';
 import { HandlerValidation } from './HandlerValidation.js';
 import {PlayerDisconnectedResponse} from "../Model/DTO/Response/PlayerDisconnectedResponse.js";
+import {JwtPayload} from "jsonwebtoken";
+import {UserDataModel} from "../Model/Entity/UserData.js";
+import {InternalError, InvalidCredentialsError} from "../Error/ErrorException.js";
 
 export type SocketNextFunction = (err?: ExtendedError | undefined) => void;
 export abstract class SocketHandler
@@ -75,24 +77,27 @@ export abstract class SocketHandler
 			console.log("Connecting to the room")
 			HandlerValidation.HandshakeHasGameIdAndMiddlewareHasJWT(socket);
 			const gameId = socket.handshake.query.gameId as string;
-			const userId = socket.middlewareData.jwt?.sub as string;
-			HandlerValidation.SocketHandlerNotHasUser(SocketHandler.connectedUsers, userId);
-
-			const userDoc = await UserModel.findById(userId);
+			const jwtPayload: JWTPayLoadInterface | JwtPayload | undefined = socket.middlewareData.jwt;
+			HandlerValidation.HasJWT(jwtPayload)
+			const user = await UserDataModel.findOne({
+				firebaseId: jwtPayload!.firebaseId,
+			});
+			if (!user) return next(new InvalidCredentialsError());
+			HandlerValidation.SocketHandlerNotHasUser(SocketHandler.connectedUsers, user.UID);
 			const gameRoom: GameRoom | undefined = GamesStore.getInstance.GetGameById(gameId);
-			HandlerValidation.HasUserDocument(userDoc);
 			HandlerValidation.HasGameRoom(gameRoom);
 			HandlerValidation.GameRoomNotStarted(gameRoom!);
 			HandlerValidation.CorrectGameRoomPasswordIfExist(socket, gameRoom!);
 			HandlerValidation.GameRoomFull(gameRoom!);
 
-			SocketHandler.connectedUsers.add(userId);
+			SocketHandler.connectedUsers.add(user.UID);
 			const newPlayer: Player = PlayerFactory.CreatePlayerObject(
 				gameRoom!.gameType,
-				userDoc!.id,
-				userDoc!.username,
+				user.UID,
+				user.username,
 				socket.id,
-				gameRoom!.owner.id === userDoc!.id
+				gameRoom!.owner.UID === user.UID,
+				jwtPayload!.firebaseId,
 			);
 			gameRoom!.AddPlayer(newPlayer);
 			socket.join(gameId);
@@ -123,40 +128,21 @@ export abstract class SocketHandler
 			this.OnConnection(socket, gameAndPlayer.gameRoom, gameAndPlayer.player);
 		});
 	}
-	private RegisterBaseListeners(socket: Socket): { gameRoom: GameRoom; player: Player } | undefined
+	private RegisterBaseListeners(socket: Socket): {gameRoom: GameRoom, player: Player} | undefined
 	{
 		try
 		{
 			HandlerValidation.HandshakeHasGameIdAndMiddlewareHasJWT(socket);
 			console.log(`Socket ${socket.id} connected`);
 			const gameId: string = socket.handshake.query.gameId as string;
-			const userId: string = socket.middlewareData.jwt?.sub as string;
+			const jwtPayload: JWTPayLoadInterface | JwtPayload | undefined = socket.middlewareData.jwt;
+			HandlerValidation.HasJWT(jwtPayload)
 			const gameRoom: GameRoom | undefined = GamesStore.getInstance.GetGameById(gameId) as GameRoom;
 			HandlerValidation.HasGameRoom(gameRoom);
-			const player: Player | undefined = gameRoom.GetPlayerById(userId) as Player;
+			const player: Player | undefined = gameRoom.GetPlayerByUID(jwtPayload!.UID) as Player;
 			HandlerValidation.HasPlayerInGameRoom(player);
-			
 			socket.on(BUILD_IN_SOCKET_GAME_EVENTS.DISCONNECT, (disconnectReason: string) => {
-				SocketHandler.connectedUsers.delete(userId);
-
-				gameRoom.DisconnectPlayer(player);
-				const newHostRoomPlayer: Player | undefined = player.isOwner ? gameRoom.SetNewHostOrOwnerRoom() : undefined
-				if (gameRoom.GetGameRoomState() === GAME_STATE.STARTED){
-
-				}
-				else {
-					const response = new PlayerDisconnectedResponse(
-						PlayerDTO.CreateFromPlayer(player),
-						newHostRoomPlayer ? PlayerDTO.CreateFromPlayer(newHostRoomPlayer) : undefined
-					)
-					this.EmitToRoomAndSender(socket, SOCKET_GAME_EVENTS.PLAYER_DISCONNECTED, gameId, response);
-				}
-				// if (gameRoom.GetGameRoomState() === GAME_STATE.FINISHED) {
-				// 	// const gameFinishedDTO: GameFinishedDTO = { winnerUsername: (gameRoom.GetWinner() as Player).username };
-				// 	// this.EmitToRoomAndSender(socket, SOCKET_GAME_EVENTS.GAME_FINISHED, gameId, gameFinishedDTO);
-				// } else
-				// 	this.EmitToRoomAndSender(socket, SOCKET_GAME_EVENTS.PLAYER_DISCONNECTED, gameId, PlayerDTO.CreateFromPlayer(player));
-				console.log(`Socket ${socket.id} disconnected - ${disconnectReason}`);
+				this.DisconnectedPlayer(gameRoom, player, disconnectReason, socket)
 			});
 			socket.on(BUILD_IN_SOCKET_GAME_EVENTS.ERROR, (error: Error) => {
 				console.log(`Socket Error - ${error.toString()}`);
@@ -170,5 +156,27 @@ export abstract class SocketHandler
 			if(ex instanceof SocketGameNotExistError) { return undefined; } 
 			if(ex instanceof Error) { return undefined; } 
 		}
+	}
+
+	protected DisconnectedPlayer( gameRoom: GameRoom, player: Player, disconnectReason: string, socket: Socket): void{
+		SocketHandler.connectedUsers.delete(player.UID);
+		gameRoom.DisconnectPlayer(player);
+		const newHostRoomPlayer: Player | undefined = player.isOwner ? gameRoom.SetNewHostOrOwnerRoom() : undefined
+		if (gameRoom.GetGameRoomState() === GAME_STATE.STARTED){
+
+		}
+		else {
+			const response: PlayerDisconnectedResponse = new PlayerDisconnectedResponse(
+				PlayerDTO.CreateFromPlayer(player),
+				newHostRoomPlayer ? PlayerDTO.CreateFromPlayer(newHostRoomPlayer) : undefined
+			)
+			this.EmitToRoomAndSender(socket, SOCKET_GAME_EVENTS.PLAYER_DISCONNECTED, gameRoom.id, response);
+		}
+		// if (gameRoom.GetGameRoomState() === GAME_STATE.FINISHED) {
+		// 	// const gameFinishedDTO: GameFinishedDTO = { winnerUsername: (gameRoom.GetWinner() as Player).username };
+		// 	// this.EmitToRoomAndSender(socket, SOCKET_GAME_EVENTS.GAME_FINISHED, gameId, gameFinishedDTO);
+		// } else
+		// 	this.EmitToRoomAndSender(socket, SOCKET_GAME_EVENTS.PLAYER_DISCONNECTED, gameId, PlayerDTO.CreateFromPlayer(player));
+		console.log(`Socket ${socket.id} disconnected - ${disconnectReason}`);
 	}
 }
