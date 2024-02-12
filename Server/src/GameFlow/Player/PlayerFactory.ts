@@ -11,11 +11,12 @@ export class PlayerFactory
 		username: string,
 		socketId: string,
 		isOwner: boolean,
-		firebaseId: string
+		firebaseId: string,
+		profileImagePath: string
 	): Player
     {
         if (gameType === GAME_TYPE.FRIENDCARDGAME) 
-            return new FriendCardPlayer(id, username, socketId, isOwner, firebaseId);
+            return new FriendCardPlayer(id, username, socketId, isOwner, firebaseId, profileImagePath);
         throw new BadRequestError();
 	}
 }

@@ -10,9 +10,9 @@ export class FriendCardPlayer extends Player
 	private startTime: number | null = null;
 	private totalTimeInSec: number | null = null;
 
-	constructor(id: string, username: string, socketId: string, isOwner: boolean, firebaseId: string)
+	constructor(id: string, username: string, socketId: string, isOwner: boolean, firebaseId: string, profileImagePath: string)
     {
-		super(id, username, socketId, isOwner, firebaseId);
+		super(id, username, socketId, isOwner, firebaseId, profileImagePath);
 	}
 	public StartTimer(secTimeInTimer: number, callback: () => void): void {
 		this.ClearTimer()
