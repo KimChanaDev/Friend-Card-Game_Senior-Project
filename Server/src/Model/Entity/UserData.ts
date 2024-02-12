@@ -27,14 +27,20 @@ const userSchema = new Schema<UserDataDocument>({
 		type: String,
 		minlength: 6,
 		maxlength: 20,
-		required: true,
+		// required: true,
 		unique: true,
+        required: function () {
+            return this.provider === 'password';
+        }
 	},
     email: {
         type: String,
-        required: true,
+        // required: true,
         unique: true,
         validate: [IsEmail, 'Invalid email format'],
+        required: function () {
+            return this.provider === 'password';
+        }
     },
     // password: {
     //     type: String,

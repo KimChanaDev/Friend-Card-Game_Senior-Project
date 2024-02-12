@@ -40,7 +40,13 @@ export class UserdataController extends ExpressRouter {
                 // return next(new PasswordMismatchError());
                 throw new Error('PasswordMismatch')
             }
-            const user = await UserDataModel.findOne({ username: newUserData.username });
+            // const user = await UserDataModel.findOne({ username: newUserData.username });
+            const user = await UserDataModel.findOne({
+                $and: [
+                    { username: newUserData.username },
+                    { provider: "password" }
+                ]
+            });
             // if (user) return next(new UserExistsError(newUserData.username));
             if (user) throw new Error('UserExistsError');
 
@@ -155,6 +161,7 @@ export class UserdataController extends ExpressRouter {
             //if firebase user exists, remove firebase user if the register operation fail. (ex. register to firebase success but fail to save object to mongoDB)
             if (firebaseTokenId) {
                 try {
+                    console.log('removing user from firebase')
                     await axios.post('https://identitytoolkit.googleapis.com/v1/accounts:delete?key=AIzaSyBCNyyTwo_RLCHrJD_xNnYHy8G67DDeKbw', {
                         idToken: firebaseTokenId,
                     });
@@ -427,9 +434,10 @@ export class UserdataController extends ExpressRouter {
             res.status(500).json({ error: 'Internal Server Error' });
         }
     }
-    // this method take idToken that you will get from login though firebase and return friendJWT
-    // broken idToken doesnt contain name, picture, etc. (idk why)
+    // this method take idToken (google) then register and return friendJWT
     private async FirebaseAuth(req: Request, res: Response, next: NextFunction): Promise<void> {
+        let firebaseTokenId: string | null | undefined = req.idToken;
+
         try {
             console.log('FirebaseAuth: ' + req);
             const firebasePayload: string | DecodedIdToken | undefined = req.firebase
@@ -437,7 +445,8 @@ export class UserdataController extends ExpressRouter {
                 const user = await UserDataModel.findOne({
                     firebaseId: firebasePayload.user_id
                 })
-                console.log(firebasePayload)
+                // console.log(firebasePayload)
+                // firebaseTokenId = req.firebase;
                 if (!user) {
                     const getNextUID = async () => {
                         const lastUser = await UserDataModel.findOne({ UID: { $exists: true, $type: 2 } }, {}, { sort: { UID: -1 } });
@@ -452,8 +461,9 @@ export class UserdataController extends ExpressRouter {
                     const uid = await getNextUID();
 
                     const createdUser = new UserDataModel({
-                        username: firebasePayload.name,
-                        email: "noemail@gmail.com",
+                        // username: firebasePayload.name,
+                        // username: firebasePayload.user_id,
+                        // email: firebasePayload.user_id + "@gmail.com",
                         // password: newUserData.password,
                         // confirmPassword: newUserData.confirmPassword,
                         imagePath: firebasePayload.picture,
@@ -466,6 +476,13 @@ export class UserdataController extends ExpressRouter {
                         UID: uid
                     });
                     const savedUser = await createdUser.save();
+                    const createdMatch = new MatchModel({
+                        firebaseId: createdUser.firebaseId,
+                        win: 0,
+                        match: 0,
+                        latestMatch: [],
+                    })
+                    await createdMatch.save();
                     const token: string = IssueJWTwithEmail(savedUser);
                     const result = {
                         message: 'success',
@@ -498,6 +515,16 @@ export class UserdataController extends ExpressRouter {
         } catch (err) {
             console.error(err);
             res.status(500).json({ error: 'Internal Server Error' });
+            if (typeof firebaseTokenId === 'string') {
+                try {
+                    console.log('removing user from firebase')
+                    await axios.post('https://identitytoolkit.googleapis.com/v1/accounts:delete?key=AIzaSyBCNyyTwo_RLCHrJD_xNnYHy8G67DDeKbw', {
+                        idToken: firebaseTokenId,
+                    });
+                } catch (deleteError) {
+                    console.error('Error deleing user from Firebase', deleteError);
+                }
+            }
         }
     }
 }
