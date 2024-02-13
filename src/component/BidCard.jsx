@@ -28,21 +28,22 @@ function BidCard() {
                     <li
                         key={bidValue}
                         className={`${selectedBid === bidValue ? 'selected' : 'bid_card'}`}
+                        onClick={() => HandleBidClick(bidValue)}
                     >
-                        <button onClick={() => HandleBidClick(bidValue)}>{bidValue}</button>
+                        {bidValue}
                     </li>
                 ))}
 
                 <button
                     onClick={HandleConfirmClick}
-                    className="bg-green-600 confirm_button hover:bg-green-900 text-white font-bold py-2 px-4 border-b-4 border-green-700 hover:border-green-800 rounded-2xl"
+                    className="bid_confirm"
                 >
                     Confirm
                 </button>
 
                 <button
                     onClick={HandlePassClick}
-                    className="bg-red-700 pass_button hover:bg-red-900 text-white font-bold py-2 px-4 border-b-4 border-orange-700 hover:border-orange-800 rounded-2xl"
+                    className="bid_pass"
                 >
                     Pass
                 </button>

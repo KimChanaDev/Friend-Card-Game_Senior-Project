@@ -15,71 +15,86 @@ function CardTable({setIsShowScoreCard}) {
     }
     return (
         <>
-            <div className="relative overflow-x-auto score_table border-double border-4 border-gray-600">
-                <table className="w-full text-sm text-left text-dark dark:text-gray-400">
-                    <thead className="text-xs  uppercase ">
+            <div className="popup-scorecard">
+                <table className="table-scorecard">
+                    <thead>
                         <tr >
-                            <th colSpan={5} className='text-center text-white bg-black text-base'>
+                            <th colSpan={5} className=''>
                                 Score Card
                             </th>
                         </tr>
 
                     </thead>
                     <tbody>
-                    <tr className="border-b dark:bg-gray-800 dark:border-gray-700 ">
-                           <td className="px-6 py-4">
-                               { ThereIsScoreCard("5S") && <img src={GetCardPath("5S")} alt="" /> }
+                    <tr className="scorecard-container">
+                           <td>
+                               <img src={GetCardPath("5S")} alt="" className={ThereIsScoreCard("5S")?'':'img-disable'}/>
+                               {/* <img src={GetCardPath("5H")} alt="" className='img-disable'/> */}
                            </td>
-                           <td className="px-6 py-4">
-                               { ThereIsScoreCard("TS") && <img src={GetCardPath("TS")} alt="" /> }
+                           <td>
+                               {/* { ThereIsScoreCard("TS") && <img src={GetCardPath("TS")} alt="" /> } */}
+                               <img src={GetCardPath("TS")} alt="" className={ThereIsScoreCard("TS")?'':'img-disable'}/>
                            </td>
-                           <td className="px-6 py-4">
-                               { ThereIsScoreCard("KS") && <img src={GetCardPath("KS")} alt="" /> }
+                           <td>
+                               {/* { ThereIsScoreCard("KS") && <img src={GetCardPath("KS")} alt="" /> } */}
+                               <img src={GetCardPath("KS")} alt="" className={ThereIsScoreCard("KS")?'':'img-disable'}/>
                            </td>
                        </tr>
 
-                        <tr className="border-b dark:bg-gray-800 dark:border-gray-700 ">
-                            <td className="px-6 py-4">
-                                { ThereIsScoreCard("5H") && <img src={GetCardPath("5H")} alt="" /> }
+                       <tr className="scorecard-container">
+                            <td>
+                                {/* { ThereIsScoreCard("5H") && <img src={GetCardPath("5H")} alt="" /> } */}
+                                <img src={GetCardPath("5H")} alt="" className={ThereIsScoreCard("5H")?'':'img-disable'}/>
                             </td>
-                            <td className="px-6 py-4">
-                                { ThereIsScoreCard("TH") && <img src={GetCardPath("TH")} alt="" /> }
+                            <td>
+                                {/* { ThereIsScoreCard("TH") && <img src={GetCardPath("TH")} alt="" /> } */}
+                                <img src={GetCardPath("TH")} alt="" className={ThereIsScoreCard("TH")?'':'img-disable'}/>
                             </td>
-                            <td className="px-6 py-4">
-                                { ThereIsScoreCard("KH") && <img src={GetCardPath("KH")} alt="" /> }
+                            <td>
+                                {/* { ThereIsScoreCard("KH") && <img src={GetCardPath("KH")} alt="" /> } */}
+                                <img src={GetCardPath("KH")} alt="" className={ThereIsScoreCard("KH")?'':'img-disable'}/>
                             </td>
                         </tr>
 
-                        <tr className="border-b dark:bg-gray-800 dark:border-gray-700 ">
-                           <td className="px-6 py-4">
-                               { ThereIsScoreCard("5D") && <img src={GetCardPath("5D")} alt="" /> }
+                        <tr className="scorecard-container">
+                           <td>
+                               {/* { ThereIsScoreCard("5D") && <img src={GetCardPath("5D")} alt="" /> } */}
+                               <img src={GetCardPath("5D")} alt="" className={ThereIsScoreCard("5D")?'':'img-disable'}/>
                            </td>
-                           <td className="px-6 py-4">
-                               { ThereIsScoreCard("TD") && <img src={GetCardPath("TD")} alt="" /> }
+                           <td>
+                               {/* { ThereIsScoreCard("TD") && <img src={GetCardPath("TD")} alt="" /> } */}
+                               <img src={GetCardPath("TD")} alt="" className={ThereIsScoreCard("TD")?'':'img-disable'}/>
                            </td>
-                           <td className="px-6 py-4">
-                               { ThereIsScoreCard("KD") && <img src={GetCardPath("KD")} alt="" /> }
+                           <td>
+                               {/* { ThereIsScoreCard("KD") && <img src={GetCardPath("KD")} alt="" /> } */}
+                               <img src={GetCardPath("KD")} alt="" className={ThereIsScoreCard("KD")?'':'img-disable'}/>
                            </td>
                        </tr>
 
-                       <tr className="border-b dark:bg-gray-800 dark:border-gray-700">
-                           <td className="px-6 py-4">
-                               { ThereIsScoreCard("5C") && <img src={GetCardPath("5C")} alt="" /> }
+                       <tr className="scorecard-container">
+                           <td>
+                               {/* { ThereIsScoreCard("5C") && <img src={GetCardPath("5C")} alt="" /> } */}
+                               <img src={GetCardPath("5C")} alt="" className={ThereIsScoreCard("5C")?'':'img-disable'}/>
                            </td>
-                           <td className="px-6 py-4">
-                               { ThereIsScoreCard("TC") && <img src={GetCardPath("TC")} alt="" /> }
+                           <td>
+                               {/* { ThereIsScoreCard("TC") && <img src={GetCardPath("TC")} alt="" /> } */}
+                               <img src={GetCardPath("TC")} alt="" className={ThereIsScoreCard("TC")?'':'img-disable'}/>
                            </td>
-                           <td className="px-6 py-4">
-                               { ThereIsScoreCard("KC") && <img src={GetCardPath("KC")} alt="" /> }
+                           <td>
+                               {/* { ThereIsScoreCard("KC") && <img src={GetCardPath("KC")} alt="" /> } */}
+                               <img src={GetCardPath("KC")} alt="" className={ThereIsScoreCard("KC")?'':'img-disable'}/>
                            </td>
                        </tr>
                     </tbody>
                 </table>
-                <button className=" close_button bg-black  text-white font-bold py-2 px-4 border rounded-3xl"
+                <div className='scorecard-button-container'>
+                <button className="scorecard-button-close"
                         onClick={() => HandleClose()}
                 >
                     CLOSE
                 </button>
+                </div>
+                
             </div>
         </>
     )

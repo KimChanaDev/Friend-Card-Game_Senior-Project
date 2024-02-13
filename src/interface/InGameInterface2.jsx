@@ -51,7 +51,7 @@ export default function InGameInterface2()
 
     const dispatch = useDispatch()
 
-    const offset = 25
+    const offset = 20
     const numCardInHand = cardInHand.length ?? 0
     const picStyles = { "width": `${Math.min(100 / (numCardInHand), 100 / 9)}%` }
     const cardInHandMap = cardInHand.map((cardId)=> {
@@ -126,6 +126,7 @@ export default function InGameInterface2()
 
     /// show trick finish alert on time limit
     useEffect(() => {
+        console.log("playerInGame: ",playersInGame)
         if(trickFinishedResult){
             setIsShowTrickFinishedAlert(true);
             const timeoutId = setTimeout(() => {
@@ -140,13 +141,13 @@ export default function InGameInterface2()
         dispatch(EmitCardPlayed({cardId: id}))
     }
 
-    const componentStyles = {
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        width: '100%',
-        zIndex: 1000,
-    };
+    // const componentStyles = {
+    //     position: 'fixed',
+    //     top: 0,
+    //     left: 0,
+    //     width: '100%',
+    //     zIndex: 1000,
+    // };
     function FindPlayerBidScore(thisPlayerId){
         return playersAuctionDetail.filter(a => a.playerId === thisPlayerId)?.at(0)?.auctionPoint ?? null
     }
@@ -154,19 +155,22 @@ export default function InGameInterface2()
         return playersAuctionDetail.filter(a => a.playerId === thisPlayerId)?.at(0)?.isPass ?? false
     }
     return (
-        <div className='tailwind-section' style={componentStyles}>
-            <div className="background-image">
-
-            </div>
+        
+        <div className='background-image' >
 
             { isGameStarted ? <WaitingPlayer isOpen={false}/> : <WaitingPlayer isOpen={true} /> }
+            
 
             <div className="content">
+            
+            {/* <section className='mid'>
+                        <BidCard />
+                    </section> */}
+
                 <section className='top' >
                     <LobbyInfo />
                     <FriendCard cardName={CARD_ID_FILE.cardIds[friendCard]}/>
                     <TrumpCard  cardName={CARD_ID_FILE.suits[trumpSuit]}/>
-                    {/*<CardTable/>*/}
                     <SettingsIcon className='setting' sx={{ fontSize: 50 }} />
 
                     {
@@ -182,23 +186,19 @@ export default function InGameInterface2()
                     { isShowRoundFinishedAlert && <RoundFinishedAlert /> }
                     { isShowSummaryScore &&
                         <div className="popup">
-                            <div className="popup-inner">
                                 <SummaryScore isShowButton={false}/>
-                            </div>
                         </div>
                     }
                     { isShowScoreCard &&
                         <div className="popup">
-                            <div className="popup-inner">
+                            {/* <div className="popup-inner"> */}
                                 <CardTable setIsShowScoreCard={setIsShowScoreCard}/>
-                            </div>
+                            {/* </div> */}
                         </div>
                     }
                     { isShowGameFinishedPopup &&
                         <div className="popup">
-                            <div className="popup-inner">
                                 <SummaryScore isShowButton={true} setIsShowGameFinishedPopup={setIsShowGameFinishedPopup} />
-                            </div>
                         </div>
                     }
 
@@ -217,6 +217,7 @@ export default function InGameInterface2()
                                                                   isOwnerReadyButton={playersInGame?.players[1]?.id === userId}
                                                                   isReady={playersInGame.players[1].isReady}
                                                                   userId={playersInGame.players[1].id}
+                                                                  imgUrl={playersInGame.players[1].imagePath}
                         />
                     )}
                     {(
@@ -231,6 +232,7 @@ export default function InGameInterface2()
                                                                   isOwnerReadyButton={playersInGame?.players[3]?.id === userId}
                                                                   isReady={playersInGame.players[3].isReady}
                                                                   userId={playersInGame.players[3].id}
+                                                                  imgUrl={playersInGame.players[3].imagePath}
                         />
                     )}
                 </section>
@@ -247,6 +249,7 @@ export default function InGameInterface2()
                                                                   isOwnerReadyButton={playersInGame?.players[2]?.id === userId}
                                                                   isReady={playersInGame.players[2].isReady}
                                                                   userId={playersInGame.players[2].id}
+                                                                  imgUrl={playersInGame.players[2].imagePath}
                         />
                     )}
                     {(
@@ -261,6 +264,7 @@ export default function InGameInterface2()
                                                                   isOwnerReadyButton={playersInGame?.players[0]?.id === userId}
                                                                   isReady={playersInGame.players[0].isReady}
                                                                   userId={playersInGame.players[0].id}
+                                                                  imgUrl={playersInGame.players[0].imagePath}
                         />
                     )}
                 </section>
@@ -270,16 +274,22 @@ export default function InGameInterface2()
                     && <section className='mid'>
                         <BidCard />
                     </section>
+                    
                 }
 
 
                 <figure className='bot' style={{ paddingInlineStart: `${(numCardInHand - 1) * offset}px` }}>
                     {
-                        cardInHandMap.map((e, i) => < CardInHand key={i} src={e.src} clickFunc={HandlePlayCard}
-                                                               styles={{
+                        
+                        cardInHandMap.map((e, i) => < CardInHand key={i} src={e.src} clickFunc={HandlePlayCard}//"zIndex"
+                                                               styles={{ 
                                                                    ...picStyles,
                                                                    "right": i * offset,
-                                                                   "border":cardsPlayerCanPlay.some(cardId => cardId === e.id) ? "3px solid green": "0px solid green"}}
+                                                                   "filter":cardsPlayerCanPlay.some(cardId => cardId === e.id) ? "opacity(100%)" : "opacity(40%)",
+                                                                   "zIndex":cardsPlayerCanPlay.some(cardId => cardId === e.id) ? "50000" : "40000",
+                                                                   "pointerEvents": cardsPlayerCanPlay.some(cardId => cardId === e.id) ? "auto" : "none",
+                                                                    }}
+                                                                   
                                                                id = {e.id}
                         />)
                     }
@@ -287,7 +297,7 @@ export default function InGameInterface2()
 
                 {
                     isAfterMainCardSelected && <section className='mid'>
-                        {cardInFiledMap.map((e, i)=><img key={i} src={e.src} alt="" />)}
+                        {cardInFiledMap.map((e, i)=><img key={i} src={e.src} alt="" className='cardOnTable'/>)}
                     </section>
                 }
                 < SlideBar />

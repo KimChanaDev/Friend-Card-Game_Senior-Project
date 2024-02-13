@@ -7,7 +7,7 @@ import {ResetAllListenerState} from "../../store/SocketGameListenersSlice.jsx";
 import {SetPage} from "../../store/PageStateSlice.jsx";
 import PAGE_STATE from "../../enum/PageStateEnum.jsx";
 import {EmitStartGame} from "../../store/SocketGameEmittersSlice.jsx";
-import { AddBotButton } from "./WaitingPlayer.styled.ts";
+import { AddNStartBotButton,QuitBotButton } from "./WaitingPlayer.styled.ts";
 
 WaitingPlayer.propTypes = {
     isOpen: PropTypes.bool,
@@ -33,43 +33,43 @@ export default function WaitingPlayer({isOpen}){
         }
     }
 
-    const componentStyles = {
-        position: 'fixed',
-        top: '50%',
-        left: '50%',
-        transform: 'translate(-50%, -50%)',
-        width: '300px', // Set the desired width
-        height: '200px', // Set the desired height
-        backgroundColor: '#f0f0f0', // Optional: add styling for background color or other styles
-        border: '1px solid #ccc', // Optional: add styling for borders
-        boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)', // Optional: add a box shadow
-        zIndex: 10000, // Optional: set a z-index to control stacking order
-    };
+    // const componentStyles = {
+    //     position: 'fixed',
+    //     top: '50%',
+    //     left: '50%',
+    //     transform: 'translate(-50%, -50%)',
+    //     width: '300px', // Set the desired width
+    //     height: '200px', // Set the desired height
+    //     backgroundColor: '#f0f0f0', // Optional: add styling for background color or other styles
+    //     border: '1px solid #ccc', // Optional: add styling for borders
+    //     boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)', // Optional: add a box shadow
+    //     zIndex: 10000, // Optional: set a z-index to control stacking order
+    // };
     return (
         <>
             {isOpen && (
-                <div className='menu_border' style={componentStyles}>
+                <div className='menu_border'>
                     <p>
                         Waiting for Player
                     </p>
-                    <br/>
+                    {/* <br/> */}
+                    <div className="waiting-button">
                     {
-                        playersInGame?.players?.length !== 4 && isOwnerRoom && <AddBotButton
+                        playersInGame?.players?.length !== 4 && isOwnerRoom && <AddNStartBotButton
                             onClick={AddBot}
-                            className="add_bot_button bg-black hover:bg-blue-700 text-white font-bold py-2  border border-blue-700 rounded-2xl"
-                        >Add Bot</AddBotButton>
+                        >Add Bot</AddNStartBotButton>
                     }
                     {
-                        playersInGame?.players?.length === 4 && isOwnerRoom && <button
+                        playersInGame?.players?.length === 4 && isOwnerRoom && <AddNStartBotButton
                             onClick={StartGame}
-                            className="add_bot_button bg-black hover:bg-blue-700 text-white font-bold py-2  border border-blue-700 rounded-2xl"
-                        >Start</button>
+                            
+                        >Start</AddNStartBotButton>
                     }
-                    <br/>
-                    <button
+                    {/* <br/> */}
+                    <QuitBotButton
                         onClick={QuitLobby}
-                        className="quit_button bg-black hover:bg-blue-700 text-white font-bold py-2  border border-blue-700 rounded-2xl"
-                    >Quit Lobby</button>
+                    >Quit Lobby</QuitBotButton>
+                    </div>
                 </div>
             )}
         </>

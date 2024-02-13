@@ -1,4 +1,4 @@
-import '../ProfilePopup/ProfilePopUp.css'
+// import '../ProfilePopup/ProfilePopUp.css'
 
 export default function WaitingSelectMainCard(){
     return (

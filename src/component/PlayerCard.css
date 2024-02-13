@@ -4,21 +4,36 @@ div.player_info{
     display: flex;
     flex-direction: column;
     justify-content: center;
-    text-align: center; 
+    text-align: center;
+    align-items: center; 
+    /* min-width: 350px; */
+    /* width: 80%; */
+    /* height: 150px; */
 }
 div.player_info>p{
     color: rgba(0, 0, 0, 0.60);
+    margin-top: -7px;
  }
 section.profile>img{
-   width:45%;
+   /* width:45%;
    height: 100%;
-   border-radius: 9999px;
-   background:   rgba(14, 34, 106, 0.42);
+   border-radius: 9999px;*/
+    background:   rgba(14, 34, 106, 0.42); 
+    width: 150px;
+    height: 150px;
+    border-radius: 90px;
+    overflow: hidden;
+    text-align: center;
+    object-fit: cover;
    
 }
 section.profile{
-    width: 85%;
-    height: 30%;
+    /* width: 85%; */
+    min-width: 350px;
+    width: 80%;
+    height: 150px;
+    min-height: 150px;
+    max-height: 150px;
     display:flex;
     border: 1px solid rgba(241, 236, 236, 0.50);
     border-radius: 9999px;
@@ -55,6 +70,9 @@ section.profile>.pass{
 section.profile .timer{
     position: absolute;
     right: 0px;
+    /* top: 100px; */
+    /* bottom: 100px; */
+    width: 60px;
     font-weight: bold;
     text-align: center;
     display: flex;
@@ -67,4 +85,40 @@ section.profile .timer .timer_value{
     border-radius: 9999px;
     
     font-size: large;
+}
+.player_name{
+    color:black;
+    font-weight: 700;
+}
+.ready_button{
+  border: 1px solid white;
+  border-radius: 20px;
+  background: #162345; 
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 10px;
+  width: 100px;
+  max-width: 300px;
+  /* min-height: 70px; */
+  height: 22px;
+  max-height: 80px;
+  padding: 8px 16px;
+  color: #FFF;
+  text-align: center;
+  font-family: Inter;
+  font-size: 10px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: normal;
+  
+}
+.ready_button:disabled{
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.ready_button:hover:enabled{
+    color: #375FC7;
+    background-color: #081128;
+    border-color: white;
 }

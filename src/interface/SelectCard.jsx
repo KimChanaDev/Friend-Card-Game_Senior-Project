@@ -34,18 +34,19 @@ function SelectCard() {
         <>
             {
                 selectMainCardStatus !== SOCKET_STATUS.SUCCESS &&
-                <div className="popup">
-                    <div className="relative overflow-x-auto select_table border-double border-4 border-gray-600">
-                        <table className="w-full text-sm text-left dark:text-gray-400">
-                            <thead className="text-xs text-white uppercase ">
+                <div className="popup_selectcard">
+                    {/*  relative overflow-x-auto select_table border-double border-4 border-gray-600*/}
+                    <div className="selectcard">
+                        <table className="table-selectcard">
+                            <thead>
                             <tr>
-                                <th scope="col" className="px-6 py-3">
+                                <th colSpan={1} scope="col" className='suite-header'>
                                     Suite
                                 </th>
-                                <th colSpan={12} scope="col" className="px-6 py-3 text-center text-white">
+                                <th colSpan={12} scope="col" className='number-header'>
                                     Select Friend Card Number
                                 </th>
-                                <th colSpan={3} scope="col" className="px-6 py-3 text-center text-white">
+                                <th colSpan={1} scope="col" className='trump-header'>
                                     Select TRUMP Card Number
                                 </th>
 
@@ -53,41 +54,41 @@ function SelectCard() {
                             </thead>
                             <tbody>
                             <tr className=" border-b border-black">
-                                <th scope="row" className=" text-4xl px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                                <th scope="row" className="suit-symbol">
                                     ♣️
                                 </th>
                                 {RenderCardValueRowNumbers("C","px-6 py-4")}
-                                <td colSpan={3} className={`px-6 py-4  text-4xl text-center  border-l-2 border-black ${trumpSelected === "C" && "selected"}`}>
+                                <td colSpan={3} className={`${trumpSelected === "C" && "selected"}`}>
                                     <button onClick={() => HandleSuitClicked("C")}>♣️</button>
                                 </td>
                             </tr>
 
                             <tr className=" border-b  border-black">
-                                <th scope="row" className="text-4xl px-6 py-4 font-medium text-red-600 whitespace-nowrap dark:text-white">
+                                <th scope="row" className="suit-symbol">
                                     ♥️
                                 </th>
                                 {RenderCardValueRowNumbers("H", "px-6 py-4")}
-                                <td colSpan={3} className={`px-6 py-4  text-4xl text-center text-red-600  border-l-2 border-black ${trumpSelected === "H" && "selected"}`}>
+                                <td colSpan={3} className={`${trumpSelected === "H" && "selected"}`}>
                                     <button onClick={() => HandleSuitClicked("H")}>♥️</button>
                                 </td>
                             </tr>
 
                             <tr className=" border-b border-black">
-                                <th scope="row" className="text-4xl px-6 py-4 font-medium text-red-600 whitespace-nowrap dark:text-white">
+                                <th scope="row" className="suit-symbol">
                                     ♦️
                                 </th>
                                 {RenderCardValueRowNumbers("D", "px-6 py-4")}
-                                <td colSpan={3} className={`px-6 py-4  text-4xl text-center text-red-600  border-l-2 border-black ${trumpSelected === "D" && "selected"}`}>
+                                <td colSpan={3} className={`${trumpSelected === "D" && "selected"}`}>
                                     <button onClick={() => HandleSuitClicked("D")}>♦️</button>
                                 </td>
                             </tr>
 
                             <tr className=" border-b border-black">
-                                <th scope="row" className="text-4xl px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                                <th scope="row" className="suit-symbol">
                                     ♠️
                                 </th>
                                 {RenderCardValueRowNumbers("S", "px-6 py-4")}
-                                <td colSpan={3} className={`px-6 py-4  text-4xl text-center border-l-2 border-black ${trumpSelected === "S" && "selected"}`}>
+                                <td colSpan={3} className={`${trumpSelected === "S" && "selected"}`}>
                                     <button onClick={() => HandleSuitClicked("S")}>♠️</button>
                                 </td>
                             </tr>
@@ -95,7 +96,7 @@ function SelectCard() {
                             </tbody>
                         </table>
 
-                        <button className=" confirm_button bg-black  text-white font-bold py-2 px-4 border  rounded-2xl"
+                        <button className="confirm_button"
                                 onClick={() => HandleConfirm()}
                         >
                             Confirm

@@ -10,7 +10,7 @@
 }
 
 .popup-inner {
-    background-color: white;
+    background-color: rgb(255, 255, 255);
     position: absolute;
     left: 50%;
     top: 50%;

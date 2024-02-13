@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 import PropTypes from "prop-types";
 import './PlayerCard.css'
 import {useDispatch, useSelector} from "react-redux";
@@ -11,10 +12,10 @@ import EMOJI from "../enum/EmojiEnum.jsx";
 PlayerCard2.propTypes = {
   socket: PropTypes.any
 }
-export default function PlayerCard2({ name, score, isInLobby, isLeft, isBidding, isMax, bidScore, isPass, isPlay, isTop, role
-                      , isReady, isOwnerReadyButton, userId}) {
+export default function  PlayerCard2({ name, score, isInLobby, isLeft, isBidding, isMax, bidScore, isPass, isPlay, isTop, role
+                      , isReady, isOwnerReadyButton, userId,imgUrl}) {
   const bidShowPosition = {right:isLeft&&'-2rem',left:!isLeft&&'-2rem'}
-  const timerPosition = {bottom:isTop&&'-3rem',top:!isTop&&'-3rem'}
+  const timerPosition = {bottom:isTop&&'-1rem',top:!isTop&&'-1rem'}
   const isOwnerRoom = useSelector(state => state.gameStore.playersInGame?.thisPlayer?.isOwner) ?? false
   const isGameStarted = useSelector(state => state.socketGameListenersStore.isGameStarted)
   const dispatch = useDispatch()
@@ -80,17 +81,17 @@ export default function PlayerCard2({ name, score, isInLobby, isLeft, isBidding,
         {/*kick button*/}
         {isInLobby && isLeft && isOwnerRoom && <button className='kick_button_left' style={{ zIndex: 9999 }}>❌</button>}
 
-        <img src="./profile.png" alt="" style={{ order: isLeft ? 1 : 2, zIndex: isInLobby && 999 }} />
+        <img src={imgUrl} alt="" style={{ order: isLeft ? 1 : 2, zIndex: isInLobby && 999 }} />
 
         <div className='player_info' style={{ order: isLeft ? 2 : 1 }}>
           {/*Name*/}
           <h3 className='player_name'>{role === PLAYER_ROLE.HOST ? '👑': ''} {isFriendAppeared ? GenerateTeamIcon() : ""} {name}</h3>
           {/*UID*/}
-          { /*!isGameStarted && */ <p className='desc text-sm text-red-600'>{`UID ${userId.substring(userId.length - 8)}`}</p> }
+          { /*!isGameStarted && */ <p className=''>{`UID ${userId.substring(userId.length - 8)}`}</p> }
           {/*score*/}
-          { isGameStarted && <p className='desc text-sm text-red-600'>{`Score : ${FindScore()}`}</p> }
+          { isGameStarted && <p className=''>{`Score : ${FindScore()}`}</p> }
           {/*ready button*/}
-          { isInLobby && role !== PLAYER_ROLE.HOST && <button onClick={HandleReady} disabled={!isOwnerReadyButton}>{isReady ? "Ready" : "Unready"}</button> }
+          { isInLobby && role !== PLAYER_ROLE.HOST && <button className="ready_button" onClick={HandleReady} disabled={!isOwnerReadyButton}>{isReady ? "Ready" : "Unready"}</button> }
         </div>
 
         {/*kick button*/}
@@ -110,7 +111,7 @@ export default function PlayerCard2({ name, score, isInLobby, isLeft, isBidding,
 
         {userId === currentTurnPlayerId &&
           <div className='timer' style={timerPosition}>
-              <p style={{order:isTop?2:1}}>TIMER</p>
+              {/* <p style={{order:isTop?2:1}}>TIMER</p> */}
               <p style={{order:isTop?1:2}} className='timer_value'>30</p>
           </div>
         }

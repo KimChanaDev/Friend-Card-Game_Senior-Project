@@ -11,10 +11,8 @@ export default function SlideBar() {
     return (
         <>
             {!isEmojiUp &&
-                <div className="slide_bar">
-                    <button onClick={handleEmoji}><ArrowLeftIcon className='left_arrow' sx={{ fontSize: 250 }} /></button>
-
-
+                <div className="slide_bar"onClick={handleEmoji}>
+                    <i className='arrow'></i>
                 </div>
             }
             {isEmojiUp && < EmojiPanel callback={handleEmoji} />}

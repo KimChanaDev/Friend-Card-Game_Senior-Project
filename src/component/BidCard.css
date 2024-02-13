@@ -1,64 +1,111 @@
-.bid_group .bid_card{
-    display: flex;
-    justify-content: center;
-    margin-inline-end: 1em;
-    width: 15%;
-    height: 12%;
-    border-radius: 2px;
-    border: 2px solid #ffa94d;
-    text-align: center;
-    margin-block-end: 4%;
-    color: #000;
-    text-align: center;
-    font-family: Inter;
-    
-    font-style: normal;
-    font-weight: 700;
-    line-height: normal;
-    border: 2px solid #000;
-    background: #A1CDFF;
-  }
-
-.bid_group .selected{
-    display: flex;
-    justify-content: center;
-    margin-inline-end: 1em;
-    width: 15%;
-    height: 12%;
-    border-radius: 2px;
-    border: 2px solid #ffa94d;
-    text-align: center;
-    margin-block-end: 4%;
-    color: #000;
-    text-align: center;
-    font-family: Inter;
-
-    font-style: normal;
-    font-weight: 700;
-    line-height: normal;
-    border: 2px solid #000;
-    background: #FF7724;
+.bid_group .bid_card {
+  cursor: pointer;
+  display: flex;
+  /* text-align: center; */
+  justify-content: center;
+  align-items: center;
+  margin-inline-end: 1em;
+  width: 15%;
+  height: 12%;
+  border-radius: 2px;
+  border: 2px solid #ffa94d;
+  text-align: center;
+  margin-block-end: 4%;
+  color: #000;
+  text-align: center;
+  font-family: Inter;
+  font-style: normal;
+  font-weight: 700;
+  line-height: normal;
+  border: 2px solid #000;
+  background: #a1cdff;
+  border-radius: 8px;
+}
+.bid_card:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.bid_card:hover {
+  background: #102a49;
+  color: whitesmoke;
 }
 
+.bid_group .selected {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-inline-end: 1em;
+  width: 15%;
+  height: 12%;
+  border-radius: 2px;
+  border: 2px solid #ffa94d;
+  text-align: center;
+  margin-block-end: 4%;
+  color: #000;
+  text-align: center;
+  font-family: Inter;
 
-  .bid_group{
-    display: flex;
-    flex-wrap: wrap;
-    align-content: center;
-    justify-content: center;
-    width:100%;
-    height: 100%;
-    margin :0 0 0 0;
-    border-radius: 84px;
-    border: 1px solid #050357;
-    background: linear-gradient(180deg, rgba(233, 233, 233, 0.00) 0%, rgba(3, 0, 172, 0.25) 100%);
-  }
-   .bid_group .bid_card button{
-    font-size: large;
-    font-weight: bold;
-  }
-  .bid_group>button{
-    width: 30%;
-    margin-inline-start: 4%;
-    /* height: 35%; */
-  }
+  font-style: normal;
+  font-weight: 700;
+  line-height: normal;
+  border: 2px solid #000;
+  background: #102a49;
+  border-radius: 8px;
+  color: whitesmoke;
+}
+
+.bid_group {
+  display: flex;
+  flex-wrap: wrap;
+  align-content: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  margin: 0 0 0 0;
+  border-radius: 84px;
+  border: 1px solid #050357;
+  background: linear-gradient(
+    180deg,
+    rgba(233, 233, 233, 0) 0%,
+    rgba(3, 0, 172, 0.25) 100%
+  );
+}
+.bid_group .bid_card button {
+  font-size: large;
+  font-weight: bold;
+}
+.bid_group > button {
+  width: 30%;
+  margin-inline-start: 4%;
+  /* height: 35%; */
+}
+.bid_confirm{
+  background-color: rgb(134, 235, 168);
+  border-radius: 8px;
+  min-height: 40px;
+  height: 10%;
+  max-height: 60px;
+  /* text */
+  color: #000;
+  font-size: large;
+  font-weight: bold;
+  border: 1px solid rgb(45, 110, 37);
+}
+.bid_confirm:hover:enabled{
+  background-color: rgb(50, 204, 101);
+}
+.bid_pass{
+  background-color: rgb(253, 96, 96);
+  border-radius: 8px;
+  min-height: 40px;
+  height: 10%;
+  max-height: 60px;
+  /* text */
+  color: #000;
+  font-size: large;
+  font-weight: bold;
+  border: 1px solid rgb(240, 67, 76);
+}
+.bid_pass:hover:enabled{
+  background-color: rgb(255, 59, 59);
+}

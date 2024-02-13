@@ -5,6 +5,7 @@ body{
     position: fixed;
     left: 0;
     right: 0;
+    top: 0;
     z-index: 1;
     display: block;
     max-width: 100vw;
@@ -134,33 +135,41 @@ section.profile{
 }
 
 .bot{
-  grid-column: 1/21;
+  grid-column: 2/20;
   grid-row:17/21;
   margin-block: 0px 0px;
   margin-inline: 0px 0px;
   display:flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   /* overflow: hidden; */
   padding: 0px 0px 0px 0px;
   justify-content: center;
+  /* background-color: black; */
+  margin-top: 10px;
 }
 
 figure.bot img:not(:first-child) {
   /* Your styles here */
   position: relative;
+  
 }
 
 figure.bot>img{
-  transform: skew(0deg,-4deg);
+  /* transform: skew(0deg,-0deg); */
   cursor: pointer;
+
+  flex-shrink: 1;
+  transition: transform 0.3s ease;
   
 }
 figure.bot>img:hover{
-  background-color:grey;
+  /* background-color:grey; */
+  /* opacity: 1; */
+  /* filter: opacity(40%) */
+  transform: translateY(-30px);
 }
-
-.tailwind-section {
-  @tailwind base;
-  @tailwind components;
-  @tailwind utilities;
+.cardOnTable{
+  /* transform: skew(0deg,-5deg); */
+  transform: translateX();
+  width: 20%;
 }

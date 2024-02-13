@@ -113,7 +113,12 @@ function CustomTable({ headers, data, onFilterIdChange }: Props) {
 
           <span>
             {" "}
-            {currentPage} / {totalPages}{" "}
+            {totalPages == 0 ? (
+                <div>{currentPage} / 1{" "}</div>
+              ) : (
+                <div>{currentPage} / {totalPages}{" "}</div>
+              )}
+            
           </span>
           <PageButton
             onClick={handleNextPage}
