@@ -230,23 +230,22 @@ export default function SummaryScore({
               <th scope="row">Round 1</th>
               <td>
                 {firstRoundPoint.at(0) ?? ""}{" "}
-                {GenerateWinnerIcon(0, playerIdsArray.at(0))}
-                10
+                {GenerateWinnerIcon(0, playerIdsArray.at(0))}                
               </td>
               <td>
                 {firstRoundPoint.at(1) ?? ""}{" "}
                 {GenerateWinnerIcon(0, playerIdsArray.at(1))}
-                10
+                
               </td>
               <td>
                 {firstRoundPoint.at(2) ?? ""}{" "}
                 {GenerateWinnerIcon(0, playerIdsArray.at(2))}
-                10
+                
               </td>
               <td>
                 {firstRoundPoint.at(3) ?? ""}{" "}
                 {GenerateWinnerIcon(0, playerIdsArray.at(3))}
-                10
+                
               </td>
             </tr>
             <tr>
