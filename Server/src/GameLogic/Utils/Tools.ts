@@ -17,3 +17,13 @@ export function GetRandomKeyFromMap <K, V>(map: Map<K, V>): K | undefined {
 	const randomIndex = Math.floor(Math.random() * keysArray.length);
 	return keysArray.at(randomIndex);
 }
+export function FindKeyByValue(obj: { [key: string]: any }, value: any): string | undefined {
+	let result: string | undefined = undefined
+	for (const key in obj) {
+		if (obj.hasOwnProperty(key) && obj[key] === value) {
+			result =  key;
+			break
+		}
+	}
+	return result;
+}

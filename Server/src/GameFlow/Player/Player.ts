@@ -3,16 +3,16 @@ export abstract class Player
 	private isReady: boolean = false;
 	private isDisconnected: boolean = false;
 	protected constructor(
-		public readonly UID: string,
-		public readonly username: string,
-		public readonly socketId: string,
+		public UID: string,
+		public username: string,
+		public socketId: string,
 		public isOwner: boolean,
-		public readonly firebaseId: string
+		public firebaseId: string
 	)
 	{
 		if(isOwner) this.isReady = true;
 	}
-
+	
 	public ToggleIsReady(): void { this.isReady = !this.isReady; }
 	public SetIsReady(bool : boolean): void { this.isReady = bool }
 	public SetIsOwner(bool : boolean): void { this.isOwner = bool }

@@ -67,6 +67,8 @@ export class FriendCardGameHandler extends SocketHandler
                     , socket
                     , () => gameRoom.AuctionTimeOutCallback(socket)
                     , () => gameRoom.SelectMainCardTimeOutCallback(socket)
+                    , () => gameRoom.BotAuctionCallback(socket)
+                    , () => gameRoom.BotSelectMainCardCallback(socket)
                 );
                 const [nextPlayerId, highestAuctionPlayerId, currentAuctionPoint, gameplayState] = gameRoom.GetCurrentRoundGame().GetInfoForAuctionPointResponse();
                 const auctionPointDTO: AuctionPointDTO = {
@@ -95,7 +97,13 @@ export class FriendCardGameHandler extends SocketHandler
                 HandlerValidation.IsFriendCardAndTrumpCardValid(gameRoom, friendCard, trumpColor);
                 HandlerValidation.NotHasCardInHand(player, friendCard);
                 HandlerValidation.NotAlreadySetTrumpAndFriend(gameRoom);
-                gameRoom.GetCurrentRoundGame().SetTrumpAndFriendProcess(trumpColor, friendCard, player, socket, () => gameRoom.PlayCardTimeOutCallback(socket));
+                gameRoom.GetCurrentRoundGame().SetTrumpAndFriendProcess(trumpColor
+                    , friendCard
+                    , player
+                    , socket
+                    , () => gameRoom.PlayCardTimeOutCallback(socket)
+                    , () => gameRoom.BotPlayCardCallback(socket)
+                );
                 const trumpAndFriendDTO :TrumpAndFriendDTO = {
                     playerId: player.UID,
                     trumpColor: trumpColor,
@@ -118,7 +126,12 @@ export class FriendCardGameHandler extends SocketHandler
                 HandlerValidation.IsGameRoomStartedState(gameRoom);
                 HandlerValidation.IsPlayerTurn(gameRoom, player);
                 HandlerValidation.HasCardOnHand(gameRoom, player, cardId);
-                const playedCard: CardId = gameRoom.GetCurrentRoundGame().PlayCardProcess(cardId, player.UID, socket, () => gameRoom.PlayCardTimeOutCallback(socket));
+                const playedCard: CardId = gameRoom.GetCurrentRoundGame().PlayCardProcess(cardId
+                    , player.UID
+                    , socket
+                    , () => gameRoom.PlayCardTimeOutCallback(socket)
+                    , () => gameRoom.BotPlayCardCallback(socket)
+                );
 
                 if(gameRoom.IsCurrentRoundGameFinished() && gameRoom.CheckGameFinished()){
                     console.log("in game finished")

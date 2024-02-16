@@ -8,7 +8,6 @@ import { GAME_STATE } from '../Enum/GameState.js';
 import { PlayerFactory } from '../GameFlow/Player/PlayerFactory.js';
 import { PlayerDTO } from '../Model/DTO/PlayerDTO.js';
 import { BUILD_IN_SOCKET_GAME_EVENTS, SOCKET_EVENT, SOCKET_GAME_EVENTS } from '../Enum/SocketEvents.js';
-import { UserModel } from '../Model/Entity/UserEntity.js';
 import { SocketBadConnectionError, SocketGameAlreadyStartedError, SocketGameNotExistError, SocketRoomFullError, SocketSessionExpiredError, SocketUnauthorizedError, SocketWrongRoomPasswordError } from '../Error/SocketErrorException.js';
 import {IJwtValidation, JWTPayLoadInterface, ValidateJWT} from '../GameLogic/Utils/Authorization/JWT.js';
 import { HandlerValidation } from './HandlerValidation.js';
@@ -161,17 +160,16 @@ export abstract class SocketHandler
 	protected DisconnectedPlayer( gameRoom: GameRoom, player: Player, disconnectReason: string, socket: Socket): void{
 		SocketHandler.connectedUsers.delete(player.UID);
 		gameRoom.DisconnectPlayer(player);
-		const newHostRoomPlayer: Player | undefined = player.isOwner ? gameRoom.SetNewHostOrOwnerRoom() : undefined
-		if (gameRoom.GetGameRoomState() === GAME_STATE.STARTED){
-
+		let newHostRoomPlayer: Player | undefined
+		if(player.isOwner){
+			newHostRoomPlayer = gameRoom.SetNewHostOrOwnerRoom()
+			player.isOwner = false
 		}
-		else {
-			const response: PlayerDisconnectedResponse = new PlayerDisconnectedResponse(
-				PlayerDTO.CreateFromPlayer(player),
-				newHostRoomPlayer ? PlayerDTO.CreateFromPlayer(newHostRoomPlayer) : undefined
-			)
-			this.EmitToRoomAndSender(socket, SOCKET_GAME_EVENTS.PLAYER_DISCONNECTED, gameRoom.id, response);
-		}
+		const response: PlayerDisconnectedResponse = new PlayerDisconnectedResponse(
+			PlayerDTO.CreateFromPlayer(player),
+			newHostRoomPlayer ? PlayerDTO.CreateFromPlayer(newHostRoomPlayer) : undefined,
+		)
+		this.EmitToRoomAndSender(socket, SOCKET_GAME_EVENTS.PLAYER_DISCONNECTED, gameRoom.id, response);
 		// if (gameRoom.GetGameRoomState() === GAME_STATE.FINISHED) {
 		// 	// const gameFinishedDTO: GameFinishedDTO = { winnerUsername: (gameRoom.GetWinner() as Player).username };
 		// 	// this.EmitToRoomAndSender(socket, SOCKET_GAME_EVENTS.GAME_FINISHED, gameId, gameFinishedDTO);

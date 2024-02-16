@@ -14,6 +14,21 @@ export class FriendCardPlayer extends Player
     {
 		super(id, username, socketId, isOwner, firebaseId);
 	}
+	public BotPlay(totalTimer:number, delayInSec: number, callback: () => void): void {
+		this.ClearTimer()
+		if (!this.timer) {
+			this.totalTimeInSec = totalTimer
+			this.startTime = Date.now();
+			this.timer = setTimeout(() => {
+				console.log("BOT Timer expired!");
+				this.timer = null;
+			}, this.totalTimeInSec * 1000 );
+		}
+		setTimeout(() => {
+			callback()
+		}, delayInSec * 1000 );
+
+	}
 	public StartTimer(secTimeInTimer: number, callback: () => void): void {
 		this.ClearTimer()
 		if (!this.timer) {

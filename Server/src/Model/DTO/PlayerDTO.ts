@@ -5,10 +5,11 @@ export class PlayerDTO {
 		private id: string,
 		private username: string,
 		private isReady: boolean,
-		private isOwner: boolean
+		private isOwner: boolean,
+		private isBot: boolean
 	) {}
 
 	public static CreateFromPlayer(player: Player): PlayerDTO {
-		return new PlayerDTO(player.UID, player.username, player.GetIsReady(), player.isOwner);
+		return new PlayerDTO(player.UID, player.username, player.GetIsReady(), player.isOwner, player.GetIsDisconnected());
 	}
 }
