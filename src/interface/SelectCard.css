@@ -49,6 +49,14 @@ thead{
   background-color: rgb(65, 100, 255);
   /* border: 10px #000102; */
 }
+
+.not-allow-select {
+    background-color: rgb(151, 152, 153);
+    /* border: 10px #000102; */
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
 .selectcard{
   display:flex;
   width: 100%;

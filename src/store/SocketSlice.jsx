@@ -10,8 +10,8 @@ const initialState = {
 
 export const ConnectToSocket = createAsyncThunk(
     'connectToSocket',
-    async ({ token, gameId, password }, { getState, dispatch }) => {
-        return await socketClient.Connect(token, gameId, password).then(() => {
+    async ({ token, gameId, password, isGuest }, { getState, dispatch }) => {
+        return await socketClient.Connect(token, gameId, password, isGuest).then(() => {
             dispatch({ type: 'socket/SetRoomIdAndPasswordConnected', payload: { gameId, password } })
         })
     }
@@ -21,8 +21,6 @@ export const DisconnectFromSocket = createAsyncThunk(
     'disconnectFromSocket',
     async () => { return await socketClient.Disconnect() }
 );
-
-
 
 const socketSlice = createSlice({
     name: 'socket',

@@ -3,12 +3,14 @@ import {serverPort} from "../../config/server-config.jsx";
 
 export default class SocketClient {
     socket;
-    Connect(token, gameId, password) {
+    Connect(token, gameId, password, isGuest=false, gameType="FRIENDCARDGAME") {
         this.socket = io.connect(`${serverPort}/FRIENDCARDGAME`, {
             query: {
                 token: token,
                 gameId: gameId,
-                password: password
+                password: password,
+                isGuest: isGuest,
+                gameType: gameType
             },
             // transports: ['websocket']
         });

@@ -24,6 +24,7 @@ import GAME_STATE from "../enum/GameStateEnum.jsx";
 import PLAYER_ROLE from "../enum/PlayerRoleEnum.jsx";
 import {ClearSelectMainCardStatus, EmitCardPlayed} from "../store/SocketGameEmittersSlice.jsx";
 import {ClearCardInField, ClearStateForNextRound} from "../store/SocketGameListenersSlice.jsx";
+import GAME_DELAY_ENUM from "../enum/GameDelayEnum.jsx";
 
 export default function InGameInterface2()
 {
@@ -87,17 +88,15 @@ export default function InGameInterface2()
     useEffect(() => {
         if(roundFinishedResult){
             setIsShowRoundFinishedAlert(true);
-            /// round finished shown 5 sec
             const firstTimeout = setTimeout(() => {
                 setIsShowRoundFinishedAlert(false);
                 setIsShowSummaryScore(true)
-            }, 5000)
-            /// summary shown 5 sec
+            }, GAME_DELAY_ENUM.ROUND_FINISHED_IN_SEC * 1000)
             const secondTimeout  = setTimeout(() => {
                 setIsShowSummaryScore(false);
                 dispatch(ClearStateForNextRound())
                 dispatch(ClearSelectMainCardStatus())
-            }, 10000);
+            }, (GAME_DELAY_ENUM.ROUND_FINISHED_IN_SEC + GAME_DELAY_ENUM.SUMMARY_SCORE_IN_SEC) * 1000);
             return () => {
                 clearTimeout(firstTimeout);
                 clearTimeout(secondTimeout);
@@ -119,20 +118,19 @@ export default function InGameInterface2()
             setIsShowFriendAppearedAlert(true);
             const timeoutId = setTimeout(() => {
                 setIsShowFriendAppearedAlert(false);
-            }, 2000); // 2 sec
+            }, GAME_DELAY_ENUM.FRIEND_APPEAR_IN_SEC * 1000);
             return () => clearTimeout(timeoutId);
         }
     }, [isFriendAppeared]);
 
     /// show trick finish alert on time limit
     useEffect(() => {
-        console.log("playerInGame: ",playersInGame)
         if(trickFinishedResult){
             setIsShowTrickFinishedAlert(true);
             const timeoutId = setTimeout(() => {
                 setIsShowTrickFinishedAlert(false);
                 dispatch(ClearCardInField())
-            }, 5000); // 5 sec
+            }, GAME_DELAY_ENUM.TRICK_FINISHED_IN_SEC * 1000);
             return () => clearTimeout(timeoutId);
         }
     }, [trickFinishedResult]);
@@ -174,7 +172,7 @@ export default function InGameInterface2()
                     <SettingsIcon className='setting' sx={{ fontSize: 50 }} />
 
                     {
-                        gameRoundState === GAME_STATE.STARTED && gameplayState === GAME_STATE.STARTED && userId === highestAuctionPlayerId
+                        gameRoundState === GAME_STATE.STARTED && gameplayState === GAME_STATE.STARTED && userId === highestAuctionPlayerId && winnerAuctionId === null
                         && <SelectCard />
                     }
                     {
@@ -218,6 +216,8 @@ export default function InGameInterface2()
                                                                   isReady={playersInGame.players[1].isReady}
                                                                   userId={playersInGame.players[1].id}
                                                                   imgUrl={playersInGame.players[1].imagePath}
+                                                                  isBot={playersInGame.players[1].isBot}
+                                                                  botLevel={playersInGame.players[1].botLevel}
                         />
                     )}
                     {(
@@ -233,6 +233,8 @@ export default function InGameInterface2()
                                                                   isReady={playersInGame.players[3].isReady}
                                                                   userId={playersInGame.players[3].id}
                                                                   imgUrl={playersInGame.players[3].imagePath}
+                                                                  isBot={playersInGame.players[3].isBot}
+                                                                  botLevel={playersInGame.players[3].botLevel}
                         />
                     )}
                 </section>
@@ -250,6 +252,8 @@ export default function InGameInterface2()
                                                                   isReady={playersInGame.players[2].isReady}
                                                                   userId={playersInGame.players[2].id}
                                                                   imgUrl={playersInGame.players[2].imagePath}
+                                                                  isBot={playersInGame.players[2].isBot}
+                                                                  botLevel={playersInGame.players[2].botLevel}
                         />
                     )}
                     {(
@@ -265,6 +269,8 @@ export default function InGameInterface2()
                                                                   isReady={playersInGame.players[0].isReady}
                                                                   userId={playersInGame.players[0].id}
                                                                   imgUrl={playersInGame.players[0].imagePath}
+                                                                  isBot={playersInGame.players[0].isBot}
+                                                                  botLevel={playersInGame.players[0].botLevel}
                         />
                     )}
                 </section>

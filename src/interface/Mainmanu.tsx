@@ -1,4 +1,4 @@
-import { useState } from "react";
+import {useEffect, useState} from "react";
 import GameMenu from "../components/GameMenu";
 import Navbar from "../components/Navbar";
 // import BaseModalWrapper from '../ModalPopup/BaseModalWrapper'
@@ -14,6 +14,18 @@ import { useDispatch, useSelector } from "react-redux";
 import { Login, Logout, LoginPayload } from "../store/UserSlice.tsx";
 import COOKIE from "../enum/CookieNameEnum.jsx";
 import { PostSignIn,PostSignUp } from "../service/Api/ApiService.jsx";
+import {ConnectToSocket} from "../store/SocketSlice.jsx";
+import SOCKET_STATUS from "../enum/SocketStatusEnum.jsx";
+import {SetPage} from "../store/PageStateSlice.jsx";
+import PAGE_STATE from "../enum/PageStateEnum.jsx";
+import {
+  Auction, CardPlayed, EmojiReceived, GameFinished,
+  PlayerConnected,
+  PlayerDisconnected,
+  PlayerInGame,
+  PlayerToggleReady, RoundFinished, SelectMainCard,
+  StartGame, TrickFinished
+} from "../store/SocketGameListenersSlice.jsx";
 
 Mainmanu.propTypes = {
   setCookie: PropTypes.func,
@@ -29,6 +41,7 @@ function Mainmanu({ setCookie, removeCookie }) {
         break;
       case 2:
         console.log(`Button 2 clicked`);
+        playWithBot()
         console.log(userStore);
         break;
       case 3:
@@ -69,6 +82,31 @@ function Mainmanu({ setCookie, removeCookie }) {
   const toggleUserProfile = () => {
     setIsProfileVisible((wasModalVisible) => !wasModalVisible);
   };
+  const playWithBot = () => {
+    // const dispatch = useDispatch()
+    dispatch(ConnectToSocket({token: undefined, gameId: undefined, password: undefined, isGuest: true}))
+    StartGameListener()
+  }
+  function StartGameListener() {
+    dispatch(PlayerToggleReady());
+    dispatch(StartGame());
+    dispatch(PlayerConnected());
+    dispatch(PlayerInGame());
+    dispatch(PlayerDisconnected());
+    dispatch(Auction());
+    dispatch(SelectMainCard());
+    dispatch(CardPlayed());
+    dispatch(TrickFinished());
+    dispatch(RoundFinished());
+    dispatch(GameFinished());
+    dispatch(EmojiReceived());
+  }
+  const socketConnectionStatus = useSelector((state) => state.socketStore.connectionStatus);
+  useEffect(() => {
+    if (socketConnectionStatus === SOCKET_STATUS.CONNECTED) {
+      dispatch(SetPage({ pageState: PAGE_STATE.LOADING }));
+    }
+  }, [socketConnectionStatus]);
 
   // User status
   const userStore = useSelector((state) => state.userStore);
