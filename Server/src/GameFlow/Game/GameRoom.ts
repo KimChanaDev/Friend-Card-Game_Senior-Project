@@ -36,6 +36,7 @@ export abstract class GameRoom
     public GetPlayerByUID(UID: string): Player | undefined { return this.playersInGame.get(UID); }
     public GetAllPlayersDTO(): PlayerDTO[] { return Array.from(this.playersInGame.values()).map((player) => PlayerDTO.CreateFromPlayer(player)); }
     public AreAllPlayersReady(): boolean { return Array.from(this.playersInGame.values()).every((player) => player.GetIsReady()); }
+    public AreAllPlayersIsDisconnected(): boolean { return Array.from(this.playersInGame.values()).every((player) => player.GetIsDisconnected()); }
     public NumPlayersInGame(): number { return this.playersInGame.size; }
     public NumConnectedPlayersInGame(): number { return Array.from(this.playersInGame.values()).filter((player) => !player.GetIsDisconnected()).length; }
     public IsRoomFull(): boolean { return this.maxPlayers - this.NumPlayersInGame() <= 0; }

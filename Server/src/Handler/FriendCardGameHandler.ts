@@ -22,6 +22,7 @@ import {GameFinishedDTO} from "../Model/DTO/GameFinishedDTO.js";
 import {TimerResponseDTO} from "../Model/DTO/Response/TImerResponseDTO.js";
 import {PlayerFactory} from "../GameFlow/Player/PlayerFactory.js";
 import {BOT_CONFIG} from "../Enum/BotConfig.js";
+import {Guid} from "guid-typescript";
 
 export class FriendCardGameHandler extends SocketHandler
 {
@@ -60,15 +61,9 @@ export class FriendCardGameHandler extends SocketHandler
                 HandlerValidation.IsGameRoomNotStartedState(gameRoom);
                 HandlerValidation.IsOwnerRoom(gameRoom, player);
                 HandlerValidation.IsBotLevelValid(botLevel);
-                let numBotInRoom: number = 0
-                gameRoom.GetAllPlayerIdAsArray().forEach((playerId: string) => {
-                    if(playerId >= BOT_CONFIG.UID && playerId <= BOT_CONFIG.UID + 1){
-                        numBotInRoom++
-                    }
-                })
                 const newBotPlayer: Player = PlayerFactory.CreateBotPlayerObject(
                     gameRoom!.gameType,
-                    BOT_CONFIG.UID + numBotInRoom,
+                    Guid.create().toString(),
                     BOT_CONFIG.USERNAME,
                     BOT_CONFIG.SOCKET_ID,
                     false,
