@@ -21,6 +21,31 @@
   background: #a1cdff;
   border-radius: 8px;
 }
+.bid_group .bid_card-disabled {
+  cursor: pointer;
+  display: flex;
+  /* text-align: center; */
+  justify-content: center;
+  align-items: center;
+  margin-inline-end: 1em;
+  width: 15%;
+  height: 12%;
+  border-radius: 2px;
+  border: 2px solid #ffa94d;
+  text-align: center;
+  margin-block-end: 4%;
+  color: #000;
+  text-align: center;
+  font-family: Inter;
+  font-style: normal;
+  font-weight: 700;
+  line-height: normal;
+  border: 2px solid #000;
+  background: #4957f2;
+  border-radius: 8px;
+  opacity: 0.5;
+  cursor: not-allowed;
+}
 .bid_card:disabled {
   opacity: 0.5;
   cursor: not-allowed;

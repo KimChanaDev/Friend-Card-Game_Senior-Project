@@ -3,7 +3,18 @@ import { socketClient} from "../main.jsx";
 import SOCKET_EVENT from "../enum/SocketEventEnum.jsx";
 import SOCKET_STATUS from "../enum/SocketStatusEnum.jsx";
 import {EmitGetGameStateFromServer, SetGameState} from "./SocketGameEmittersSlice.jsx";
-import {AddPlayersInGame, RemovePlayersInGame, SetNewHostRoom, SetPlayersInGame, TogglePlayer} from "./GameSlice.jsx";
+import {
+    AddPlayersInGame,
+    RemovePlayersInGame,
+    ResetPlayersInGame,
+    SetNewHostRoom,
+    SetPlayersInGame,
+    TogglePlayer,
+    UpdatePlayerInGame
+} from "./GameSlice.jsx";
+import {DisconnectFromSocket} from "./SocketSlice.jsx";
+import {SetPage} from "./PageStateSlice.jsx";
+import PAGE_STATE from "../enum/PageStateEnum.jsx";
 
 export const PlayerToggleReady = createAsyncThunk(
     'toggleReady',
@@ -44,10 +55,33 @@ export const PlayerInGame = createAsyncThunk(
 export const PlayerDisconnected = createAsyncThunk(
     'playerDisconnected',
     async function (_, { getState, dispatch }) {
-        return await socketClient.On(SOCKET_EVENT.PLAYER_DISCONNECTED, (player) =>{
-            dispatch(RemovePlayersInGame({player : player.disconnectPlayer}))
-            if(player.newHostPlayer){
-                dispatch(SetNewHostRoom({player: player.newHostPlayer}))
+        return await socketClient.On(SOCKET_EVENT.PLAYER_DISCONNECTED, (response) =>{
+            console.log("playerDisconnected: " + JSON.stringify(response))
+            const state = getState()
+            const myUserId = state.userStore.userId
+            if(state.socketGameListenersStore.isGameStarted){
+                if(response.disconnectPlayer.isBot){
+                    dispatch(UpdatePlayerInGame({ updatePlayer: response.disconnectPlayer}))
+                }else{
+                    dispatch(RemovePlayersInGame({player : response.disconnectPlayer}))
+                }
+                if(response.newHostPlayer){
+                    dispatch(SetNewHostRoom({player: response.newHostPlayer}))
+                }
+            }
+            else{
+                if(response.disconnectPlayer.id === myUserId){
+                    alert("You are kicked from host")
+                    dispatch(DisconnectFromSocket())
+                    dispatch(ResetPlayersInGame())
+                    dispatch(ResetAllListenerState())
+                    dispatch(SetPage({ pageState: PAGE_STATE.MENU }))
+                }else{
+                    dispatch(RemovePlayersInGame({player : response.disconnectPlayer}))
+                    if(response.newHostPlayer){
+                        dispatch(SetNewHostRoom({player: response.newHostPlayer}))
+                    }
+                }
             }
         });
     }
@@ -120,7 +154,7 @@ const initialState = {
     /// playerInGame
     playerInGameListenerResponseStatus: '',
 
-    emojiDetail: null, // { playerId, emoji }
+    emojiDetail: [], // { playerId, emoji, isShowed }
 
     /// Auction
     playersAuctionDetail: [], //playerId, isPass, actionPoint
@@ -247,12 +281,18 @@ const socketGameListenerSlice = createSlice({
             state.gameFinishedResult = action.payload.result
         },
         Emoji: (state, action) => {
-            state.emojiDetail = action.payload.result
+            const responseFromServer = action.payload.result
+            if(state.emojiDetail.some(a => a.playerId === responseFromServer.playerId)){
+                const existedEmojiDetail = state.emojiDetail.filter(a => a.playerId !== responseFromServer.playerId)
+                state.emojiDetail = [...existedEmojiDetail, responseFromServer]
+            }else{
+                state.emojiDetail = [...state.emojiDetail, responseFromServer]
+            }
         },
         ClearCardInField: (state, action) => { state.cardsInField = [] },
         ClearEmojiDetail: (state, action) => {
-            state.emojiDetail = null;
-        }
+            state.emojiDetail = state.emojiDetail.filter(a => a.playerId !== action.payload.userId)
+        },
     },
     extraReducers: (builder) => {
         builder.addCase(PlayerInGame.pending, (state) => {

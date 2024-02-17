@@ -12,6 +12,9 @@ const SOCKET_EVENT = {
     SELECT_MAIN_CARD: 'select_main_card',
     TRICK_FINISHED: 'trick_finished',
     ROUND_FINISHED: 'round_finished',
-    EMOJI: 'emoji'
+    EMOJI: 'emoji',
+    KICK_PLAYER: 'kick_player',
+    GET_TIMEOUT: "get_timeout",
+    ADD_BOT_PLAYER: 'add_bot_player'
 }
 export default SOCKET_EVENT

@@ -6,8 +6,9 @@ import {ResetPlayersInGame} from "../../store/GameSlice.jsx";
 import {ResetAllListenerState} from "../../store/SocketGameListenersSlice.jsx";
 import {SetPage} from "../../store/PageStateSlice.jsx";
 import PAGE_STATE from "../../enum/PageStateEnum.jsx";
-import {EmitStartGame} from "../../store/SocketGameEmittersSlice.jsx";
+import {EmitAddBotPlayer, EmitStartGame} from "../../store/SocketGameEmittersSlice.jsx";
 import { AddNStartBotButton,QuitBotButton } from "./WaitingPlayer.styled.ts";
+import BOT_LEVEL from "../../enum/BotLevelEnum.jsx";
 
 WaitingPlayer.propTypes = {
     isOpen: PropTypes.bool,
@@ -17,7 +18,12 @@ export default function WaitingPlayer({isOpen}){
     const playersInGame = useSelector(state => state.gameStore.playersInGame)
     const dispatch = useDispatch()
     function AddBot(){
-        alert("Add bot clicked")
+        const inputBotLevel = prompt('Bot Level Here (0 for Easy, 1 for Medium, 2 for Hard)');
+        const inputBotLevelNumber = parseInt(inputBotLevel)
+        if(inputBotLevelNumber !== BOT_LEVEL.EASY_BOT && inputBotLevelNumber !== BOT_LEVEL.MEDIUM_BOT && inputBotLevelNumber !== BOT_LEVEL.HARD_BOT){
+            return
+        }
+        dispatch(EmitAddBotPlayer({botLevel: inputBotLevelNumber}))
     }
     function StartGame() {
         dispatch(EmitStartGame())

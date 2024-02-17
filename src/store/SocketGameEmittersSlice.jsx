@@ -9,6 +9,7 @@ const initialState = {
     gameStateFromServer: null,
     //     {
     //     currentPlayerId: "",
+    //     currentPlayerTimeout: "",
     //     thisPlayer: {
     //         id: null,
     //         username: null,
@@ -36,6 +37,8 @@ const initialState = {
     //     success: false,
     // }
     scoreCardIds: null,
+    currentPlayerTimeoutId: "",
+    currentPlayerTimeout: null,
 };
 
 export const EmitToggleReady = createAsyncThunk(
@@ -85,6 +88,23 @@ export const EmitSendEmoji = createAsyncThunk(
 async ({ emoji }, {getState, dispatch}) => {
     return socketClient.Emit(SOCKET_EVENT.EMOJI, emoji)
 });
+export const EmitKickPlayer = createAsyncThunk(
+'emitKickPlayer',
+async ({ userId }, {getState, dispatch}) => {
+    return socketClient.Emit(SOCKET_EVENT.KICK_PLAYER, userId)
+});
+export const EmitGetTimeout = createAsyncThunk(
+'emitEmitGetTimeout',
+async ({ userId }, {getState, dispatch}) => {
+    return socketClient.Emit(SOCKET_EVENT.GET_TIMEOUT)
+});
+export const EmitAddBotPlayer = createAsyncThunk(
+'emitAddBotPlayer',
+async ({ botLevel }, {getState, dispatch}) => {
+    return socketClient.Emit(SOCKET_EVENT.ADD_BOT_PLAYER, botLevel).then(a => {
+    }).catch(a => {
+    })
+});
 
 const socketGameEmittersSlice = createSlice({
     name: 'socketGameEmitters',
@@ -92,19 +112,30 @@ const socketGameEmittersSlice = createSlice({
     reducers: {
         SetGameState: (state, action) => {
             state.gameStateFromServer = action.payload.gameState
+            state.currentPlayerTimeoutId = action.payload.gameState.currentPlayerId
+            state.currentPlayerTimeout = action.payload.gameState.currentPlayerTimeout
         },
         ResetAllEmitterState: (state, action) => {
             state.selectMainCardStatus = null
             state.gameStateFromServer = null
             state.scoreCardIds = null
         },
-        ClearSelectMainCardStatus: (state, auction) => {
+        ClearSelectMainCardStatus: (state, action) => {
             state.selectMainCardStatus = null
+        },
+        SetPlayerTimeout: (state, action) => {
+            state.currentPlayerTimeout = action.payload.time
+        },
+        DecreasePlayerTimeout: (state, action) => {
+            state.currentPlayerTimeout = state.currentPlayerTimeout-1
         }
     },
     extraReducers: (builder) => {
         builder.addCase(EmitGetGameStateFromServer.fulfilled, (state,action) => {
+            console.log("timer: " + action.payload.currentPlayerTimeout)
             state.gameStateFromServer = action.payload
+            state.currentPlayerTimeoutId = action.payload.currentPlayerId
+            state.currentPlayerTimeout = action.payload.currentPlayerTimeout
         });
         builder.addCase(EmitGetScoreCard.fulfilled, (state,action) => {
             state.scoreCardIds = action.payload
@@ -118,11 +149,18 @@ const socketGameEmittersSlice = createSlice({
         builder.addCase(EmitSelectMainCard.rejected, (state,action) => {
             state.selectMainCardStatus = SOCKET_STATUS.FAILED
         });
+        builder.addCase(EmitGetTimeout.fulfilled, (state,action) => {
+            state.currentPlayerTimeoutId = action.payload.playerId
+            state.currentPlayerTimeout = action.payload.timer
+            console.log("Emit timeout: " + action.payload.timer)
+        });
     },
 });
 export const {
     ClearSelectMainCardStatus,
     ResetAllEmitterState,
     SetGameState,
+    SetPlayerTimeout,
+    DecreasePlayerTimeout,
 } = socketGameEmittersSlice.actions
 export default socketGameEmittersSlice.reducer;

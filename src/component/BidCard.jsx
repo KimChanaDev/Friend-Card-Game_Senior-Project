@@ -1,11 +1,13 @@
 import './BidCard.css'
 import {useState} from "react";
-import {useDispatch} from "react-redux";
+import {useDispatch, useSelector} from "react-redux";
 import {EmitAuction} from "../store/SocketGameEmittersSlice.jsx";
 
 function BidCard() {
     const [selectedBid, setSelectedBid] = useState(null);
     const dispatch = useDispatch()
+    const highestAuctionPoint = useSelector(state => state.socketGameListenersStore.highestAuctionPoint)
+
     function HandleBidClick (bidValue) {
         setSelectedBid(bidValue);
     }
@@ -21,14 +23,15 @@ function BidCard() {
         }))
     }
 
+
     return (
         <>
             <ol className='bid_group'>
                 {[55, 60, 65, 70, 75, 80, 85, 90, 95, 100].map((bidValue) => (
                     <li
                         key={bidValue}
-                        className={`${selectedBid === bidValue ? 'selected' : 'bid_card'}`}
-                        onClick={() => HandleBidClick(bidValue)}
+                        className={`${selectedBid === bidValue ? 'selected' :  (bidValue <= highestAuctionPoint ? 'bid_card-disabled' : 'bid_card') }`}
+                        onClick={bidValue <= highestAuctionPoint ? null : () => HandleBidClick(bidValue)}
                     >
                         {bidValue}
                     </li>

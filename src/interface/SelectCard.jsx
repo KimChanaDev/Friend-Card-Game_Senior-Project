@@ -8,12 +8,16 @@ function SelectCard() {
     const [friendCardSelected, setFriendCardSelected] = useState("")
     const [trumpSelected, setTrumpSelected] = useState("")
     const selectMainCardStatus = useSelector(state => state.socketGameEmittersStore.selectMainCardStatus)
+    const cardsPlayerCanPlay = useSelector(state => state.socketGameEmittersStore.gameStateFromServer?.thisPlayerActions?.cardsPlayerCanPlay) ?? []
     const dispatch = useDispatch()
 
+    function IsDimFriendCardChoice(card){
+        return cardsPlayerCanPlay.some(c => c === card)
+    }
     function RenderCardValueRowNumbers(suit, className){
         return cardValues.map((value, index) => (
-            <td key={index} className={`${className} ${value === friendCardSelected.charAt(0) && suit === friendCardSelected.charAt(1) ? "selected" : ""} `}>
-                <button onClick={() => HandleCardValueClicked(suit, value)}>{value}</button>
+            <td key={index} className={`${className} ${IsDimFriendCardChoice(value+suit) ? "not-allow-select" : (value === friendCardSelected.charAt(0) && suit === friendCardSelected.charAt(1) ? "selected" : "") } `}>
+                <button onClick={IsDimFriendCardChoice(value+suit) ? null : () => HandleCardValueClicked(suit, value)}>{value}</button>
             </td>
         ))
     }

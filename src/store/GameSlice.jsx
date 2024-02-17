@@ -29,6 +29,14 @@ export const gameSlice = createSlice({
                 thisPlayer: state.playersInGame.thisPlayer,
             }
         },
+        UpdatePlayerInGame: (state, action) => {
+            const updatePlayer = action.payload.updatePlayer
+            if(state.playersInGame.players){
+                state.playersInGame.players = state.playersInGame.players.map(player => {
+                    return player.id === updatePlayer.id ? updatePlayer : player
+                })
+            }
+        },
         ResetPlayersInGame: (state) => {
             state.playersInGame = null
         },
@@ -86,5 +94,6 @@ export const {
     AddPlayersInGame,
     RemovePlayersInGame,
     SetNewHostRoom,
+    UpdatePlayerInGame
 } = gameSlice.actions
 export default gameSlice.reducer
