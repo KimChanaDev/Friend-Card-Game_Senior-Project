@@ -27,3 +27,12 @@ export function FindKeyByValue(obj: { [key: string]: any }, value: any): string 
 	}
 	return result;
 }
+
+export function GenerateRandomStringEightChar() {
+	const characters: string = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+	let randomString = '';
+	for (let i = 0; i < 8; i++) {
+		randomString += characters.charAt(Math.floor(Math.random() * characters.length));
+	}
+	return randomString;
+}
