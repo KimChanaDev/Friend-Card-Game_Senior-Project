@@ -47,6 +47,7 @@ export abstract class GameRoom
     {
         if (this.gameState === GAME_STATE.STARTED){
             player.SetDisconnected(true);
+            player.SetBotLevel(BOT_CONFIG.EASY_BOT)
         }
         else {
             this.playersInGame.delete(player.UID);

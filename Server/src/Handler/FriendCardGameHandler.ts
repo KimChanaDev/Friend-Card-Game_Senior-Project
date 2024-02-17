@@ -20,6 +20,8 @@ import {WinnerRoundResponse} from "../Model/DTO/Response/WinnerRoundResponse.js"
 import {EMOJI} from "../Enum/Emoji.js";
 import {GameFinishedDTO} from "../Model/DTO/GameFinishedDTO.js";
 import {TimerResponseDTO} from "../Model/DTO/Response/TImerResponseDTO.js";
+import {PlayerFactory} from "../GameFlow/Player/PlayerFactory.js";
+import {BOT_CONFIG} from "../Enum/BotConfig.js";
 
 export class FriendCardGameHandler extends SocketHandler
 {
@@ -52,6 +54,37 @@ export class FriendCardGameHandler extends SocketHandler
                 callback({ success: false, error: ex?.message } as BaseResponseDTO);
             }
 		});
+        socket.on(SOCKET_GAME_EVENTS.ADD_BOT_PLAYER, (botLevel: number, callback: (response: BaseResponseDTO) => void) => {
+            try
+            {
+                HandlerValidation.IsGameRoomNotStartedState(gameRoom);
+                HandlerValidation.IsOwnerRoom(gameRoom, player);
+                HandlerValidation.IsBotLevelValid(botLevel);
+                let numBotInRoom: number = 0
+                gameRoom.GetAllPlayerIdAsArray().forEach((playerId: string) => {
+                    if(playerId >= BOT_CONFIG.UID && playerId <= BOT_CONFIG.UID + 1){
+                        numBotInRoom++
+                    }
+                })
+                const newBotPlayer: Player = PlayerFactory.CreateBotPlayerObject(
+                    gameRoom!.gameType,
+                    BOT_CONFIG.UID + numBotInRoom,
+                    BOT_CONFIG.USERNAME,
+                    BOT_CONFIG.SOCKET_ID,
+                    false,
+                    BOT_CONFIG.FIREBASE_ID,
+                    "",
+                    botLevel
+                );
+                gameRoom.AddPlayer(newBotPlayer);
+                super.EmitToRoomAndSender(socket, SOCKET_GAME_EVENTS.PLAYER_CONNECTED, gameRoom.id, PlayerDTO.CreateFromPlayer(newBotPlayer));
+                callback({ success: true } as BaseResponseDTO);
+            }
+            catch(ex : any)
+            {
+                callback({ success: false, error: ex?.message } as BaseResponseDTO);
+            }
+        });
         socket.on(SOCKET_GAME_EVENTS.AUCTION, (auctionPass: boolean, auctionPoint: number, callback: (response: AuctionPointResponseDTO | BaseResponseDTO) => void) => {
             try
             {

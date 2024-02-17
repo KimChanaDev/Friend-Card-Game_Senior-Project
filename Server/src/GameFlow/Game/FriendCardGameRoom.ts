@@ -161,7 +161,7 @@ export class FriendCardGameRoom extends GameRoom
         const cardInHand: CardId[] = this.GetCurrentRoundGame().GetCurrentPlayer().GetHandCard().GetInDeck()
         const cardsInHandAIFormat: number[] = FriendCardGameRoundLogic.GenerateCardIdsInHandAIFormat(cardInHand)
         const currentBid: number = this.GetCurrentRoundGame().GetAuctionPoint()
-        const botLevel: number = BOT_CONFIG.EASY_BOT
+        const botLevel: number = this.GetCurrentRoundGame().GetCurrentPlayer().GetBotLevel() ?? BOT_CONFIG.EASY_BOT
         BotAuction(cardsInHandAIFormat, currentBid, botLevel)
             .then((biddingScore: string) => {
                 const botAuctionScore: number = parseInt(biddingScore, 10)
@@ -180,7 +180,7 @@ export class FriendCardGameRoom extends GameRoom
         console.log("cardInHand: " + cardInHand.toString())
         const cardsInHandAIFormat: number[] = FriendCardGameRoundLogic.GenerateCardIdsInHandAIFormat(cardInHand)
         console.log("cardsInHandAIFormat: " + cardsInHandAIFormat.toString())
-        const botLevel: number = BOT_CONFIG.EASY_BOT
+        const botLevel: number = this.GetCurrentRoundGame().GetCurrentPlayer().GetBotLevel() ?? BOT_CONFIG.EASY_BOT
         BotSelectTrumpSuit(cardsInHandAIFormat, botLevel)
             .then((trumpFromAI: string) => {
                 BotSelectFriendCard(cardsInHandAIFormat)
@@ -215,7 +215,7 @@ export class FriendCardGameRoom extends GameRoom
         const cardInHand: CardId[] = this.GetCurrentRoundGame().GetCurrentPlayer().GetHandCard().GetInDeck()
         const cardsInHandAIFormat: number[] = FriendCardGameRoundLogic.GenerateCardIdsInHandAIFormat(cardInHand)
         const gameStateAIFormat: number[] = this.GenerateGameStateAIFormat(cardInHand)
-        const botLevel: number = BOT_CONFIG.EASY_BOT
+        const botLevel: number = this.GetCurrentRoundGame().GetCurrentPlayer().GetBotLevel() ?? BOT_CONFIG.EASY_BOT
 
         console.log("cardInHand: " + cardInHand.toString())
         console.log("cardsInHandAIFormat: " + cardsInHandAIFormat.toString())
