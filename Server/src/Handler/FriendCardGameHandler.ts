@@ -20,6 +20,9 @@ import {WinnerRoundResponse} from "../Model/DTO/Response/WinnerRoundResponse.js"
 import {EMOJI} from "../Enum/Emoji.js";
 import {GameFinishedDTO} from "../Model/DTO/GameFinishedDTO.js";
 import {TimerResponseDTO} from "../Model/DTO/Response/TImerResponseDTO.js";
+import {PlayerFactory} from "../GameFlow/Player/PlayerFactory.js";
+import {BOT_CONFIG} from "../Enum/BotConfig.js";
+import {Guid} from "guid-typescript";
 
 export class FriendCardGameHandler extends SocketHandler
 {
@@ -52,6 +55,31 @@ export class FriendCardGameHandler extends SocketHandler
                 callback({ success: false, error: ex?.message } as BaseResponseDTO);
             }
 		});
+        socket.on(SOCKET_GAME_EVENTS.ADD_BOT_PLAYER, (botLevel: number, callback: (response: BaseResponseDTO) => void) => {
+            try
+            {
+                HandlerValidation.IsGameRoomNotStartedState(gameRoom);
+                HandlerValidation.IsOwnerRoom(gameRoom, player);
+                HandlerValidation.IsBotLevelValid(botLevel);
+                const newBotPlayer: Player = PlayerFactory.CreateBotPlayerObject(
+                    gameRoom!.gameType,
+                    Guid.create().toString(),
+                    BOT_CONFIG.USERNAME,
+                    BOT_CONFIG.SOCKET_ID,
+                    false,
+                    BOT_CONFIG.FIREBASE_ID,
+                    "",
+                    botLevel
+                );
+                gameRoom.AddPlayer(newBotPlayer);
+                super.EmitToRoomAndSender(socket, SOCKET_GAME_EVENTS.PLAYER_CONNECTED, gameRoom.id, PlayerDTO.CreateFromPlayer(newBotPlayer));
+                callback({ success: true } as BaseResponseDTO);
+            }
+            catch(ex : any)
+            {
+                callback({ success: false, error: ex?.message } as BaseResponseDTO);
+            }
+        });
         socket.on(SOCKET_GAME_EVENTS.AUCTION, (auctionPass: boolean, auctionPoint: number, callback: (response: AuctionPointResponseDTO | BaseResponseDTO) => void) => {
             try
             {
@@ -67,6 +95,8 @@ export class FriendCardGameHandler extends SocketHandler
                     , socket
                     , () => gameRoom.AuctionTimeOutCallback(socket)
                     , () => gameRoom.SelectMainCardTimeOutCallback(socket)
+                    , () => gameRoom.BotAuctionCallback(socket)
+                    , () => gameRoom.BotSelectMainCardCallback(socket)
                 );
                 const [nextPlayerId, highestAuctionPlayerId, currentAuctionPoint, gameplayState] = gameRoom.GetCurrentRoundGame().GetInfoForAuctionPointResponse();
                 const auctionPointDTO: AuctionPointDTO = {
@@ -95,7 +125,13 @@ export class FriendCardGameHandler extends SocketHandler
                 HandlerValidation.IsFriendCardAndTrumpCardValid(gameRoom, friendCard, trumpColor);
                 HandlerValidation.NotHasCardInHand(player, friendCard);
                 HandlerValidation.NotAlreadySetTrumpAndFriend(gameRoom);
-                gameRoom.GetCurrentRoundGame().SetTrumpAndFriendProcess(trumpColor, friendCard, player, socket, () => gameRoom.PlayCardTimeOutCallback(socket));
+                gameRoom.GetCurrentRoundGame().SetTrumpAndFriendProcess(trumpColor
+                    , friendCard
+                    , player
+                    , socket
+                    , () => gameRoom.PlayCardTimeOutCallback(socket)
+                    , () => gameRoom.BotPlayCardCallback(socket)
+                );
                 const trumpAndFriendDTO :TrumpAndFriendDTO = {
                     playerId: player.UID,
                     trumpColor: trumpColor,
@@ -118,7 +154,12 @@ export class FriendCardGameHandler extends SocketHandler
                 HandlerValidation.IsGameRoomStartedState(gameRoom);
                 HandlerValidation.IsPlayerTurn(gameRoom, player);
                 HandlerValidation.HasCardOnHand(gameRoom, player, cardId);
-                const playedCard: CardId = gameRoom.GetCurrentRoundGame().PlayCardProcess(cardId, player.UID, socket, () => gameRoom.PlayCardTimeOutCallback(socket));
+                const playedCard: CardId = gameRoom.GetCurrentRoundGame().PlayCardProcess(cardId
+                    , player.UID
+                    , socket
+                    , () => gameRoom.PlayCardTimeOutCallback(socket)
+                    , () => gameRoom.BotPlayCardCallback(socket)
+                );
 
                 if(gameRoom.IsCurrentRoundGameFinished() && gameRoom.CheckGameFinished()){
                     console.log("in game finished")

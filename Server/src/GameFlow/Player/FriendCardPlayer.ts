@@ -10,9 +10,24 @@ export class FriendCardPlayer extends Player
 	private startTime: number | null = null;
 	private totalTimeInSec: number | null = null;
 
-	constructor(id: string, username: string, socketId: string, isOwner: boolean, firebaseId: string, profileImagePath: string)
+	constructor(id: string, username: string, socketId: string, isOwner: boolean, firebaseId: string, profileImagePath: string, botLevel?: number | undefined)
     {
-		super(id, username, socketId, isOwner, firebaseId, profileImagePath);
+		super(id, username, socketId, isOwner, firebaseId, profileImagePath, botLevel);
+	}
+	public BotPlay(totalTimer:number, delayInSec: number, callback: () => void): void {
+		this.ClearTimer()
+		if (!this.timer) {
+			this.totalTimeInSec = totalTimer
+			this.startTime = Date.now();
+			this.timer = setTimeout(() => {
+				console.log("BOT Timer expired!");
+				this.timer = null;
+			}, this.totalTimeInSec * 1000 );
+		}
+		setTimeout(() => {
+			callback()
+		}, delayInSec * 1000 );
+
 	}
 	public StartTimer(secTimeInTimer: number, callback: () => void): void {
 		this.ClearTimer()
