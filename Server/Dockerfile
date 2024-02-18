@@ -5,7 +5,7 @@ COPY package.json .
 RUN npm install
 
 COPY requirements.txt .
-RUN pip install --target=/install -r requirements.txt
+RUN pip3 install --target=/install -r requirements.txt && pip3 install --target=/install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
 
 COPY . .
 RUN npm run build
