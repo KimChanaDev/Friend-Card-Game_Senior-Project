@@ -18,7 +18,6 @@ export function BotAuction(cardInHandArray: number[], currentBid: number, botDif
     return PythonListener(python)
 }
 export function BotSelectTrumpSuit(cardInHandArray: number[], botDifferenceNumber: number): Promise<string>{
-    console.log("scriptPathWithDoubleBackSlashes: " + scriptPathWithDoubleBackSlashes)
     const python: ChildProcessWithoutNullStreams = spawn('python', [
         scriptPathWithDoubleBackSlashes
         , 'calculateTrumpsuite'
