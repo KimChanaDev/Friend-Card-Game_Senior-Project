@@ -97,6 +97,7 @@ export default function InGameInterface2()
                 dispatch(ClearStateForNextRound())
                 dispatch(ClearSelectMainCardStatus())
             }, (GAME_DELAY_ENUM.ROUND_FINISHED_IN_SEC + GAME_DELAY_ENUM.SUMMARY_SCORE_IN_SEC) * 1000);
+            setIsFriendAppearFirstTime(true);
             return () => {
                 clearTimeout(firstTimeout);
                 clearTimeout(secondTimeout);
@@ -166,6 +167,7 @@ export default function InGameInterface2()
                     </section> */}
 
                 <section className='top' >
+                    
                     <LobbyInfo />
                     <FriendCard cardName={CARD_ID_FILE.cardIds[friendCard]}/>
                     <TrumpCard  cardName={CARD_ID_FILE.suits[trumpSuit]}/>

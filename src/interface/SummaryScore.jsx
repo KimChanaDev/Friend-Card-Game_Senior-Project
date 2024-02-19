@@ -208,20 +208,16 @@ export default function SummaryScore({
             <tr>
               <th scope="col" className="table-topleft"></th>
               <th scope="col" className="table-playername">
-                {/* {playerNameArray[0]} */}
-                Test0
+                {playerNameArray[0]}
               </th>
               <th scope="col" className="table-playername">
-                {/* {playerNameArray[1]} */}
-                Test1
+                {playerNameArray[1]}
               </th>
               <th scope="col" className="table-playername">
-                {/* {playerNameArray[2]} */}
-                Test2
+                {playerNameArray[2]}
               </th>
               <th scope="col" className="table-playername">
-                {/* {playerNameArray[3]} */}
-                Test3
+                {playerNameArray[3]}
               </th>
             </tr>
           </thead>
