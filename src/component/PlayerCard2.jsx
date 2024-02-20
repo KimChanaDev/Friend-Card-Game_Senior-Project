@@ -38,6 +38,7 @@ export default function  PlayerCard2({ name, score, isInLobby, isLeft, isBidding
   const gameRoundState = useSelector(state => state.socketGameEmittersStore.gameStateFromServer?.gameRoundState) ?? GAME_STATE.NOT_STARTED
   const gameplayState = useSelector(state => state.socketGameEmittersStore.gameStateFromServer?.gameplayState) ?? GAME_STATE.NOT_STARTED
   const winnerAuctionId = useSelector(state => state.socketGameListenersStore.winnerAuctionId)
+  const winnerAuctionPoint = useSelector(state => state.socketGameListenersStore.winnerAuctionPoint)
   const [isShowEmojiReceived, setIsShowEmojiReceived] = useState(false)
   const [timerId, setTimerId] = useState(null)
 
@@ -149,7 +150,7 @@ export default function  PlayerCard2({ name, score, isInLobby, isLeft, isBidding
           {/*UID*/}
           { /*!isGameStarted && */!isBot && <p className=''>{`UID ${userId.substring(userId.length - 8)}`}</p> }
           {/*score*/}
-          { isGameStarted && <p className=''>{`Score : ${FindScore()}`}</p> }
+          { isGameStarted && <p className=''>{`Score : ${FindScore()} ${winnerAuctionId === userId ? `|| WinBidPoint: ${winnerAuctionPoint}` : ""}`}</p> }
           {/*ready button*/}
           { isInLobby && role !== PLAYER_ROLE.HOST && <button className="ready_button" onClick={HandleReady} disabled={!isOwnerReadyButton}>{isReady ? "Ready" : "Unready"}</button> }
         </div>

@@ -165,7 +165,7 @@ const initialState = {
     winnerAuctionId: null,
     trumpSuit: null,
     friendCard: null,
-
+    winnerAuctionPoint: null,
     /// CardPlayed
     currentCardPlayedResult: null,  /// {playerId, cardId}
     cardsInField: [],
@@ -220,6 +220,7 @@ const socketGameListenerSlice = createSlice({
             state.winnerAuctionId = null
             state.trumpSuit = null
             state.friendCard = null
+            state.winnerAuctionPoint = null
             state.currentCardPlayedResult = null
             state.cardsInField = []
             state.trickFinishedResult = null
@@ -235,6 +236,7 @@ const socketGameListenerSlice = createSlice({
             state.winnerAuctionId = null;
             state.trumpSuit = null;
             state.friendCard = null;
+            state.winnerAuctionPoint = null
 
             state.currentCardPlayedResult = null;
             state.cardsInField = [];
@@ -257,10 +259,11 @@ const socketGameListenerSlice = createSlice({
             state.highestAuctionPoint = highestAuctionPoint
         },
         SelectMainCard: (state, action) => {
-            const { playerId, trumpColor, friendCard} = action.payload.mainCard
+            const { playerId, trumpColor, friendCard, winnerAuctionPoint} = action.payload.mainCard
             state.winnerAuctionId = playerId
             state.trumpSuit = trumpColor
             state.friendCard = friendCard
+            state.winnerAuctionPoint = winnerAuctionPoint
         },
         CardPlayed: (state, action) => {
             state.currentCardPlayedResult = action.payload.cardPlayDetail
