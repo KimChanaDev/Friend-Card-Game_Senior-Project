@@ -353,7 +353,8 @@ export class FriendCardGameRoom extends GameRoom
             const trumpAndFriendDTO :TrumpAndFriendDTO = {
                 playerId: player.UID,
                 trumpColor: trumpColor,
-                friendCard: friendCard
+                friendCard: friendCard,
+                winnerAuctionPoint: this.GetCurrentRoundGame().GetAuctionPoint()
             };
             this.EmitToRoomAndSender(socket, SOCKET_GAME_EVENTS.SELECT_MAIN_CARD, this.id, trumpAndFriendDTO);
         }

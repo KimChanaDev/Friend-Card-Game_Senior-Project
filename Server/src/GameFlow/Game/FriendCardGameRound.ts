@@ -50,8 +50,8 @@ export class FriendCardGameRound
                              , BotAuctionCallback: (socket: Socket) => void
     ): void {
         if (initialPlayers.length !== 4) throw new Error("Players are not equal to 4");
-        this.playersInOrder = ShuffleArray(Array.from(initialPlayers.values()));
-        this.currentPlayerNumber = 0;
+        this.playersInOrder = initialPlayers;
+        this.currentPlayerNumber = Math.floor(Math.random() * 4);
         FriendCardGameRoundLogic.PrepareCard(this.deck, this.playersInOrder);
         this.roundState = GAME_STATE.STARTED
 

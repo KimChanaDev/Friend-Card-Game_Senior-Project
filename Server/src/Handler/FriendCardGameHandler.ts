@@ -135,7 +135,8 @@ export class FriendCardGameHandler extends SocketHandler
                 const trumpAndFriendDTO :TrumpAndFriendDTO = {
                     playerId: player.UID,
                     trumpColor: trumpColor,
-                    friendCard: friendCard
+                    friendCard: friendCard,
+                    winnerAuctionPoint: gameRoom.GetCurrentRoundGame().GetAuctionPoint()
                 };
                 super.EmitToRoomAndSender(socket, SOCKET_GAME_EVENTS.SELECT_MAIN_CARD, gameRoom.id, trumpAndFriendDTO);
                 callback({
