@@ -4,6 +4,7 @@ export type TrumpAndFriendDTO = {
     playerId?: string;
     trumpColor: ColorType;
     friendCard: CardId;
+    winnerAuctionPoint: number
 };
 
 export type TrumpAndFriendResponseDTO = BaseResponseDTO & TrumpAndFriendDTO
