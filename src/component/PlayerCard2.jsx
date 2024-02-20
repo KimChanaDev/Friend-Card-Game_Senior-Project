@@ -21,7 +21,7 @@ PlayerCard2.propTypes = {
   socket: PropTypes.any
 }
 export default function  PlayerCard2({ name, score, isInLobby, isLeft, isBidding, isMax, bidScore, isPass, isPlay, isTop, role
-                      , isReady, isOwnerReadyButton, userId,imgUrl, isBot, botLevel}) {
+                      , isReady, isOwnerReadyButton, userId,imgUrl, isBot, botLevel, disableTimer}) {
   const bidShowPosition = {right:isLeft&&'-2rem',left:!isLeft&&'-2rem'}
   const timerPosition = {bottom:isTop&&'-1rem',top:!isTop&&'-1rem'}
   const isOwnerRoom = useSelector(state => state.gameStore.playersInGame?.thisPlayer?.isOwner) ?? false
@@ -171,7 +171,7 @@ export default function  PlayerCard2({ name, score, isInLobby, isLeft, isBidding
         }
 
         {/*Timer*/}
-        {userId === currentTurnPlayerId &&
+        {userId === currentTurnPlayerId && !disableTimer &&
           <div className='timer' style={timerPosition}>
               {/* <p style={{order:isTop?2:1}}>TIMER</p> */}
               <p style={{order:isTop?1:2}} className='timer_value'>{playerTimeoutInStore ? GenerateTimer(playerTimeoutInStore) : "Timeout"}</p>
