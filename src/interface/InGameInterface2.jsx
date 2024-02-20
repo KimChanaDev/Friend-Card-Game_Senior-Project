@@ -55,7 +55,7 @@ export default function InGameInterface2()
     const offset = 20
     const numCardInHand = cardInHand.length ?? 0
     const picStyles = { "width": `${Math.min(100 / (numCardInHand), 100 / 9)}%` }
-    const cardInHandMap = cardInHand.map((cardId)=> {
+    const cardInHandMap = [...cardInHand].sort(SortCardCustomComparator).map((cardId)=> {
         return  {
             src:"..\\SVG-cards-1.3\\" + CARD_ID_FILE.cardIds[cardId],
             id : cardId
@@ -67,6 +67,24 @@ export default function InGameInterface2()
             id : cardId
         }
     })
+    function SortCardCustomComparator(a, b){
+        const rankA = a.charAt(0);
+        const suitA = a.charAt(1);
+        const rankB = b.charAt(0);
+        const suitB = b.charAt(1);
+
+        const suitOrder = { 'H': 0, 'C': 1, 'D': 2, 'S': 3 };
+        if (suitOrder[suitA] !== suitOrder[suitB]) {
+            return suitOrder[suitA] - suitOrder[suitB];
+        }
+        const rankOrder = '23456789TJQKA';
+        const rankIndexA = rankOrder.indexOf(rankA);
+        const rankIndexB = rankOrder.indexOf(rankB);
+        if (rankIndexA !== rankIndexB) {
+            return rankIndexA - rankIndexB;
+        }
+        return a.localeCompare(b);
+    }
     const isAfterMainCardSelected = gameRoundState === GAME_STATE.STARTED && gameplayState === GAME_STATE.STARTED && winnerAuctionId !== null
     const trickFinishedResult = useSelector(state => state.socketGameListenersStore.trickFinishedResult)
     const [isShowTrickFinishedAlert, setIsShowTrickFinishedAlert] = useState(false)
@@ -205,49 +223,12 @@ export default function InGameInterface2()
                 </section>
                 <section className='left' >
                     {(
-                        playersInGame?.players[1] && <PlayerCard2 name={playersInGame.players[1].username} isLeft={true}
-                                                                  isBidding={gameRoundState === GAME_STATE.STARTED && gameplayState === GAME_STATE.NOT_STARTED}
-                                                                  isInLobby={!isGameStarted}
-                                                                  bidScore={FindPlayerBidScore(playersInGame.players[1].id)}
-                                                                  isPass={FindPlayerAuctionPass(playersInGame.players[1].id)}
-                                                                  // isPlay={turn[0]}
-                                                                  isTop={true}
-                                                                  score={GameScore[0]}
-                                                                  role = {playersInGame.players[1].isOwner ? PLAYER_ROLE.HOST : PLAYER_ROLE.NORMAL}
-                                                                  isOwnerReadyButton={playersInGame?.players[1]?.id === userId}
-                                                                  isReady={playersInGame.players[1].isReady}
-                                                                  userId={playersInGame.players[1].id}
-                                                                  imgUrl={playersInGame.players[1].imagePath}
-                                                                  isBot={playersInGame.players[1].isBot}
-                                                                  botLevel={playersInGame.players[1].botLevel}
-                        />
-                    )}
-                    {(
-                        playersInGame?.players[3] && <PlayerCard2 name={playersInGame.players[3].username} isLeft={true}
-                                                                  isBidding={gameRoundState === GAME_STATE.STARTED && gameplayState === GAME_STATE.NOT_STARTED}
-                                                                  isInLobby={!isGameStarted}
-                                                                  bidScore={FindPlayerBidScore(playersInGame.players[3].id)}
-                                                                  isPass={FindPlayerAuctionPass(playersInGame.players[3].id)}
-                                                                  // isPlay={turn[1]}
-                                                                  score={GameScore[1]}
-                                                                  role = {playersInGame.players[3].isOwner ? PLAYER_ROLE.HOST : PLAYER_ROLE.NORMAL}
-                                                                  isOwnerReadyButton={playersInGame?.players[3]?.id === userId}
-                                                                  isReady={playersInGame.players[3].isReady}
-                                                                  userId={playersInGame.players[3].id}
-                                                                  imgUrl={playersInGame.players[3].imagePath}
-                                                                  isBot={playersInGame.players[3].isBot}
-                                                                  botLevel={playersInGame.players[3].botLevel}
-                        />
-                    )}
-                </section>
-                <section className='right'>
-                    {(
-                        playersInGame?.players[2] && <PlayerCard2 name={playersInGame.players[2].username} isLeft={false}
+                        playersInGame?.players[2] && <PlayerCard2 name={playersInGame.players[2].username} isLeft={true}
                                                                   isBidding={gameRoundState === GAME_STATE.STARTED && gameplayState === GAME_STATE.NOT_STARTED}
                                                                   isInLobby={!isGameStarted}
                                                                   bidScore={FindPlayerBidScore(playersInGame.players[2].id)}
                                                                   isPass={FindPlayerAuctionPass(playersInGame.players[2].id)}
-                                                                  // isPlay={turn[3]}
+                                                                  isTop={true}
                                                                   score={GameScore[3]}
                                                                   role = {playersInGame.players[2].isOwner ? PLAYER_ROLE.HOST : PLAYER_ROLE.NORMAL}
                                                                   isOwnerReadyButton={playersInGame?.players[2]?.id === userId}
@@ -259,12 +240,46 @@ export default function InGameInterface2()
                         />
                     )}
                     {(
+                        playersInGame?.players[1] && <PlayerCard2 name={playersInGame.players[1].username} isLeft={true}
+                                                                  isBidding={gameRoundState === GAME_STATE.STARTED && gameplayState === GAME_STATE.NOT_STARTED}
+                                                                  isInLobby={!isGameStarted}
+                                                                  bidScore={FindPlayerBidScore(playersInGame.players[1].id)}
+                                                                  isPass={FindPlayerAuctionPass(playersInGame.players[1].id)}
+                                                                  score={GameScore[0]}
+                                                                  role = {playersInGame.players[1].isOwner ? PLAYER_ROLE.HOST : PLAYER_ROLE.NORMAL}
+                                                                  isOwnerReadyButton={playersInGame?.players[1]?.id === userId}
+                                                                  isReady={playersInGame.players[1].isReady}
+                                                                  userId={playersInGame.players[1].id}
+                                                                  imgUrl={playersInGame.players[1].imagePath}
+                                                                  isBot={playersInGame.players[1].isBot}
+                                                                  botLevel={playersInGame.players[1].botLevel}
+                        />
+                    )}
+                </section>
+                <section className='right'>
+                    {(
+                        playersInGame?.players[3] && <PlayerCard2 name={playersInGame.players[3].username} isLeft={false}
+                                                                  isBidding={gameRoundState === GAME_STATE.STARTED && gameplayState === GAME_STATE.NOT_STARTED}
+                                                                  isInLobby={!isGameStarted}
+                                                                  bidScore={FindPlayerBidScore(playersInGame.players[3].id)}
+                                                                  isPass={FindPlayerAuctionPass(playersInGame.players[3].id)}
+                                                                  isTop={true}
+                                                                  score={GameScore[1]}
+                                                                  role = {playersInGame.players[3].isOwner ? PLAYER_ROLE.HOST : PLAYER_ROLE.NORMAL}
+                                                                  isOwnerReadyButton={playersInGame?.players[3]?.id === userId}
+                                                                  isReady={playersInGame.players[3].isReady}
+                                                                  userId={playersInGame.players[3].id}
+                                                                  imgUrl={playersInGame.players[3].imagePath}
+                                                                  isBot={playersInGame.players[3].isBot}
+                                                                  botLevel={playersInGame.players[3].botLevel}
+                        />
+                    )}
+                    {(
                         playersInGame?.players[0] && <PlayerCard2 name={playersInGame.players[0].username} isLeft={false}
                                                                   isBidding={gameRoundState === GAME_STATE.STARTED && gameplayState === GAME_STATE.NOT_STARTED}
                                                                   isInLobby={!isGameStarted}
                                                                   bidScore={FindPlayerBidScore(playersInGame.players[0].id)}
                                                                   isPass={FindPlayerAuctionPass(playersInGame.players[0].id)}
-                                                                  // isPlay={turn[2]}
                                                                   score={GameScore[2]}
                                                                   role = {playersInGame.players[0].isOwner ? PLAYER_ROLE.HOST : PLAYER_ROLE.NORMAL}
                                                                   isOwnerReadyButton={playersInGame?.players[0]?.id === userId}
