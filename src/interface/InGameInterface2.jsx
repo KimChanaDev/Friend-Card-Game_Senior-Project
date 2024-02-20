@@ -88,6 +88,7 @@ export default function InGameInterface2()
     const isAfterMainCardSelected = gameRoundState === GAME_STATE.STARTED && gameplayState === GAME_STATE.STARTED && winnerAuctionId !== null
     const [isWaitingDelayLastCard, setIsWaitingDelayLastCard] = useState(false)
     const isBidding = gameRoundState === GAME_STATE.STARTED && gameplayState === GAME_STATE.NOT_STARTED && !isWaitingDelayLastCard
+    const isSelectingCard = gameRoundState === GAME_STATE.STARTED && gameplayState === GAME_STATE.STARTED && winnerAuctionId === null
     const trickFinishedResult = useSelector(state => state.socketGameListenersStore.trickFinishedResult)
     const [isShowTrickFinishedAlert, setIsShowTrickFinishedAlert] = useState(false)
     const [isShowFriendAppearedAlert, setIsShowFriendAppearedAlert] = useState(false)
@@ -210,11 +211,11 @@ export default function InGameInterface2()
                     <SettingsIcon className='setting' sx={{ fontSize: 50 }} />
 
                     {
-                        gameRoundState === GAME_STATE.STARTED && gameplayState === GAME_STATE.STARTED && userId === highestAuctionPlayerId && winnerAuctionId === null
+                        isSelectingCard && userId === highestAuctionPlayerId
                         && <SelectCard />
                     }
                     {
-                        gameRoundState === GAME_STATE.STARTED && gameplayState === GAME_STATE.STARTED && userId !== highestAuctionPlayerId && winnerAuctionId === null
+                        isSelectingCard && userId !== highestAuctionPlayerId
                         && <WaitingSelectMainCard />
                     }
                     { isShowTrickFinishedAlert && <TrickFinishedAlert /> }
@@ -319,13 +320,11 @@ export default function InGameInterface2()
                     && <section className='mid'>
                         <BidCard />
                     </section>
-                    
                 }
-
 
                 <figure className='bot' style={{ paddingInlineStart: `${(numCardInHand - 1) * offset}px` }}>
                     {
-                        (isAfterMainCardSelected || isBidding) &&
+                        (isSelectingCard || isAfterMainCardSelected || isBidding) &&
                         cardInHandMap.map((e, i) => < CardInHand key={i} src={e.src} clickFunc={HandlePlayCard}//"zIndex"
                                                                styles={{ 
                                                                    ...picStyles,
