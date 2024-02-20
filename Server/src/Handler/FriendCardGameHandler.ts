@@ -263,14 +263,10 @@ export class FriendCardGameHandler extends SocketHandler
                 HandlerValidation.GameAndRoundNotNotStarted(gameRoom);
                 const currentPlayer: FriendCardPlayer = gameRoom.GetCurrentRoundGame().GetCurrentPlayer()
                 const timer: number | undefined = currentPlayer.GetTimeRemaining()
-                if(timer) {
-                    callback({
-                        playerId: currentPlayer.UID,
-                        timer: timer
-                    } as TimerResponseDTO);
-                }else{
-                    throw new Error("Timer not found")
-                }
+                callback({
+                    playerId: currentPlayer.UID,
+                    timer: timer
+                } as TimerResponseDTO);
             }catch (error: any)
             {
                 callback({ success: false, error: error?.message } as BaseResponseDTO);
