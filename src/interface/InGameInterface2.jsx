@@ -86,6 +86,8 @@ export default function InGameInterface2()
         return a.localeCompare(b);
     }
     const isAfterMainCardSelected = gameRoundState === GAME_STATE.STARTED && gameplayState === GAME_STATE.STARTED && winnerAuctionId !== null
+    const [isWaitingDelayLastCard, setIsWaitingDelayLastCard] = useState(false)
+    const isBidding = gameRoundState === GAME_STATE.STARTED && gameplayState === GAME_STATE.NOT_STARTED && !isWaitingDelayLastCard
     const trickFinishedResult = useSelector(state => state.socketGameListenersStore.trickFinishedResult)
     const [isShowTrickFinishedAlert, setIsShowTrickFinishedAlert] = useState(false)
     const [isShowFriendAppearedAlert, setIsShowFriendAppearedAlert] = useState(false)
@@ -94,6 +96,8 @@ export default function InGameInterface2()
     const [isShowRoundFinishedAlert, setIsShowRoundFinishedAlert] = useState(false)
     const [isShowScoreCard, setIsShowScoreCard] = useState(false)
     const [isShowGameFinishedPopup, setIsShowGameFinishedPopup] = useState(false)
+
+    const [disableTimer, setDisableTimer] = useState(false)
 
     /// open scorecard
     useEffect(() => {
@@ -105,28 +109,36 @@ export default function InGameInterface2()
     /// Show Summary Score, RoundFinishedAlert when Finished Round
     useEffect(() => {
         if(roundFinishedResult){
-            setIsShowRoundFinishedAlert(true);
-            const firstTimeout = setTimeout(() => {
-                setIsShowRoundFinishedAlert(false);
-                setIsShowSummaryScore(true)
-            }, GAME_DELAY_ENUM.ROUND_FINISHED_IN_SEC * 1000)
-            const secondTimeout  = setTimeout(() => {
-                setIsShowSummaryScore(false);
-                dispatch(ClearStateForNextRound())
-                dispatch(ClearSelectMainCardStatus())
-            }, (GAME_DELAY_ENUM.ROUND_FINISHED_IN_SEC + GAME_DELAY_ENUM.SUMMARY_SCORE_IN_SEC) * 1000);
-            setIsFriendAppearFirstTime(true);
-            return () => {
-                clearTimeout(firstTimeout);
-                clearTimeout(secondTimeout);
-            }
+            setDisableTimer(true)
+            setIsWaitingDelayLastCard(true)
+            setTimeout(() => {
+                setIsShowRoundFinishedAlert(true);
+                const firstTimeout = setTimeout(() => {
+                    setIsShowRoundFinishedAlert(false);
+                    setIsShowSummaryScore(true)
+                }, GAME_DELAY_ENUM.ROUND_FINISHED_IN_SEC * 1000)
+                const secondTimeout  = setTimeout(() => {
+                    setIsShowSummaryScore(false);
+                    setDisableTimer(false)
+                    dispatch(ClearStateForNextRound())
+                    dispatch(ClearSelectMainCardStatus())
+                    setIsWaitingDelayLastCard(false)
+                }, (GAME_DELAY_ENUM.ROUND_FINISHED_IN_SEC + GAME_DELAY_ENUM.SUMMARY_SCORE_IN_SEC) * 1000);
+                setIsFriendAppearFirstTime(true);
+                return () => {
+                    clearTimeout(firstTimeout);
+                    clearTimeout(secondTimeout);
+                }
+            }, GAME_DELAY_ENUM.AFTER_LAST_CARD * 1000);
         }
     }, [roundFinishedResult]);
 
     /// Game Finished popup
     useEffect(() => {
         if (gameFinishedResult){
-            setIsShowGameFinishedPopup(true);
+            setTimeout(() => {
+                setIsShowGameFinishedPopup(true);
+            }, GAME_DELAY_ENUM.AFTER_LAST_CARD * 1000);
         }
     }, [gameFinishedResult]);
 
@@ -145,12 +157,18 @@ export default function InGameInterface2()
     /// show trick finish alert on time limit
     useEffect(() => {
         if(trickFinishedResult){
-            setIsShowTrickFinishedAlert(true);
-            const timeoutId = setTimeout(() => {
-                setIsShowTrickFinishedAlert(false);
-                dispatch(ClearCardInField())
-            }, GAME_DELAY_ENUM.TRICK_FINISHED_IN_SEC * 1000);
-            return () => clearTimeout(timeoutId);
+            setDisableTimer(true)
+            setIsWaitingDelayLastCard(true)
+            setTimeout(() => {
+                setIsWaitingDelayLastCard(false)
+                setIsShowTrickFinishedAlert(true);
+                const timeoutId = setTimeout(() => {
+                    setDisableTimer(false)
+                    setIsShowTrickFinishedAlert(false);
+                    dispatch(ClearCardInField())
+                }, GAME_DELAY_ENUM.TRICK_FINISHED_IN_SEC * 1000);
+                return () => clearTimeout(timeoutId);
+            }, GAME_DELAY_ENUM.AFTER_LAST_CARD * 1000);
         }
     }, [trickFinishedResult]);
 
@@ -224,7 +242,7 @@ export default function InGameInterface2()
                 <section className='left' >
                     {(
                         playersInGame?.players[2] && <PlayerCard2 name={playersInGame.players[2].username} isLeft={true}
-                                                                  isBidding={gameRoundState === GAME_STATE.STARTED && gameplayState === GAME_STATE.NOT_STARTED}
+                                                                  isBidding={isBidding}
                                                                   isInLobby={!isGameStarted}
                                                                   bidScore={FindPlayerBidScore(playersInGame.players[2].id)}
                                                                   isPass={FindPlayerAuctionPass(playersInGame.players[2].id)}
@@ -237,11 +255,12 @@ export default function InGameInterface2()
                                                                   imgUrl={playersInGame.players[2].imagePath}
                                                                   isBot={playersInGame.players[2].isBot}
                                                                   botLevel={playersInGame.players[2].botLevel}
+                                                                  disableTimer={disableTimer}
                         />
                     )}
                     {(
                         playersInGame?.players[1] && <PlayerCard2 name={playersInGame.players[1].username} isLeft={true}
-                                                                  isBidding={gameRoundState === GAME_STATE.STARTED && gameplayState === GAME_STATE.NOT_STARTED}
+                                                                  isBidding={isBidding}
                                                                   isInLobby={!isGameStarted}
                                                                   bidScore={FindPlayerBidScore(playersInGame.players[1].id)}
                                                                   isPass={FindPlayerAuctionPass(playersInGame.players[1].id)}
@@ -253,13 +272,14 @@ export default function InGameInterface2()
                                                                   imgUrl={playersInGame.players[1].imagePath}
                                                                   isBot={playersInGame.players[1].isBot}
                                                                   botLevel={playersInGame.players[1].botLevel}
+                                                                  disableTimer={disableTimer}
                         />
                     )}
                 </section>
                 <section className='right'>
                     {(
                         playersInGame?.players[3] && <PlayerCard2 name={playersInGame.players[3].username} isLeft={false}
-                                                                  isBidding={gameRoundState === GAME_STATE.STARTED && gameplayState === GAME_STATE.NOT_STARTED}
+                                                                  isBidding={isBidding}
                                                                   isInLobby={!isGameStarted}
                                                                   bidScore={FindPlayerBidScore(playersInGame.players[3].id)}
                                                                   isPass={FindPlayerAuctionPass(playersInGame.players[3].id)}
@@ -272,11 +292,12 @@ export default function InGameInterface2()
                                                                   imgUrl={playersInGame.players[3].imagePath}
                                                                   isBot={playersInGame.players[3].isBot}
                                                                   botLevel={playersInGame.players[3].botLevel}
+                                                                  disableTimer={disableTimer}
                         />
                     )}
                     {(
                         playersInGame?.players[0] && <PlayerCard2 name={playersInGame.players[0].username} isLeft={false}
-                                                                  isBidding={gameRoundState === GAME_STATE.STARTED && gameplayState === GAME_STATE.NOT_STARTED}
+                                                                  isBidding={isBidding}
                                                                   isInLobby={!isGameStarted}
                                                                   bidScore={FindPlayerBidScore(playersInGame.players[0].id)}
                                                                   isPass={FindPlayerAuctionPass(playersInGame.players[0].id)}
@@ -288,12 +309,13 @@ export default function InGameInterface2()
                                                                   imgUrl={playersInGame.players[0].imagePath}
                                                                   isBot={playersInGame.players[0].isBot}
                                                                   botLevel={playersInGame.players[0].botLevel}
+                                                                  disableTimer={disableTimer}
                         />
                     )}
                 </section>
 
                 {
-                    gameRoundState === GAME_STATE.STARTED && gameplayState === GAME_STATE.NOT_STARTED && isPlayerTurn
+                    gameRoundState === GAME_STATE.STARTED && gameplayState === GAME_STATE.NOT_STARTED && isPlayerTurn && !isWaitingDelayLastCard
                     && <section className='mid'>
                         <BidCard />
                     </section>
@@ -303,14 +325,14 @@ export default function InGameInterface2()
 
                 <figure className='bot' style={{ paddingInlineStart: `${(numCardInHand - 1) * offset}px` }}>
                     {
-                        
+                        (isAfterMainCardSelected || isBidding) &&
                         cardInHandMap.map((e, i) => < CardInHand key={i} src={e.src} clickFunc={HandlePlayCard}//"zIndex"
                                                                styles={{ 
                                                                    ...picStyles,
                                                                    "right": i * offset,
-                                                                   "filter":cardsPlayerCanPlay.some(cardId => cardId === e.id) ? "opacity(100%)" : "opacity(40%)",
-                                                                   "zIndex":cardsPlayerCanPlay.some(cardId => cardId === e.id) ? "50000" : "40000",
-                                                                   "pointerEvents": cardsPlayerCanPlay.some(cardId => cardId === e.id) ? "auto" : "none",
+                                                                   "filter":cardsPlayerCanPlay.some(cardId => cardId === e.id) && !isWaitingDelayLastCard ? "opacity(100%)" : "opacity(40%)",
+                                                                   "zIndex":cardsPlayerCanPlay.some(cardId => cardId === e.id) && !isWaitingDelayLastCard ? "50000" : "40000",
+                                                                   "pointerEvents": cardsPlayerCanPlay.some(cardId => cardId === e.id) && !isWaitingDelayLastCard ? "auto" : "none",
                                                                     }}
                                                                    
                                                                id = {e.id}
@@ -319,7 +341,7 @@ export default function InGameInterface2()
                 </figure>
 
                 {
-                    isAfterMainCardSelected && <section className='mid'>
+                    (isAfterMainCardSelected || isWaitingDelayLastCard) && <section className='mid'>
                         {cardInFiledMap.map((e, i)=><img key={i} src={e.src} alt="" className='cardOnTable'/>)}
                     </section>
                 }
