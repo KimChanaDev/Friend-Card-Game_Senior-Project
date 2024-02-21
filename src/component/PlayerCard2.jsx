@@ -137,7 +137,7 @@ export default function  PlayerCard2({ name, score, isInLobby, isLeft, isBidding
     return <img src={imagePath} alt="" style={{ order: isLeft ? 1 : 2, zIndex: isInLobby && 999 }} />
   }
   const getBorderColor = () => {
-    return orderStyled === 0 ? '2px solid blue' : orderStyled === 1 ? '2px solid green' : orderStyled === 2 ? '2px solid red' :orderStyled === 3 ? '2px solid pink' : '2px solid black';
+    return orderStyled === 0 ? '2px solid #265073' : orderStyled === 1 ? '2px solid #7F27FF' : orderStyled === 2 ? '2px solid #944E63' :orderStyled === 3 ? '2px solid #D04848' : '2px solid black';
   };
   return (
     <>
@@ -150,7 +150,7 @@ export default function  PlayerCard2({ name, score, isInLobby, isLeft, isBidding
           {/*Name*/}
           <h3 className='player_name'>{role === PLAYER_ROLE.HOST ? '👑': ''} {isFriendAppeared ? GenerateTeamIcon() : ""} {isBot ? "BOT" : name}</h3>
           {/*UID*/}
-          { /*!isGameStarted && */!isBot && <p className=''>{`UID ${userId.substring(userId.length - 8)}`}</p> }
+          { /*!isGameStarted && */!isBot && !isGameStarted && <p className=''>{`UID ${userId.substring(userId.length - 8)}`}</p> }
           {/*score*/}
           { isGameStarted && <p className=''>{`Score : ${FindScore()} ${winnerAuctionId === userId ? `|| WinBidPoint: ${winnerAuctionPoint}` : ""}`}</p> }
           {/*ready button*/}

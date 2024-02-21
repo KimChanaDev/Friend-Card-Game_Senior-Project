@@ -195,7 +195,7 @@ export default function InGameInterface2()
         return playersAuctionDetail.filter(a => a.playerId === thisPlayerId)?.at(0)?.isPass ?? false
     }
     function getBorderColor(orderStyled){ 
-        return orderStyled === 0 ? '2px solid blue' : orderStyled === 1 ? '2px solid green' : orderStyled === 2 ? '2px solid red' :orderStyled === 3 ? '2px solid pink' : '2px solid black';
+        return orderStyled === 0 ? '2px solid #265073' : orderStyled === 1 ? '2px solid #7F27FF' : orderStyled === 2 ? '2px solid #944E63' :orderStyled === 3 ? '2px solid #D04848' : '2px solid black';
     }
     return (
         
