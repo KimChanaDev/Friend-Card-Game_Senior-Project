@@ -268,10 +268,10 @@ const socketGameListenerSlice = createSlice({
         CardPlayed: (state, action) => {
             state.currentCardPlayedResult = action.payload.cardPlayDetail
             if (state.cardsInField.length < 4) {
-                state.cardsInField = [...state.cardsInField, action.payload.cardPlayDetail.cardId]
+                state.cardsInField = [...state.cardsInField, action.payload.cardPlayDetail]
             }
             else{
-                state.cardsInField = [action.payload.cardPlayDetail.cardId]
+                state.cardsInField = [action.payload.cardPlayDetail]
             }
         },
         TrickFinished: (state, action) => {
