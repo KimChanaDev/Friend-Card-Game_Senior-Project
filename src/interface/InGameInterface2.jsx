@@ -214,7 +214,7 @@ export default function InGameInterface2()
                     
                     <LobbyInfo />
                     <FriendCard cardName={CARD_ID_FILE.cardIds[friendCard]}/>
-                    <TrumpCard  cardName={CARD_ID_FILE.suits[trumpSuit]}/>
+                    <TrumpCard  cardName={CARD_ID_FILE.suitsOnly[trumpSuit]}/>
                     <SettingsIcon className='setting' sx={{ fontSize: 50 }} />
 
                     {
