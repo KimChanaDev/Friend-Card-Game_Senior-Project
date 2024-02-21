@@ -63,5 +63,12 @@ const suits = {
     'S':'ace_of_spades.svg'
 }
 
-const CARD_ID_FILE = { cardIds, suits }
+const suitsOnly = {
+    'H':'hearts.png',
+    'D':'diamonds.png',
+    'C':'clubs.png',
+    'S':'spades.png'
+}
+
+const CARD_ID_FILE = { cardIds, suits, suitsOnly }
 export default CARD_ID_FILE
