@@ -21,7 +21,7 @@ PlayerCard2.propTypes = {
   socket: PropTypes.any
 }
 export default function  PlayerCard2({ name, score, isInLobby, isLeft, isBidding, isMax, bidScore, isPass, isPlay, isTop, role
-                      , isReady, isOwnerReadyButton, userId,imgUrl, isBot, botLevel, disableTimer}) {
+                      , isReady, isOwnerReadyButton, userId,imgUrl, isBot, botLevel, disableTimer,orderStyled}) {
   const bidShowPosition = {right:isLeft&&'-2rem',left:!isLeft&&'-2rem'}
   const timerPosition = {bottom:isTop&&'-1rem',top:!isTop&&'-1rem'}
   const isOwnerRoom = useSelector(state => state.gameStore.playersInGame?.thisPlayer?.isOwner) ?? false
@@ -136,10 +136,12 @@ export default function  PlayerCard2({ name, score, isInLobby, isLeft, isBidding
     else if (isBot && botLevel === BOT_LEVEL.HARD_BOT) imagePath = "./bot-profile-hard.png"
     return <img src={imagePath} alt="" style={{ order: isLeft ? 1 : 2, zIndex: isInLobby && 999 }} />
   }
-
+  const getBorderColor = () => {
+    return orderStyled === 0 ? '2px solid blue' : orderStyled === 1 ? '2px solid green' : orderStyled === 2 ? '2px solid red' :orderStyled === 3 ? '2px solid pink' : '2px solid black';
+  };
   return (
     <>
-      <section className='profile ' onClick={() => PlayCardClicked()}>
+      <section className='profile ' onClick={() => PlayCardClicked()} style={{ border: getBorderColor() }}>
         {/*kick button*/}
         {userId !== ownerId && isInLobby && isLeft && isOwnerRoom && <button onClick={() => HandleKickPlayer()} className='kick_button_left' style={{ zIndex: 9999 }}>❌</button>}
         { GenerateProfileImage() }

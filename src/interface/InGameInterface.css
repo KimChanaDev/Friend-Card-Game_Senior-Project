@@ -89,26 +89,25 @@ body{
   }
 
   section.mid img{
-    height: 60%;
-    margin-block-start: 3rem;
+    height: 50%;
     color: #75A7E2;
   }
   section.top section.friend_card{
-      /* margin-right: auto; */
       margin-left: auto;
   }
   
   section.mid{
     grid-column: 7/15;
-    grid-row:7/16;
-    justify-content: center;
+    grid-row: 7/16;
+    display: flex;
+    
     align-content: center;
-    display:flex;
-   
+    align-items: center; /* Center vertically */
+    justify-content: center; /* Center horizontally */
+    
     border-radius: 84px;
     border: 1px solid #050357;
     background: linear-gradient(180deg, rgba(233, 233, 233, 0.00) 0%, rgba(3, 0, 172, 0.25) 100%);
-    /* border: 1px solid orange; */
   }
 
   section.top .setting{
@@ -169,7 +168,5 @@ figure.bot>img:hover{
   transform: translateY(-30px);
 }
 .cardOnTable{
-  /* transform: skew(0deg,-5deg); */
-  transform: translateX();
-  width: 20%;
+  border: 1px solid rgb(0, 174, 255);
 }

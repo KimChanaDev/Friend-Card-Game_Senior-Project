@@ -62,9 +62,13 @@ export default function InGameInterface2()
         }
     })
     const cardInFiledMap = cardsInField.map((cardId)=> {
+        console.log("card",cardId)
+        // console.log(cardsInField)
+        // console.log(cardsInField.playerId)
         return  {
-            src:"..\\SVG-cards-1.3\\" + CARD_ID_FILE.cardIds[cardId],
-            id : cardId
+            src:"..\\SVG-cards-1.3\\" + CARD_ID_FILE.cardIds[cardId.cardId],
+            id : cardId,
+            order : cardId.playerOrder
         }
     })
     function SortCardCustomComparator(a, b){
@@ -190,6 +194,9 @@ export default function InGameInterface2()
     function FindPlayerAuctionPass(thisPlayerId){
         return playersAuctionDetail.filter(a => a.playerId === thisPlayerId)?.at(0)?.isPass ?? false
     }
+    function getBorderColor(orderStyled){ 
+        return orderStyled === 0 ? '2px solid blue' : orderStyled === 1 ? '2px solid green' : orderStyled === 2 ? '2px solid red' :orderStyled === 3 ? '2px solid pink' : '2px solid black';
+    }
     return (
         
         <div className='background-image' >
@@ -257,6 +264,7 @@ export default function InGameInterface2()
                                                                   isBot={playersInGame.players[2].isBot}
                                                                   botLevel={playersInGame.players[2].botLevel}
                                                                   disableTimer={disableTimer}
+                                                                  orderStyled={2}
                         />
                     )}
                     {(
@@ -274,6 +282,7 @@ export default function InGameInterface2()
                                                                   isBot={playersInGame.players[1].isBot}
                                                                   botLevel={playersInGame.players[1].botLevel}
                                                                   disableTimer={disableTimer}
+                                                                  orderStyled={1}
                         />
                     )}
                 </section>
@@ -294,6 +303,7 @@ export default function InGameInterface2()
                                                                   isBot={playersInGame.players[3].isBot}
                                                                   botLevel={playersInGame.players[3].botLevel}
                                                                   disableTimer={disableTimer}
+                                                                  orderStyled={3}
                         />
                     )}
                     {(
@@ -311,6 +321,7 @@ export default function InGameInterface2()
                                                                   isBot={playersInGame.players[0].isBot}
                                                                   botLevel={playersInGame.players[0].botLevel}
                                                                   disableTimer={disableTimer}
+                                                                  orderStyled={0}
                         />
                     )}
                 </section>
@@ -341,7 +352,7 @@ export default function InGameInterface2()
 
                 {
                     (isAfterMainCardSelected || isWaitingDelayLastCard) && <section className='mid'>
-                        {cardInFiledMap.map((e, i)=><img key={i} src={e.src} alt="" className='cardOnTable'/>)}
+                            {cardInFiledMap.map((e, i)=><img key={i} src={e.src} alt=""  className='cardOnTable' style={{ border: getBorderColor(e.order) }} /> ) }
                     </section>
                 }
                 < SlideBar />
@@ -349,3 +360,5 @@ export default function InGameInterface2()
         </div>
     )
 }
+
+//getBorderColor
