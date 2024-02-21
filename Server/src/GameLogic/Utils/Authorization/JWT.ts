@@ -34,7 +34,8 @@ export interface JWTPayLoadInterface {
 	iat: number,
 	exp: number,
 	UID: string,
-	firebaseId: string
+	firebaseId: string,
+	UUID: string
 }
 export function IssueJWTwithEmail(user: UserDataDocument): string {
 	const expiresInSec: number = 86400; //24h
@@ -50,7 +51,8 @@ export function IssueJWTwithEmail(user: UserDataDocument): string {
 		// username: user.username,
 		// email: user.email,
 		// provider: user.provider,
-		firebaseId: user.firebaseId
+		firebaseId: user.firebaseId,
+		UUID: user.UUID,
 	};
 	const signedToken = sign(payload, PRIVATE_KEY, {
 		algorithm: 'RS256',

@@ -17,6 +17,7 @@ export interface UserDataDocument extends Document {
     provider: string;
     firebaseId: string;
     UID: string;
+    UUID: string;
     // win: number;
     // match: number;
     // lastestMatch: matchObject[];
@@ -65,6 +66,10 @@ const userSchema = new Schema<UserDataDocument>({
         required: true,
     },
     UID: {
+        type: String,
+        required: true,
+    },
+    UUID: {
         type: String,
         required: true,
     }

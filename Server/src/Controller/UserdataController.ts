@@ -14,6 +14,7 @@ import { JwtAuthMiddleware } from "../Middleware/JwtAuthMiddleware.js";
 import { JwtPayload } from "jsonwebtoken";
 import { DecodedIdToken } from "firebase-admin/lib/auth/token-verifier.js";
 import { MatchModel } from "../Model/Entity/MatchData.js";
+import { v4 as uuidv4 } from 'uuid'
 
 export class UserdataController extends ExpressRouter {
     public path: string = '/userdata';
@@ -72,6 +73,8 @@ export class UserdataController extends ExpressRouter {
 
             const uid = await getNextUID();
 
+            const uuid = uuidv4();
+
             // const { salt, hash } = GenerateNewSaltAndHash(newUserData.password);
             const createdUser = new UserDataModel({
                 username: newUserData.username,
@@ -110,7 +113,8 @@ export class UserdataController extends ExpressRouter {
                 //         score: 444,
                 //     },
                 // ],
-                UID: uid
+                UID: uid,
+                UUID: uuid,
             });
             const savedUser = await createdUser.save();
             const createdMatch = new MatchModel({
@@ -189,14 +193,33 @@ export class UserdataController extends ExpressRouter {
                     password: newUserData.password,
                     returnSecureToken: true,
                 })
-                const token: string = IssueJWTwithEmail(user);
+                const uuid = uuidv4();
+                const updatedResult = await UserDataModel.updateOne(
+                    { firebaseId: user.firebaseId },
+                    {
+                        $set: {
+                            UUID: uuid,
+                        }
+                    }
+                )
+                if (updatedResult.modifiedCount == 0) {
+                    throw new Error('Fail to update UUID');
+                }
+                const updatedUser = await UserDataModel.findOne({
+                    $and: [
+                        { username: newUserData.username },
+                        { provider: "password" }
+                    ]
+                });
+                if (!updatedUser) throw new Error('Cannot find updated user');
+                const token: string = IssueJWTwithEmail(updatedUser);
                 const result = {
                     message: 'success',
                     data: {
                         jwt: token,
-                        displayName: user.displayName,
-                        UID: user.UID,
-                        imagePath: user.imagePath,
+                        displayName: updatedUser.displayName,
+                        UID: updatedUser.UID,
+                        imagePath: updatedUser.imagePath,
                     }
                 }
                 res.json(new LoginWithEmailResponseDTO(result))
@@ -212,14 +235,30 @@ export class UserdataController extends ExpressRouter {
                 });
                 // if (!user) return next(new InvalidCredentialsError());
                 if (!user) throw new Error('InvalidCredentialsError');
-                const token: string = IssueJWTwithEmail(user);
+                const uuid = uuidv4();
+                const updatedResult = await UserDataModel.updateOne(
+                    { firebaseId: user.firebaseId },
+                    {
+                        $set: {
+                            UUID: uuid,
+                        }
+                    }
+                )
+                if (updatedResult.modifiedCount == 0) {
+                    throw new Error('Fail to update UUID');
+                }
+                const updatedUser = await UserDataModel.findOne({
+                    firebaseId: jsonRes.user_id
+                });
+                if (!updatedUser) throw new Error('Cannot find updated user');
+                const token: string = IssueJWTwithEmail(updatedUser);
                 const result = {
                     message: 'success',
                     data: {
                         jwt: token,
-                        displayName: user.displayName,
-                        UID: user.UID,
-                        imagePath: user.imagePath,
+                        displayName: updatedUser.displayName,
+                        UID: updatedUser.UID,
+                        imagePath: updatedUser.imagePath,
                     }
                 }
                 res.json(new LoginWithEmailResponseDTO(result))
@@ -460,6 +499,8 @@ export class UserdataController extends ExpressRouter {
                     
                     const uid = await getNextUID();
 
+                    const uuid = uuidv4();
+
                     const createdUser = new UserDataModel({
                         // username: firebasePayload.name,
                         // username: firebasePayload.user_id,
@@ -473,7 +514,8 @@ export class UserdataController extends ExpressRouter {
                         // win: 0,
                         // match: 0,
                         // latestMatch: [],
-                        UID: uid
+                        UID: uid,
+                        UUID: uuid,
                     });
                     const savedUser = await createdUser.save();
                     const createdMatch = new MatchModel({
