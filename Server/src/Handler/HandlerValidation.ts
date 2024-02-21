@@ -9,6 +9,7 @@ import {IJwtValidation, JWTPayLoadInterface} from "../GameLogic/Utils/Authorizat
 import { JwtValidationError } from "../Enum/JwtValidationError.js";
 import { Player } from "../GameFlow/Player/Player.js";
 import {JwtPayload} from "jsonwebtoken";
+import {BOT_CONFIG} from "../Enum/BotConfig.js";
 
 export abstract class HandlerValidation
 {
@@ -170,5 +171,10 @@ export abstract class HandlerValidation
     {
         if(!jwtPayload || typeof jwtPayload !== 'object' || !jwtPayload.firebaseId || !jwtPayload.UID)
             throw new Error("No JWT");
+    }
+    public static IsBotLevelValid(botLevel: number)
+    {
+        if(botLevel !== BOT_CONFIG.EASY_BOT && botLevel !== BOT_CONFIG.MEDIUM_BOT && botLevel !== BOT_CONFIG.HARD_BOT)
+            throw new Error("Bot level is invalid");
     }
 }

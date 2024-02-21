@@ -1,3 +1,5 @@
+import {BOT_CONFIG} from "../../Enum/BotConfig";
+
 export abstract class Player
 {
 	private isReady: boolean = false;
@@ -7,10 +9,16 @@ export abstract class Player
 		public readonly username: string,
 		public readonly socketId: string,
 		public isOwner: boolean,
-		public readonly firebaseId: string
+		public readonly firebaseId: string,
+		public readonly profileImagePath: string,
+		private botLevel?: number | undefined
 	)
 	{
 		if(isOwner) this.isReady = true;
+		if(botLevel !== undefined){
+			this.isDisconnected = true;
+			this.isReady = true;
+		}
 	}
 
 	public ToggleIsReady(): void { this.isReady = !this.isReady; }
@@ -19,4 +27,6 @@ export abstract class Player
 	public GetIsReady(): boolean { return this.isReady; }
 	public SetDisconnected(bool : boolean): void { this.isDisconnected = bool }
 	public GetIsDisconnected(): boolean { return this.isDisconnected; }
+	public GetBotLevel(): number | undefined { return this.botLevel }
+	public SetBotLevel(level: number): void { this.botLevel = level }
 }

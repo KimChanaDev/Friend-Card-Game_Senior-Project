@@ -4,16 +4,23 @@ import { FriendCardPlayer } from "../Player/FriendCardPlayer.js";
 import { FriendCardGameRound } from "./FriendCardGameRound.js";
 import { GAME_STATE } from "../../Enum/GameState.js";
 import {WinnerRoundResponse} from "../../Model/DTO/Response/WinnerRoundResponse.js";
-import {CardId, ColorType} from "../../Enum/CardConstant.js";
+import {CARD_AI_FORMAT, CardId, ColorType, TRUMP_SUIT_AI_FORMAT} from "../../Enum/CardConstant.js";
 import {GameFinishedDTO} from "../../Model/DTO/GameFinishedDTO.js";
 import {SOCKET_EVENT, SOCKET_GAME_EVENTS} from "../../Enum/SocketEvents.js";
 import {WinnerTrickResponse} from "../../Model/DTO/Response/WinnerTrickResponse.js";
 import {CardPlayedDTO} from "../../Model/DTO/CardPlayedDTO.js";
 import {TrumpAndFriendDTO} from "../../Model/DTO/TrumpAndFriendDTO.js";
 import {AuctionPointDTO} from "../../Model/DTO/AuctionPointDTO.js";
-import {RandomArrayElement} from "../../GameLogic/Utils/Tools.js";
+import {FindKeyByValue, RandomArrayElement} from "../../GameLogic/Utils/Tools.js";
 import {MatchModel, matchObject} from "../../Model/Entity/MatchData.js";
-import { UserDataModel } from "../../Model/Entity/UserData.js";
+import {BOT_CONFIG} from "../../Enum/BotConfig.js";
+import {BotAuction, BotPlayCard, BotSelectFriendCard, BotSelectTrumpSuit} from "../../Service/Bot/BotService.js";
+import {FriendCardGameRoundLogic} from "../../GameLogic/Game/FriendCardGameRoundLogic.js";
+import {CardLogic} from "../../GameLogic/Card/CardLogic.js";
+import {HandlerValidation} from "../../Handler/HandlerValidation.js";
+import {FriendCardGameRepository} from "../../Repository/FriendCardGameRepository.js";
+import {GamesStore} from "./GameStore.js";
+import {GUEST_CONFIG} from "../../Enum/GuestConfig.js";
 
 export class FriendCardGameRoom extends GameRoom
 {
@@ -22,12 +29,19 @@ export class FriendCardGameRoom extends GameRoom
     private winnerPoint: number = 0;
     private roundsInGame: FriendCardGameRound[] = [];
     private currentRoundNumber: number = 0;
+    private isNoPlayerInRoom: boolean = false
     private readonly totalNumberRound: number = 4;
+
     public StartGameProcess(socket: Socket): void
     {
         this.InitRoundInGame();
         super.SetStartState();
-        this.GetCurrentRoundGame().StartRoundProcess(false, this.GetAllPlayerAsArray(), socket,() => this.AuctionTimeOutCallback(socket));
+        this.GetCurrentRoundGame().StartRoundProcess(false
+            , this.GetAllPlayerAsArray()
+            , socket
+            ,() => this.AuctionTimeOutCallback(socket)
+            ,() => this.BotAuctionCallback(socket)
+        );
     }
     private InitRoundInGame(): void
     {
@@ -60,7 +74,12 @@ export class FriendCardGameRoom extends GameRoom
     public NextRoundProcess(socket: Socket): void
     {
         this.currentRoundNumber++;
-        this.GetCurrentRoundGame().StartRoundProcess(true, this.GetAllPlayerAsArray(), socket,() => this.AuctionTimeOutCallback(socket));
+        this.GetCurrentRoundGame().StartRoundProcess(true
+            , this.GetAllPlayerAsArray()
+            , socket
+            ,() => this.AuctionTimeOutCallback(socket)
+            , () => this.BotAuctionCallback(socket)
+        );
     }
     public CheckGameFinished(): boolean{
         const nextRoundNumberTemp = this.currentRoundNumber + 1
@@ -79,21 +98,21 @@ export class FriendCardGameRoom extends GameRoom
     public DisconnectPlayer(player: FriendCardPlayer): void
     {
         super.DisconnectPlayer(player);
-
-		if (this.GetGameRoomState() === GAME_STATE.STARTED)
-        {
-			if (this.NumConnectedPlayersInGame() === 1)
-            {
-				this.winner = Array.from(this.playersInGame.values()).find((player) => !player.GetIsDisconnected());
-				return this.GetCurrentRoundGame().FinishRound();
-			}
-            else
-            {
-                // TODO add bot player
-                // if (this.GetCurrentRoundGame().GetCurrentPlayer().id === player.id)  // TODO bot play
-                //     console.log('Bot play!');
-            }
-		}
+        if (this.AreAllPlayersIsDisconnected()){
+            this.isNoPlayerInRoom = true
+            GamesStore.getInstance.DeleteGameById(this.id);
+        }
+        const isNotGuestRoom: boolean = this.owner.UID !== GUEST_CONFIG.UID
+        if (isNotGuestRoom){
+            const matchModel: matchObject = {
+                id: this.id,
+                score: player.GetTotalGamePoint(),
+                place: 4,
+                win: false,
+                createdAt: new Date(Date.now()),
+            };
+            FriendCardGameRepository.SaveMatchHistory(matchModel, false, player)
+        }
     }
     public FinishGameProcess(): void
     {
@@ -110,7 +129,10 @@ export class FriendCardGameRoom extends GameRoom
         this.winner = winnerPlayer;
         this.winnerPoint = winnerPoint;
         super.SetFinishState();
-        this.SaveMatchHistory(winnerPlayer?.UID);
+        const isNotGuestRoom: boolean = this.owner.UID !== GUEST_CONFIG.UID
+        if (isNotGuestRoom){
+            this.SaveMatchHistory(winnerPlayer?.UID);
+        }
     }
     public SaveMatchHistory(winnerPlayerUID: string | undefined): void{
         const userPlaces: FriendCardPlayer[] = Array.from(this.playersInGame.values());
@@ -127,101 +149,299 @@ export class FriendCardGameRoom extends GameRoom
                 createdAt: new Date(Date.now()),
             };
             previousPoint = player.GetTotalGamePoint()
-            MatchModel.updateOne({ firebaseId: player.firebaseId },
-            {
-                $push: { latestMatch: matchModel },
-                $inc: {
-                    match: 1,
-                    win: isWinner ? 1 : 0
-                },
+            if(!player.GetIsDisconnected()){
+                FriendCardGameRepository.SaveMatchHistory(matchModel, isWinner, player)
             }
-            ).then(() => {
-                console.log(`save database success. firebaseId: ${player.firebaseId}`)
-            }).catch(() => {
-                console.error(`save database failed. firebaseId: ${player.firebaseId} match: ${JSON.stringify(matchModel)}`)
-            });
         })
     }
-    public AuctionTimeOutCallback(socket: Socket): void{
-        console.log("Auto auction")
-        let auctionPass: boolean
-        let auctionPoint: number | undefined
-        if(this.GetCurrentRoundGame().IsFirstAuction()){
-            auctionPass = false
-            auctionPoint = 55
-        }else{
-            auctionPass = true
-            auctionPoint = 100 // Not important
+    public BotAuctionCallback(socket: Socket): void{
+        if(!this.isNoPlayerInRoom){
+            const cardInHand: CardId[] = this.GetCurrentRoundGame().GetCurrentPlayer().GetHandCard().GetInDeck()
+            const cardsInHandAIFormat: number[] = FriendCardGameRoundLogic.GenerateCardIdsInHandAIFormat(cardInHand)
+            const currentBid: number = this.GetCurrentRoundGame().GetAuctionPoint()
+            const botLevel: number = this.GetCurrentRoundGame().GetCurrentPlayer().GetBotLevel() ?? BOT_CONFIG.EASY_BOT
+            BotAuction(cardsInHandAIFormat, currentBid, botLevel)
+                .then((biddingScore: string) => {
+                    const botAuctionScore: number = parseInt(biddingScore, 10)
+                    const botAuctionPass: boolean = botAuctionScore === 0
+                    console.log("botAuctionScore: " + botAuctionScore)
+                    console.log("botAuctionPass: " + botAuctionPass)
+                    const player: FriendCardPlayer = this.GetCurrentRoundGame().GetCurrentPlayer()
+                    this.AuctionProcessThenEmitEvent(botAuctionPass, botAuctionScore, player, socket)
+                })
+                .catch(error => {
+                    console.error(`Bot auction python generate error: ${error.toString()}`)
+                })
         }
-        const playerId: string = this.GetCurrentRoundGame().GetCurrentPlayer().UID
-        this.GetCurrentRoundGame().AuctionProcess(
-            auctionPass
-            , auctionPoint
-            , socket
-            , () => this.AuctionTimeOutCallback(socket)
-            , () => this.SelectMainCardTimeOutCallback(socket)
-        )
-        const [nextPlayerId, highestAuctionPlayerId, currentAuctionPoint, gameplayState] = this.GetCurrentRoundGame().GetInfoForAuctionPointResponse();
-        const auctionPointDTO: AuctionPointDTO = {
-            playerId: playerId,
-            isPass: auctionPass,
-            auctionPoint: !auctionPass ? auctionPoint : undefined,
-            nextPlayerId: nextPlayerId,
-            highestAuctionPlayerId: highestAuctionPlayerId ?? "",
-            highestAuctionPoint: currentAuctionPoint,
-        };
-        this.EmitToRoomAndSender(socket, SOCKET_GAME_EVENTS.AUCTION, this.id, auctionPointDTO);
+    }
+    public BotSelectMainCardCallback(socket: Socket): void{
+        if(!this.isNoPlayerInRoom) {
+            const cardInHand: CardId[] = this.GetCurrentRoundGame().GetCurrentPlayer().GetHandCard().GetInDeck()
+            console.log("cardInHand: " + cardInHand.toString())
+            const cardsInHandAIFormat: number[] = FriendCardGameRoundLogic.GenerateCardIdsInHandAIFormat(cardInHand)
+            console.log("cardsInHandAIFormat: " + cardsInHandAIFormat.toString())
+            const botLevel: number = this.GetCurrentRoundGame().GetCurrentPlayer().GetBotLevel() ?? BOT_CONFIG.EASY_BOT
+            BotSelectTrumpSuit(cardsInHandAIFormat, botLevel)
+                .then((trumpFromAI: string) => {
+                    BotSelectFriendCard(cardsInHandAIFormat)
+                        .then((friendCardFromAI: string) => {
+                            const trumpServerFormat: ColorType | undefined = TRUMP_SUIT_AI_FORMAT.hasOwnProperty(trumpFromAI)
+                                ? TRUMP_SUIT_AI_FORMAT[trumpFromAI] as ColorType
+                                : undefined
+                            const friendCardServerFormat: CardId | undefined = CARD_AI_FORMAT.hasOwnProperty(friendCardFromAI)
+                                ? CARD_AI_FORMAT[friendCardFromAI] as CardId
+                                : undefined
+                            console.log("bot trumpFromAI: " + trumpFromAI)
+                            console.log("bot friendCardFromAI: " + friendCardFromAI)
+                            console.log("bot trumpServerFormat: " + trumpServerFormat)
+                            console.log("bot friendCardServerFormat: " + friendCardServerFormat)
+                            if(trumpServerFormat && friendCardServerFormat) {
+                                const player: FriendCardPlayer = this.GetCurrentRoundGame().GetCurrentPlayer()
+                                this.SelectMainCardThenEmitEvent(trumpServerFormat, friendCardServerFormat, player, socket)
+                            }
+                            else{
+                                console.error(`trumpFromAI: ${trumpFromAI} or friendCardFromAI: ${friendCardFromAI} are undefined while convert to server format => trumpServerFormat: ${trumpServerFormat}, friendCardServerFormat: ${friendCardServerFormat}`)
+                            }
+                        })
+                        .catch(error => {
+                            console.error(`BotSelectFriendCard python generate error: ${error.toString()}`)
+                        })
+                })
+                .catch(error => {
+                    console.error(`BotSelectTrumpSuit python generate error: ${error.toString()}`)
+                })
+        }
+    }
+    public BotPlayCardCallback(socket: Socket): void{
+        if(!this.isNoPlayerInRoom) {
+            const cardInHand: CardId[] = this.GetCurrentRoundGame().GetCurrentPlayer().GetHandCard().GetInDeck()
+            const cardsInHandAIFormat: number[] = FriendCardGameRoundLogic.GenerateCardIdsInHandAIFormat(cardInHand)
+            const gameStateAIFormat: number[] = this.GenerateGameStateAIFormat(cardInHand)
+            const botLevel: number = this.GetCurrentRoundGame().GetCurrentPlayer().GetBotLevel() ?? BOT_CONFIG.EASY_BOT
+
+            console.log("cardInHand: " + cardInHand.toString())
+            console.log("cardsInHandAIFormat: " + cardsInHandAIFormat.toString())
+            console.log("gameStateAIFormat: " + gameStateAIFormat.toString())
+
+            BotPlayCard(cardsInHandAIFormat, gameStateAIFormat, botLevel)
+                .then((cardAIFormat: string) => {
+                    console.log("cardAIFormat: " + cardAIFormat)
+                    const botCard: CardId | undefined = CARD_AI_FORMAT.hasOwnProperty(cardAIFormat)
+                        ? CARD_AI_FORMAT[cardAIFormat] as CardId
+                        : undefined
+                    if(botCard){
+                        console.log("botCardID server: " + botCard)
+                        const player: FriendCardPlayer = this.GetCurrentRoundGame().GetCurrentPlayer()
+                        this.PlayCardProcessThenEmitEvent(botCard, player, socket)
+                    }else{
+                        console.error("botCard server null : " + botCard)
+                    }
+
+                })
+                .catch(error => {
+                    console.error(`Bot play card python generate error: ${error.toString()}`)
+                })
+        }
+    }
+    private GenerateGameStateAIFormat(cardInHand: CardId[]): number[] {
+        const cardsInHandAIFormatBit: number[] = FriendCardGameRoundLogic.GenerateCardsInHandOrFieldAIFormatBit(cardInHand)
+        const firstSuitInFieldAIFormatBit: number[] = FriendCardGameRoundLogic.GenerateFirstSuitInFieldAIFormatBit(this.GetCurrentRoundGame().GetCardsInField())
+        const trumpAIFormatBit: number[] = FriendCardGameRoundLogic.GenerateTrumpCardAIFormatBit(this.GetCurrentRoundGame().GetTrumpColor())
+        const cardsInFieldAIFormatBit: number[] = FriendCardGameRoundLogic.GenerateCardsInHandOrFieldAIFormatBit(this.GetCurrentRoundGame().GetCardsInField())
+        const allCardPlayedAsTrumpAIFormatBit: number[] = this.GenerateAllCardPlayedAsTrumpAIFormatBit()
+        const allPointCardPlayedAIFormatBit: number[] = this.GenerateAllPointCardPlayedAIFormatBit()
+        const orderBotPlayerAIFormatBit: number[] = this.GenerateOrderBotPlayerAIFormatBit()
+        const friendCardInTrickAIFormatBit: number[] = this.GenerateFriendCardInTrickAIFormatBit()
+        const orderFriendPlayerAIFormatBit: number[] = [0,0,0,0] // Fix value by AI Requirement
+        return cardsInHandAIFormatBit
+            .concat(firstSuitInFieldAIFormatBit)
+            .concat(trumpAIFormatBit)
+            .concat(cardsInFieldAIFormatBit)
+            .concat(allCardPlayedAsTrumpAIFormatBit)
+            .concat(allPointCardPlayedAIFormatBit)
+            .concat(orderBotPlayerAIFormatBit)
+            .concat(friendCardInTrickAIFormatBit)
+            .concat(orderFriendPlayerAIFormatBit)
+    }
+    private GenerateOrderBotPlayerAIFormatBit(): number[] {
+        let orderBotPlayerAIFormatBit: number[] = [0, 0, 0, 0]
+        const botOrderTurn: number = this.GetCurrentRoundGame().GetCurrentPlayerOrderTurn()
+        orderBotPlayerAIFormatBit[botOrderTurn] = 1
+        return orderBotPlayerAIFormatBit
+    }
+    private GenerateFriendCardInTrickAIFormatBit(): number[] {
+        const friendCardInTrick: CardId | undefined = this.GetCurrentRoundGame().GetFriendCardInTrick()
+        return FriendCardGameRoundLogic.GenerateCardsInHandOrFieldAIFormatBit(friendCardInTrick ? [friendCardInTrick] : []) // Can use this method for gen 28 bit also
+    }
+    private GenerateAllPointCardPlayedAIFormatBit(): number[]{
+        const cardsPlayedShape5: CardId[] = this.GetCurrentRoundGame().GetCardsByShapeArePlayed("5")
+        const cardsPlayedShapeT: CardId[] = this.GetCurrentRoundGame().GetCardsByShapeArePlayed("T")
+        const cardsPlayedShapeK: CardId[] = this.GetCurrentRoundGame().GetCardsByShapeArePlayed("K")
+        return [
+            CardLogic.IsCardsHasColor(cardsPlayedShape5, "H") ? 1 : 0,
+            CardLogic.IsCardsHasColor(cardsPlayedShapeT, "H") ? 1 : 0,
+            CardLogic.IsCardsHasColor(cardsPlayedShapeK, "H") ? 1 : 0,
+
+            CardLogic.IsCardsHasColor(cardsPlayedShape5, "D") ? 1 : 0,
+            CardLogic.IsCardsHasColor(cardsPlayedShapeT, "D") ? 1 : 0,
+            CardLogic.IsCardsHasColor(cardsPlayedShapeK, "D") ? 1 : 0,
+
+            CardLogic.IsCardsHasColor(cardsPlayedShape5, "C") ? 1 : 0,
+            CardLogic.IsCardsHasColor(cardsPlayedShapeT, "C") ? 1 : 0,
+            CardLogic.IsCardsHasColor(cardsPlayedShapeK, "C") ? 1 : 0,
+
+            CardLogic.IsCardsHasColor(cardsPlayedShape5, "S") ? 1 : 0,
+            CardLogic.IsCardsHasColor(cardsPlayedShapeT, "S") ? 1 : 0,
+            CardLogic.IsCardsHasColor(cardsPlayedShapeK, "S") ? 1 : 0,
+        ]
+    }
+    private GenerateAllCardPlayedAsTrumpAIFormatBit(): number[]{
+        let allCardPlayedAsTrump: CardId[] = []
+        if(this.GetCurrentRoundGame().GetTrumpColor()){
+            allCardPlayedAsTrump = this.GetCurrentRoundGame().GetCardsByColorArePlayed(this.GetCurrentRoundGame().GetTrumpColor()!)
+        }
+        return FriendCardGameRoundLogic.GenerateAllCardPlayedAsTrumpAIFormatBit(allCardPlayedAsTrump)
+    }
+    public AuctionTimeOutCallback(socket: Socket): void{
+        if(!this.isNoPlayerInRoom){
+            console.log("Auto auction")
+            let auctionPass: boolean
+            let auctionPoint: number | undefined
+            if(this.GetCurrentRoundGame().IsFirstAuction()){
+                auctionPass = false
+                auctionPoint = 55
+            }else{
+                auctionPass = true
+                auctionPoint = 100 // Not important
+            }
+            const player: FriendCardPlayer = this.GetCurrentRoundGame().GetCurrentPlayer()
+            this.AuctionProcessThenEmitEvent(auctionPass, auctionPoint, player, socket)
+        }
     }
     public SelectMainCardTimeOutCallback(socket: Socket): void{
-        console.log("Auto Select Main Card")
-        const player: FriendCardPlayer = this.GetCurrentRoundGame().GetCurrentPlayer()
-        const card: CardId = player.GetHandCard().RandomCardNotValidInHand()
-        const color: ColorType = player.GetHandCard().RandomColor()
-        this.GetCurrentRoundGame().SetTrumpAndFriendProcess(color, card, player, socket, () => this.PlayCardTimeOutCallback(socket))
-        const trumpAndFriendDTO :TrumpAndFriendDTO = {
-            playerId: player.UID,
-            trumpColor: color,
-            friendCard: card
-        };
-        this.EmitToRoomAndSender(socket, SOCKET_GAME_EVENTS.SELECT_MAIN_CARD, this.id, trumpAndFriendDTO);
+        if(!this.isNoPlayerInRoom){
+            console.log("Auto Select Main Card")
+            const player: FriendCardPlayer = this.GetCurrentRoundGame().GetCurrentPlayer()
+            const card: CardId = player.GetHandCard().RandomCardNotValidInHand()
+            const color: ColorType = player.GetHandCard().RandomColor()
+            this.SelectMainCardThenEmitEvent(color, card, player, socket)
+        }
     }
     public PlayCardTimeOutCallback(socket: Socket): void{
-        console.log("Auto Play Card")
-        const player: FriendCardPlayer = this.GetCurrentRoundGame().GetCurrentPlayer()
-        const cardsCanPlay: CardId[] = this.GetCurrentRoundGame().CardsCanPlay(player)
-        const randomCard: CardId = RandomArrayElement(cardsCanPlay)
-        const playedCard: CardId = this.GetCurrentRoundGame().PlayCardProcess(randomCard, player.UID, socket, () => this.PlayCardTimeOutCallback(socket))
-        if(this.IsCurrentRoundGameFinished() && this.CheckGameFinished()){
-            this.FinishGameProcess()
-            const winner: FriendCardPlayer | undefined = this.GetWinner()
-            if(winner){
-                const winnerResponse: GameFinishedDTO = {
-                    winnerId: winner.UID,
-                    winnerName: winner.username,
-                    winnerPoint: this.GetWinnerPoint(),
-                    roundsFinishedDetail: this.GetAllRoundResult()
+        if(!this.isNoPlayerInRoom){
+            console.log("Auto Play Card")
+            const player: FriendCardPlayer = this.GetCurrentRoundGame().GetCurrentPlayer()
+            const cardsCanPlay: CardId[] = this.GetCurrentRoundGame().CardsCanPlay(player)
+            const randomCard: CardId = RandomArrayElement(cardsCanPlay)
+            this.PlayCardProcessThenEmitEvent(randomCard, player, socket)
+        }
+    }
+    private SelectMainCardThenEmitEvent(trumpColor: ColorType, friendCard: CardId, player: FriendCardPlayer, socket: Socket): void {
+        try {
+            HandlerValidation.GameAndRoundAndGameplayStarted(this);
+            HandlerValidation.IsWinnerAuction(this, player);
+            HandlerValidation.IsFriendCardAndTrumpCardValid(this, friendCard, trumpColor);
+            HandlerValidation.NotHasCardInHand(player, friendCard);
+            HandlerValidation.NotAlreadySetTrumpAndFriend(this);
+            this.GetCurrentRoundGame().SetTrumpAndFriendProcess(trumpColor
+                , friendCard
+                , player
+                , socket
+                , () => this.PlayCardTimeOutCallback(socket)
+                , () => this.BotPlayCardCallback(socket)
+            )
+            const trumpAndFriendDTO :TrumpAndFriendDTO = {
+                playerId: player.UID,
+                trumpColor: trumpColor,
+                friendCard: friendCard,
+                winnerAuctionPoint: this.GetCurrentRoundGame().GetAuctionPoint()
+            };
+            this.EmitToRoomAndSender(socket, SOCKET_GAME_EVENTS.SELECT_MAIN_CARD, this.id, trumpAndFriendDTO);
+        }
+        catch (error: any) {
+            console.error("Error SelectMainCardThenEmitEvent method: " + error.toString())
+        }
+    }
+    private AuctionProcessThenEmitEvent(auctionPass: boolean, auctionPoint: number, player: FriendCardPlayer, socket: Socket): void {
+        try {
+            HandlerValidation.GameAndRoundStarted(this);
+            HandlerValidation.IsGamePlayNotStarted(this);
+            HandlerValidation.IsPlayerTurn(this, player);
+            HandlerValidation.AcceptableAuctionPoint(auctionPass, auctionPoint);
+            HandlerValidation.FirstPlayerCannotNotPass(this, auctionPass);
+            HandlerValidation.AuctionPointGreaterThan(auctionPass, auctionPoint, this.GetCurrentRoundGame().GetAuctionPoint());
+            this.GetCurrentRoundGame().AuctionProcess(
+                auctionPass
+                , auctionPoint
+                , socket
+                , () => this.AuctionTimeOutCallback(socket)
+                , () => this.SelectMainCardTimeOutCallback(socket)
+                , () => this.BotAuctionCallback(socket)
+                ,() => this.BotSelectMainCardCallback(socket)
+            )
+            const [nextPlayerId, highestAuctionPlayerId, currentAuctionPoint, gameplayState] = this.GetCurrentRoundGame().GetInfoForAuctionPointResponse();
+            const auctionPointDTO: AuctionPointDTO = {
+                playerId: player.UID,
+                isPass: auctionPass,
+                auctionPoint: !auctionPass ? auctionPoint : undefined,
+                nextPlayerId: nextPlayerId,
+                highestAuctionPlayerId: highestAuctionPlayerId ?? "",
+                highestAuctionPoint: currentAuctionPoint,
+            };
+            this.EmitToRoomAndSender(socket, SOCKET_GAME_EVENTS.AUCTION, this.id, auctionPointDTO);
+        }
+        catch (error: any){
+            console.error("Error AuctionProcessThenEmitEvent method: " + error.toString())
+        }
+    }
+    private PlayCardProcessThenEmitEvent(cardToPlay: CardId, player: FriendCardPlayer, socket: Socket): void {
+        try
+        {
+            HandlerValidation.AlreadySetTrumpAndFriend(this);
+            HandlerValidation.IsGameRoomStartedState(this);
+            HandlerValidation.IsPlayerTurn(this, player);
+            HandlerValidation.HasCardOnHand(this, player, cardToPlay);
+            const playedCard: CardId = this.GetCurrentRoundGame().PlayCardProcess(cardToPlay
+                , player.UID
+                , socket
+                , () => this.PlayCardTimeOutCallback(socket)
+                , () => this.BotPlayCardCallback(socket)
+            )
+            if(this.IsCurrentRoundGameFinished() && this.CheckGameFinished()){
+                this.FinishGameProcess()
+                const winner: FriendCardPlayer | undefined = this.GetWinner()
+                if(winner){
+                    const winnerResponse: GameFinishedDTO = {
+                        winnerId: winner.UID,
+                        winnerName: winner.username,
+                        winnerPoint: this.GetWinnerPoint(),
+                        roundsFinishedDetail: this.GetAllRoundResult()
+                    }
+                    this.EmitToRoomAndSender(socket, SOCKET_GAME_EVENTS.GAME_FINISHED, this.id, winnerResponse);
                 }
-                this.EmitToRoomAndSender(socket, SOCKET_GAME_EVENTS.GAME_FINISHED, this.id, winnerResponse);
+                else{
+                }
             }
-            else{
+            else if (this.IsCurrentRoundGameFinished())
+            {
+                const roundFinishedResponse: WinnerRoundResponse[] = this.GetAllRoundResult()
+                this.NextRoundProcess(socket);
+                this.EmitToRoomAndSender(socket, SOCKET_GAME_EVENTS.ROUND_FINISHED, this.id, roundFinishedResponse);
             }
+            else if (this.GetCurrentRoundGame().IsEndOfTrick())
+            {
+                const winnerTrickModel: WinnerTrickResponse | undefined = this.GetCurrentRoundGame().GetLatestWinnerTrickResponse();
+                this.EmitToRoomAndSender(socket, SOCKET_GAME_EVENTS.TRICK_FINISHED, this.id, winnerTrickModel);
+            }
+            const cardPlayedDTO: CardPlayedDTO = {
+                playerId: player.UID,
+                cardId: playedCard
+            };
+            this.EmitToRoomAndSender(socket, SOCKET_GAME_EVENTS.CARD_PLAYED, this.id, cardPlayedDTO);
         }
-        else if (this.IsCurrentRoundGameFinished())
-        {
-            const roundFinishedResponse: WinnerRoundResponse[] = this.GetAllRoundResult()
-            this.NextRoundProcess(socket);
-            this.EmitToRoomAndSender(socket, SOCKET_GAME_EVENTS.ROUND_FINISHED, this.id, roundFinishedResponse);
+        catch (error: any) {
+            console.error("Error PlayCardProcessThenEmitEvent method: " + error.toString())
         }
-        else if (this.GetCurrentRoundGame().IsEndOfTrick())
-        {
-            const winnerTrickModel: WinnerTrickResponse | undefined = this.GetCurrentRoundGame().GetLatestWinnerTrickResponse();
-            this.EmitToRoomAndSender(socket, SOCKET_GAME_EVENTS.TRICK_FINISHED, this.id, winnerTrickModel);
-        }
-        const cardPlayedDTO: CardPlayedDTO = {
-            playerId: player.UID,
-            cardId: playedCard
-        };
-        this.EmitToRoomAndSender(socket, SOCKET_GAME_EVENTS.CARD_PLAYED, this.id, cardPlayedDTO);
     }
     private EmitToRoomAndSender(socket: Socket, event: SOCKET_EVENT, gameId: string, ...args: any[]): void
     {
