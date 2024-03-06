@@ -18,6 +18,7 @@ import {
 import {JwtPayload} from "jsonwebtoken";
 import {UserDataModel} from "../Model/Entity/UserData.js";
 import {JWTPayLoadInterface} from "../GameLogic/Utils/Authorization/JWT.js";
+import {GenerateRandomStringEightChar} from "../GameLogic/Utils/Tools.js";
 
 export class GameController extends ExpressRouter
 {
@@ -70,6 +71,11 @@ export class GameController extends ExpressRouter
 			isPasswordProtected: !!newGameData.password,
 		});
 		const savedGame = await createdGame.save();
+		let randomMatchIdEightChar: string = GenerateRandomStringEightChar()
+		const existingMatchId: string[] = GamesStore.getInstance.GetAllGamesIdAsArray()
+		while (existingMatchId.some(id => id === randomMatchIdEightChar)){
+			randomMatchIdEightChar = GenerateRandomStringEightChar()
+		}
 		const gameRoom: GameRoom = GameFactory.CreateGame(
 			savedGame.gameType,
 			{ UID: userModel.UID, username: userModel.username },
@@ -77,7 +83,7 @@ export class GameController extends ExpressRouter
 			savedGame.roomName,
 			savedGame.isPasswordProtected,
 			savedGame.createdAt,
-			savedGame.id,
+			randomMatchIdEightChar,
 			newGameData.password
 		);
 		GamesStore.getInstance.AddGame(gameRoom);

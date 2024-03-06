@@ -39,4 +39,43 @@ export class FriendCardLogic extends CardLogic
         }
         return result;
     }
+    public static CheckShapeCard(cards: CardId[]): number[] {
+        const arrayAIFormat: number[] = []
+        if( FriendCardLogic.IsCardsHasShapes(cards, ["2","3","4","6","7","8","9"]) ){
+            arrayAIFormat.push(1)
+        }else{
+            arrayAIFormat.push(0)
+        }
+        if (FriendCardLogic.IsCardsHasShapes(cards, ['5'])){
+            arrayAIFormat.push(1)
+        }else{
+            arrayAIFormat.push(0)
+        }
+        if (FriendCardLogic.IsCardsHasShapes(cards, ['T'])){
+            arrayAIFormat.push(1)
+        }else{
+            arrayAIFormat.push(0)
+        }
+        if (FriendCardLogic.IsCardsHasShapes(cards, ['J'])){
+            arrayAIFormat.push(1)
+        }else{
+            arrayAIFormat.push(0)
+        }
+        if (FriendCardLogic.IsCardsHasShapes(cards, ['Q'])){
+            arrayAIFormat.push(1)
+        }else{
+            arrayAIFormat.push(0)
+        }
+        if(FriendCardLogic.IsCardsHasShapes(cards, ['K'])){
+            arrayAIFormat.push(1)
+        }else{
+            arrayAIFormat.push(0)
+        }
+        if(FriendCardLogic.IsCardsHasShapes(cards, ['A'])){
+            arrayAIFormat.push(1)
+        }else{
+            arrayAIFormat.push(0)
+        }
+        return arrayAIFormat
+    }
 }

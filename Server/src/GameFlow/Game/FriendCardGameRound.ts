@@ -1,8 +1,8 @@
 import {Socket} from "socket.io";
-import {CardId, ColorType} from "../../Enum/CardConstant.js";
+import {CardId, ColorType, ShapeType} from "../../Enum/CardConstant.js";
 import {GAME_STATE} from "../../Enum/GameState.js";
 import {ActionsDTO} from "../../Model/DTO/ActionsDTO.js";
-import {TrickCardModel} from "../../Model/DTO/TrickCardModel.js";
+import {TrickCardDetailModel, TrickCardModel} from "../../Model/DTO/TrickCardModel.js";
 import {CardLogic} from "../../GameLogic/Card/CardLogic.js";
 import {DeckLogic} from "../../GameLogic/Card/DeckLogic.js";
 import {FriendCardPlayer} from "../Player/FriendCardPlayer.js";
@@ -43,21 +43,34 @@ export class FriendCardGameRound
         this.roundNumber = roundNumber;
         this.gameId = gameId;
     };
-    public StartRoundProcess(isFromNextRoundProcess: boolean, initialPlayers : FriendCardPlayer[], socket: Socket, AuctionTimeOutCallback: (socket: Socket) => void): void
-    {
+    public StartRoundProcess(isFromNextRoundProcess: boolean
+                             , initialPlayers : FriendCardPlayer[]
+                             , socket: Socket
+                             , AuctionTimeOutCallback: (socket: Socket) => void
+                             , BotAuctionCallback: (socket: Socket) => void
+    ): void {
         if (initialPlayers.length !== 4) throw new Error("Players are not equal to 4");
-        this.playersInOrder = ShuffleArray(Array.from(initialPlayers.values()));
-        this.currentPlayerNumber = 0;
+        this.playersInOrder = initialPlayers;
+        this.currentPlayerNumber = Math.floor(Math.random() * 4);
         FriendCardGameRoundLogic.PrepareCard(this.deck, this.playersInOrder);
         this.roundState = GAME_STATE.STARTED
+
         const timeout: number = isFromNextRoundProcess ? FRIEND_TIMEOUT_CONFIG.AUCTION_WITH_ROUND_FINISH_IN_SEC : FRIEND_TIMEOUT_CONFIG.AUCTION_IN_SEC
-        this.GetCurrentPlayer().StartTimer(timeout, () => AuctionTimeOutCallback(socket))
+        if(this.GetCurrentPlayer().GetIsDisconnected()){
+            const actionBotDelay: number = 0
+            this.GetCurrentPlayer().BotPlay(timeout, actionBotDelay, () => BotAuctionCallback(socket))
+        }
+        else{
+            this.GetCurrentPlayer().StartTimer(timeout, () => AuctionTimeOutCallback(socket))
+        }
     }
     public AuctionProcess(auctionPass: boolean
                           , newAuctionPoint: number
                           , socket: Socket
                           , AuctionTimeOutCallback: (socket: Socket) => void
                           , SelectMainCardTimeOutCallback: (socket: Socket) => void
+                          , BotAuctionCallback: (socket: Socket) => void
+                          , BotSelectMainCardCallback: (socket: Socket) => void
     ): void
     {
         this.GetCurrentPlayer().ClearTimer()
@@ -75,10 +88,22 @@ export class FriendCardGameRound
         {
             this.gameplayState = GAME_STATE.STARTED;
             this.currentPlayerNumber = this.GetHighestAuctionPlayerIndex()
-            this.GetCurrentPlayer().StartTimer(FRIEND_TIMEOUT_CONFIG.SELECT_MAIN_CARD_IN_SEC, () => SelectMainCardTimeOutCallback(socket))
+            if(this.GetCurrentPlayer().GetIsDisconnected()){
+                const actionBotDelay: number = 0
+                this.GetCurrentPlayer().BotPlay(FRIEND_TIMEOUT_CONFIG.SELECT_MAIN_CARD_IN_SEC, actionBotDelay, () => BotSelectMainCardCallback(socket))
+            }
+            else{
+                this.GetCurrentPlayer().StartTimer(FRIEND_TIMEOUT_CONFIG.SELECT_MAIN_CARD_IN_SEC, () => SelectMainCardTimeOutCallback(socket))
+            }
         }else{
             this.currentPlayerNumber = FriendCardGameRoundLogic.NextPlayer(this.currentPlayerNumber, this.playersInOrder.length);
-            this.GetCurrentPlayer().StartTimer(FRIEND_TIMEOUT_CONFIG.AUCTION_IN_SEC, () => AuctionTimeOutCallback(socket))
+            if(this.GetCurrentPlayer().GetIsDisconnected()){
+                const actionBotDelay: number = 0
+                this.GetCurrentPlayer().BotPlay(FRIEND_TIMEOUT_CONFIG.AUCTION_IN_SEC, actionBotDelay, () => BotAuctionCallback(socket))
+            }
+            else{
+                this.GetCurrentPlayer().StartTimer(FRIEND_TIMEOUT_CONFIG.AUCTION_IN_SEC, () => AuctionTimeOutCallback(socket))
+            }
         }
     }
     public GetScoreCard(playerId: string): CardId[]{
@@ -97,8 +122,13 @@ export class FriendCardGameRound
         return result
     }
     public IsFirstAuction(): boolean { return this.auctionPoint === 50; }
-    public SetTrumpAndFriendProcess(trumpColor: ColorType, friendCard: CardId, player: FriendCardPlayer, socket:Socket, PlayCardTimeOutCallback: (socket: Socket) => void): void
-    {
+    public SetTrumpAndFriendProcess(trumpColor: ColorType
+                                    , friendCard: CardId
+                                    , player: FriendCardPlayer
+                                    , socket:Socket
+                                    , PlayCardTimeOutCallback: (socket: Socket) => void
+                                    , BotPlayCardCallback: (socket: Socket) => void
+    ): void {
         this.trumpColor = trumpColor;
         this.friendCard = friendCard;
         const highestAuctionPlayer : FriendCardPlayer | undefined= this.GetHighestAuctionPlayer();
@@ -107,12 +137,22 @@ export class FriendCardGameRound
         FriendCardGameRoundLogic.InitializeTrick(this.totalTrickNumber, this.trickCardMap);
         this.GetCurrentPlayer().ClearTimer()
         this.currentPlayerNumber = this.playersInOrder.findIndex(p => p.UID === player.UID);
-        this.GetCurrentPlayer().StartTimer(FRIEND_TIMEOUT_CONFIG.PLAY_CARD_IN_SEC, () => PlayCardTimeOutCallback(socket))
+        if(this.GetCurrentPlayer().GetIsDisconnected()){
+            const actionBotDelay: number = 0
+            this.GetCurrentPlayer().BotPlay(FRIEND_TIMEOUT_CONFIG.PLAY_CARD_IN_SEC, actionBotDelay, () => BotPlayCardCallback(socket))
+        }
+        else {
+            this.GetCurrentPlayer().StartTimer(FRIEND_TIMEOUT_CONFIG.PLAY_CARD_IN_SEC, () => PlayCardTimeOutCallback(socket))
+        }
         this.currentTrickNumber = 0;
     }
     
-    public PlayCardProcess(cardId: CardId, playerId: string, socket: Socket, PlayCardTimeOutCallback: (socket: Socket) => void): CardId
-    {
+    public PlayCardProcess(cardId: CardId
+                           , playerId: string
+                           , socket: Socket
+                           , PlayCardTimeOutCallback: (socket: Socket) => void
+                           , BotPlayCardCallback: (socket: Socket) => void
+    ): CardId {
         let removeCard: CardId;
         const leaderCardId: CardId | undefined  = this.trickCardMap.get(this.currentTrickNumber)?.detail.at(0)?.cardId;
         const leaderColor: ColorType | undefined = leaderCardId ? CardLogic.GetColor(leaderCardId) : undefined;
@@ -140,13 +180,24 @@ export class FriendCardGameRound
             this.isFriendAppeared = true;
         }
         if(this.IsFinishedTrick(leaderColor, currentTrickCardModel)){
-            this.TrickFinishedProcess(leaderColor!, currentTrickCardModel!, () => PlayCardTimeOutCallback(socket), socket)
+            this.TrickFinishedProcess(leaderColor!
+                , currentTrickCardModel!
+                , () => PlayCardTimeOutCallback(socket)
+                , socket
+                ,() => BotPlayCardCallback(socket)
+            )
         }
         else{
             this.GetCurrentPlayer().ClearTimer()
             this.currentPlayerNumber = FriendCardGameRoundLogic.NextPlayer(this.currentPlayerNumber, this.playersInOrder.length);
             const timeout: number = firstTimeFriendAppear ? FRIEND_TIMEOUT_CONFIG.PLAY_CARD_WITH_ONLY_FRIEND_APPEAR_POPUP_IN_SEC : FRIEND_TIMEOUT_CONFIG.PLAY_CARD_IN_SEC
-            this.GetCurrentPlayer().StartTimer(timeout, () => PlayCardTimeOutCallback(socket))
+            if(this.GetCurrentPlayer().GetIsDisconnected()){
+                const actionBotDelay: number = firstTimeFriendAppear ? FRIEND_TIMEOUT_CONFIG.FRIEND_APPEAR_POPUP_IN_SEC : 0
+                this.GetCurrentPlayer().BotPlay(timeout, actionBotDelay, () => BotPlayCardCallback(socket))
+            }
+            else{
+                this.GetCurrentPlayer().StartTimer(timeout, () => PlayCardTimeOutCallback(socket))
+            }
         }
         return removeCard;
     }
@@ -158,6 +209,7 @@ export class FriendCardGameRound
         , currentTrickCardModel: TrickCardModel
         , PlayCardTimeOutCallback: (socket: Socket) => void
         , socket: Socket
+        , BotPlayCardCallback: (socket: Socket) => void
     ): void
     {
         this.GetCurrentPlayer().ClearTimer()
@@ -173,7 +225,15 @@ export class FriendCardGameRound
         if(this.currentTrickNumber >= this.totalTrickNumber) {
             this.FinishRound()
         }else{
-            this.GetCurrentPlayer().StartTimer(FRIEND_TIMEOUT_CONFIG.PLAY_CARD_WITH_TRICK_FINISH_POPUP_IN_SEC, () => PlayCardTimeOutCallback(socket))
+            if(this.GetCurrentPlayer().GetIsDisconnected()){
+                this.GetCurrentPlayer().BotPlay(FRIEND_TIMEOUT_CONFIG.PLAY_CARD_WITH_TRICK_FINISH_POPUP_IN_SEC
+                    , FRIEND_TIMEOUT_CONFIG.TRICK_FINISHED_POPUP_IN_SEC
+                    , () => BotPlayCardCallback(socket)
+                )
+            }
+            else {
+                this.GetCurrentPlayer().StartTimer(FRIEND_TIMEOUT_CONFIG.PLAY_CARD_WITH_TRICK_FINISH_POPUP_IN_SEC, () => PlayCardTimeOutCallback(socket))
+            }
         }
     }
     public FinishRound(): void
@@ -299,5 +359,63 @@ export class FriendCardGameRound
     {
         const playerHand: CardId[] = player.GetHandCard().GetInDeck();
         return playerHand.indexOf(cardId) >= 0;
+    }
+    public GetTrumpColor(): ColorType | undefined { return this.trumpColor }
+    public GetCardsByColorArePlayed(color: ColorType): CardId[] {
+        const cardsResult: CardId[] = []
+        let allCardsPlayed: CardId[] = []
+        this.trickCardMap.forEach((trick: TrickCardModel, key: number) => {
+            allCardsPlayed = allCardsPlayed.concat(trick.GetAllCardInTrick())
+        })
+        allCardsPlayed.forEach(card => {
+            if(CardLogic.IsColor(card, color)){
+                cardsResult.push(card)
+            }
+        })
+        return cardsResult
+    }
+    public GetCardsByShapeArePlayed(shape: ShapeType): CardId[] {
+        const cardsResult: CardId[] = []
+        let allCardsPlayed: CardId[] = []
+        this.trickCardMap.forEach((trick: TrickCardModel, key: number) => {
+            allCardsPlayed = allCardsPlayed.concat(trick.GetAllCardInTrick())
+        })
+        allCardsPlayed.forEach(card => {
+            if(CardLogic.IsShape(card, shape)){
+                cardsResult.push(card)
+            }
+        })
+        return cardsResult
+    }
+    public GetFriendCardInTrick(): CardId | undefined {
+        let friendCard: CardId | undefined = undefined
+        const currentPlayerUID: string = this.GetCurrentPlayer().UID
+        let friendUID: string | undefined = undefined
+        if (this.isFriendAppeared && this.auctionWinnerTeamIds.some(UID => UID === currentPlayerUID)){
+            this.auctionWinnerTeamIds.forEach(UID => {
+                if(UID !== currentPlayerUID){
+                    friendUID = UID
+                }
+            })
+        }
+        else if (this.isFriendAppeared && this.anotherTeamIds.some(UID => UID === currentPlayerUID)) {
+            this.anotherTeamIds.forEach(UID => {
+                if(UID !== currentPlayerUID){
+                    friendUID = UID
+                }
+            })
+        }
+        if(friendUID){
+            friendCard = this.trickCardMap.get(this.currentTrickNumber)?.GetCardByPlayerId(friendUID)
+        }
+        return friendCard
+    }
+    public GetCurrentPlayerOrderTurn(): number {
+        let orderTurn: number = 0 // start from 0 to 3
+        const totalPlayerPlayedInTrick: number | undefined = this.trickCardMap.get(this.currentTrickNumber)?.detail.length
+        if(totalPlayerPlayedInTrick){
+            orderTurn = totalPlayerPlayedInTrick
+        }
+        return orderTurn
     }
 }

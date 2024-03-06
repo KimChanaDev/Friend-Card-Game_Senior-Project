@@ -34,6 +34,7 @@ export async function newFirebaseAuthMiddleware(req: Request, res: Response, nex
         const decodeValue = await admin.auth().verifyIdToken(token)
         if (decodeValue) {
             req.firebase = decodeValue
+            req.idToken = token
             return next();
         }
         // return next(new UnauthorizedError());

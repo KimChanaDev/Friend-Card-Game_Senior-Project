@@ -4,6 +4,7 @@ import {PlayerDTO} from "../../Model/DTO/PlayerDTO.js";
 import {GamesStore} from "./GameStore.js";
 import {Player} from "../Player/Player.js";
 import {GetRandomKeyFromMap} from "../../GameLogic/Utils/Tools.js";
+import {BOT_CONFIG} from "../../Enum/BotConfig.js";
 
 export abstract class GameRoom
 {
@@ -35,6 +36,7 @@ export abstract class GameRoom
     public GetPlayerByUID(UID: string): Player | undefined { return this.playersInGame.get(UID); }
     public GetAllPlayersDTO(): PlayerDTO[] { return Array.from(this.playersInGame.values()).map((player) => PlayerDTO.CreateFromPlayer(player)); }
     public AreAllPlayersReady(): boolean { return Array.from(this.playersInGame.values()).every((player) => player.GetIsReady()); }
+    public AreAllPlayersIsDisconnected(): boolean { return Array.from(this.playersInGame.values()).every((player) => player.GetIsDisconnected()); }
     public NumPlayersInGame(): number { return this.playersInGame.size; }
     public NumConnectedPlayersInGame(): number { return Array.from(this.playersInGame.values()).filter((player) => !player.GetIsDisconnected()).length; }
     public IsRoomFull(): boolean { return this.maxPlayers - this.NumPlayersInGame() <= 0; }
@@ -46,7 +48,7 @@ export abstract class GameRoom
     {
         if (this.gameState === GAME_STATE.STARTED){
             player.SetDisconnected(true);
-            /// TODO Add bot here
+            player.SetBotLevel(BOT_CONFIG.EASY_BOT)
         }
         else {
             this.playersInGame.delete(player.UID);
@@ -54,9 +56,15 @@ export abstract class GameRoom
         if (this.NumConnectedPlayersInGame() <= 0) this.StartRemoveFromGameStoreTimeout();
     }
     public SetNewHostOrOwnerRoom(): Player | undefined{
-        const randomPlayerIdKey: string | undefined = GetRandomKeyFromMap(this.playersInGame)
+        const playersInGameExcludeBot = new Map<string,Player>();
+        this.playersInGame.forEach(player => {
+            if(!player.GetIsDisconnected() && !player.isOwner){
+                playersInGameExcludeBot.set(player.UID, player)
+            }
+        })
+        const randomPlayerIdKey: string | undefined = GetRandomKeyFromMap(playersInGameExcludeBot)
         if(randomPlayerIdKey){
-            const player: Player | undefined = this.playersInGame.get(randomPlayerIdKey);
+            const player: Player | undefined = playersInGameExcludeBot.get(randomPlayerIdKey);
             if(player){
                 this.owner = {
                     UID: player.UID,

@@ -1,8 +1,10 @@
-import {CardId, ColorType} from "../../Enum/CardConstant.js";
+import {CARD_AI_FORMAT, CardId, ColorType} from "../../Enum/CardConstant.js";
 import {FriendCardPlayer} from "../../GameFlow/Player/FriendCardPlayer.js";
 import {TrickCardDetailModel, TrickCardModel} from "../../Model/DTO/TrickCardModel.js";
 import {DeckLogic} from "../Card/DeckLogic.js";
 import {FriendCardLogic} from "../Card/FriendCardLogic.js";
+import {CardLogic} from "../Card/CardLogic.js";
+import {FindKeyByValue} from "../Utils/Tools.js";
 
 export class FriendCardGameRoundLogic
 {
@@ -125,5 +127,73 @@ export class FriendCardGameRoundLogic
             playersInOrder.filter(player => anotherTeamIds.some(id => id === player.UID)).forEach(player => player.AddGamePoint(roundNumber, sumPlayerPoint / 2) );
         }
         return[roundWinnerIds, roundWinnerPoint];
+    }
+    public static GenerateCardsInHandOrFieldAIFormatBit(cardsInHandOrField: CardId[]): number[] {
+        const cardInHandColorH: CardId[] = FriendCardLogic.GetCardsOnlyColor(cardsInHandOrField, "H")
+        const cardInHandColorD: CardId[] = FriendCardLogic.GetCardsOnlyColor(cardsInHandOrField, "D")
+        const cardInHandColorC: CardId[] = FriendCardLogic.GetCardsOnlyColor(cardsInHandOrField, "C")
+        const cardInHandColorS: CardId[] = FriendCardLogic.GetCardsOnlyColor(cardsInHandOrField, "S")
+        const arrayAIFormatColorH: number[] = FriendCardLogic.CheckShapeCard(cardInHandColorH)
+        const arrayAIFormatColorD: number[] = FriendCardLogic.CheckShapeCard(cardInHandColorD)
+        const arrayAIFormatColorC: number[] = FriendCardLogic.CheckShapeCard(cardInHandColorC)
+        const arrayAIFormatColorS: number[] = FriendCardLogic.CheckShapeCard(cardInHandColorS)
+        return arrayAIFormatColorH
+            .concat(arrayAIFormatColorD)
+            .concat(arrayAIFormatColorC)
+            .concat(arrayAIFormatColorS)
+    }
+    public static GenerateCardIdsInHandAIFormat(cardsInHand: CardId[]): number[]{
+        const CardIdsAIFormat: number[] = []
+        cardsInHand.forEach(card => {
+            const cardAI: string | undefined = FindKeyByValue(CARD_AI_FORMAT, card)
+            if(cardAI){
+                CardIdsAIFormat.push(parseInt(cardAI))
+            }
+        })
+        return CardIdsAIFormat
+    }
+    public static GenerateFirstSuitInFieldAIFormatBit(cardsInField: CardId[]): number[]{
+        let firstSuitInFieldAIFormatBit: number[] = [0, 0, 0, 0]
+        if(cardsInField.length > 0){
+            const firstCardInField: CardId | undefined = cardsInField.at(0)
+            if(firstCardInField){
+                firstSuitInFieldAIFormatBit = [
+                    CardLogic.IsColor(firstCardInField, "H") ? 1 : 0,
+                    CardLogic.IsColor(firstCardInField, "D") ? 1 : 0,
+                    CardLogic.IsColor(firstCardInField, "C") ? 1 : 0,
+                    CardLogic.IsColor(firstCardInField, "S") ? 1 : 0,
+                ]
+            }
+        }
+        return firstSuitInFieldAIFormatBit
+    }
+    public static GenerateTrumpCardAIFormatBit(trumpColor: ColorType | undefined): number[]{
+        let trumpCardAIFormatBit: number[] = [ 0,0,0,0 ]
+        if(trumpColor){
+            trumpCardAIFormatBit = [
+                trumpColor === "H" ? 1 : 0,
+                trumpColor === "D" ? 1 : 0,
+                trumpColor === "C" ? 1 : 0,
+                trumpColor === "S" ? 1 : 0,
+            ]
+        }
+        return trumpCardAIFormatBit
+    }
+    public static GenerateAllCardPlayedAsTrumpAIFormatBit(cards: CardId[]): number[] {
+        return [
+            CardLogic.IsCardsHasShapes(cards, ["2"]) ? 1 : 0,
+            CardLogic.IsCardsHasShapes(cards, ["3"]) ? 1 : 0,
+            CardLogic.IsCardsHasShapes(cards, ["4"]) ? 1 : 0,
+            CardLogic.IsCardsHasShapes(cards, ["5"]) ? 1 : 0,
+            CardLogic.IsCardsHasShapes(cards, ["6"]) ? 1 : 0,
+            CardLogic.IsCardsHasShapes(cards, ["7"]) ? 1 : 0,
+            CardLogic.IsCardsHasShapes(cards, ["8"]) ? 1 : 0,
+            CardLogic.IsCardsHasShapes(cards, ["9"]) ? 1 : 0,
+            CardLogic.IsCardsHasShapes(cards, ["T"]) ? 1 : 0,
+            CardLogic.IsCardsHasShapes(cards, ["J"]) ? 1 : 0,
+            CardLogic.IsCardsHasShapes(cards, ["Q"]) ? 1 : 0,
+            CardLogic.IsCardsHasShapes(cards, ["K"]) ? 1 : 0,
+            CardLogic.IsCardsHasShapes(cards, ["A"]) ? 1 : 0,
+        ]
     }
 }

@@ -6,6 +6,7 @@ declare global {
 		interface Request {
 			jwt?: JwtPayload;
 			firebase?: string | DecodedIdToken;
+			idToken?: string;
 		}
 	}
 }

@@ -17,6 +17,7 @@ export interface UserDataDocument extends Document {
     provider: string;
     firebaseId: string;
     UID: string;
+    UUID: string;
     // win: number;
     // match: number;
     // lastestMatch: matchObject[];
@@ -27,14 +28,20 @@ const userSchema = new Schema<UserDataDocument>({
 		type: String,
 		minlength: 6,
 		maxlength: 20,
-		required: true,
+		// required: true,
 		unique: true,
+        required: function () {
+            return this.provider === 'password';
+        }
 	},
     email: {
         type: String,
-        required: true,
+        // required: true,
         unique: true,
         validate: [IsEmail, 'Invalid email format'],
+        required: function () {
+            return this.provider === 'password';
+        }
     },
     // password: {
     //     type: String,
@@ -59,6 +66,10 @@ const userSchema = new Schema<UserDataDocument>({
         required: true,
     },
     UID: {
+        type: String,
+        required: true,
+    },
+    UUID: {
         type: String,
         required: true,
     }
