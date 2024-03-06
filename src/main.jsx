@@ -9,6 +9,7 @@ import {store} from "./store/Store.jsx";
 import { CookiesProvider } from "react-cookie";
 import SocketClient from "./service/Socket/SocketClient.jsx";
 
+
 export const socketClient = new SocketClient()
 
 ReactDOM.createRoot(document.getElementById('root')).render(
@@ -17,6 +18,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
       <ReduxProvider store={store}>
           {/*<App />*/}
           <App2/>
+         
       </ReduxProvider>
     </CookiesProvider>
   </React.StrictMode>,
