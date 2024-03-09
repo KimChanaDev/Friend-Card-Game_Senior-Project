@@ -15,6 +15,10 @@ import { JwtPayload } from "jsonwebtoken";
 import { DecodedIdToken } from "firebase-admin/lib/auth/token-verifier.js";
 import { MatchModel } from "../Model/Entity/MatchData.js";
 import { v4 as uuidv4 } from 'uuid'
+import {SocketHandler} from "../Handler/SocketHandler.js";
+import {GameRoom} from "../GameFlow/Game/GameRoom.js";
+import {GamesStore} from "../GameFlow/Game/GameStore.js";
+import {Player} from "../GameFlow/Player/Player.js";
 
 export class UserdataController extends ExpressRouter {
     public path: string = '/userdata';
@@ -259,6 +263,19 @@ export class UserdataController extends ExpressRouter {
                         displayName: updatedUser.displayName,
                         UID: updatedUser.UID,
                         imagePath: updatedUser.imagePath,
+                    }
+                }
+                if(SocketHandler.HasUserIdInConnectedUsers(updatedUser.UID)){
+                    console.log("at check HasUserId")
+                    const gameRoomIdAreConnect: string | undefined = SocketHandler.GetGameId(updatedUser.UID)
+                    if(gameRoomIdAreConnect){
+                        console.log("at check gameRoomIdAreConnect")
+                        const gameRoom: GameRoom = GamesStore.getInstance.GetGameById(gameRoomIdAreConnect) as GameRoom;
+                        const player: Player = gameRoom.GetPlayerByUID(updatedUser.UID) as Player;
+                        console.log("gameRoom: " + gameRoom)
+                        console.log("player: " + player)
+                        console.log("gameRoomIdAreConnect: " + gameRoomIdAreConnect)
+                        SocketHandler.DisconnectedPlayer(gameRoom, player, "You have been double logged in", undefined)
                     }
                 }
                 res.json(new LoginWithEmailResponseDTO(result))

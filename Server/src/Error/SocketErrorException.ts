@@ -10,9 +10,9 @@ export class SocketUnauthorizedError extends SocketError {
 		super(401, 'Unauthorized');
 	}
 }
-export class SocketUserAlreadyConnectedError extends SocketError {
+export class SocketUserOverlappingLoginError extends SocketError {
 	constructor() {
-		super(403, `You are already connected to game room`);
+		super(403, `You have been double logged in`);
 	}
 }
 export class SocketGameNotExistError extends SocketError {

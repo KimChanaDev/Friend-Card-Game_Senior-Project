@@ -4,26 +4,40 @@ import { GAME_TYPE } from '../Enum/GameType.js';
 import { GameRoom } from '../GameFlow/Game/GameRoom.js';
 import { Player } from '../GameFlow/Player/Player.js';
 import { GamesStore } from '../GameFlow/Game/GameStore.js';
-import { GAME_STATE } from '../Enum/GameState.js';
 import { PlayerFactory } from '../GameFlow/Player/PlayerFactory.js';
 import { PlayerDTO } from '../Model/DTO/PlayerDTO.js';
 import { BUILD_IN_SOCKET_GAME_EVENTS, SOCKET_EVENT, SOCKET_GAME_EVENTS } from '../Enum/SocketEvents.js';
-import { SocketBadConnectionError, SocketGameAlreadyStartedError, SocketGameNotExistError, SocketRoomFullError, SocketSessionExpiredError, SocketUnauthorizedError, SocketWrongRoomPasswordError } from '../Error/SocketErrorException.js';
+import {
+	SocketBadConnectionError,
+	SocketGameAlreadyStartedError,
+	SocketGameNotExistError,
+	SocketRoomFullError,
+	SocketSessionExpiredError,
+	SocketUnauthorizedError,
+	SocketWrongRoomPasswordError
+} from '../Error/SocketErrorException.js';
 import {IJwtValidation, JWTPayLoadInterface, ValidateJWT} from '../GameLogic/Utils/Authorization/JWT.js';
 import { HandlerValidation } from './HandlerValidation.js';
 import {PlayerDisconnectedResponse} from "../Model/DTO/Response/PlayerDisconnectedResponse.js";
 import {JwtPayload} from "jsonwebtoken";
 import {UserDataModel} from "../Model/Entity/UserData.js";
-import {InternalError, InvalidCredentialsError} from "../Error/ErrorException.js";
+import {InvalidCredentialsError} from "../Error/ErrorException.js";
 import {GameFactory} from "../GameFlow/Game/GameFactory.js";
+import {DISCONNECT_REASON} from "../Enum/DisconnectReason.js";
 
 export type SocketNextFunction = (err?: ExtendedError | undefined) => void;
+type UserGameMap = { [UID: string]: string };
 export abstract class SocketHandler
 {
-    protected static connectedUsers: Set<string> = new Set<string>();
+	protected static connectedUsers: UserGameMap = {};
 	protected static io: Server;
 	private static isIoSet: boolean = false;
     protected namespace: Namespace;
+	protected static JoinGameRoom(userId: string, gameId: string): void { SocketHandler.connectedUsers[userId] = gameId; }
+	public static GetGameId(userId: string): string | undefined { return SocketHandler.connectedUsers[userId]; }
+	protected static LeaveGameRoom(userId: string): void { delete SocketHandler.connectedUsers[userId]; }
+	public static HasUserIdInConnectedUsers(userId: string): boolean { return userId in SocketHandler.connectedUsers; }
+
     protected constructor(io: Server, namespaceName: GAME_TYPE) {
 		if (!SocketHandler.isIoSet) {
 			SocketHandler.io = io;
@@ -37,7 +51,10 @@ export abstract class SocketHandler
 	}
 
 	protected abstract OnConnection(socket: Socket, game: GameRoom, player: Player): void;
-	protected EmitToRoomAndSender(socket: Socket, event: SOCKET_EVENT, gameId: string, ...args: any[]): void
+	public static EmitToSpecificRoom(event: SOCKET_EVENT, gameId: string, ...args: any[] ): void{
+		SocketHandler.io.of(GAME_TYPE.FRIENDCARDGAME).to(gameId).emit(event, ...args);
+	}
+	protected static EmitToRoomAndSender(socket: Socket, event: SOCKET_EVENT, gameId: string, ...args: any[]): void
 	{
 		socket.to(gameId).emit(event, ...args);
 		socket.emit(event, ...args);
@@ -79,9 +96,8 @@ export abstract class SocketHandler
 		try {
 			const isGuest: string = socket.handshake.query.isGuest as string
 			if(isGuest !== "true"){
-				console.log("Connecting to the room")
 				HandlerValidation.HandshakeHasGameIdAndMiddlewareHasJWT(socket);
-				const gameId = socket.handshake.query.gameId as string;
+				const gameId: string = socket.handshake.query.gameId as string;
 				const jwtPayload: JWTPayLoadInterface | JwtPayload | undefined = socket.middlewareData.jwt;
 				HandlerValidation.HasJWT(jwtPayload)
 				const user = await UserDataModel.findOne({
@@ -95,7 +111,7 @@ export abstract class SocketHandler
 				HandlerValidation.CorrectGameRoomPasswordIfExist(socket, gameRoom!);
 				HandlerValidation.GameRoomFull(gameRoom!);
 
-				SocketHandler.connectedUsers.add(user.UID);
+				SocketHandler.JoinGameRoom(user.UID, gameId)
 				const newPlayer: Player = PlayerFactory.CreatePlayerObject(
 					gameRoom!.gameType,
 					user.UID,
@@ -166,7 +182,7 @@ export abstract class SocketHandler
 			HandlerValidation.HasGameRoom(gameRoom);
 			HandlerValidation.HasPlayerInGameRoom(player);
 			socket.on(BUILD_IN_SOCKET_GAME_EVENTS.DISCONNECT, (disconnectReason: string) => {
-				this.DisconnectedPlayer(gameRoom!, player!, disconnectReason, socket)
+				SocketHandler.DisconnectedPlayer(gameRoom!, player!, disconnectReason, socket)
 			});
 			socket.on(BUILD_IN_SOCKET_GAME_EVENTS.ERROR, (error: Error) => {
 				console.log(`Socket Error - ${error.toString()}`);
@@ -184,19 +200,27 @@ export abstract class SocketHandler
 		}
 	}
 
-	protected DisconnectedPlayer( gameRoom: GameRoom, player: Player, disconnectReason: string, socket: Socket): void{
-		SocketHandler.connectedUsers.delete(player.UID);
-		gameRoom.DisconnectPlayer(player);
-		let newHostRoomPlayer: Player | undefined
-		if(player.isOwner){
-			newHostRoomPlayer = gameRoom.SetNewHostOrOwnerRoom()
-			player.isOwner = false
+	public static DisconnectedPlayer( gameRoom: GameRoom, player: Player, disconnectReason: string, socket: Socket | undefined): void{
+		if(SocketHandler.HasUserIdInConnectedUsers(player.UID)){
+			SocketHandler.LeaveGameRoom(player.UID)
+			gameRoom.DisconnectPlayer(player);
+			let newHostRoomPlayer: Player | undefined
+			if(player.isOwner){
+				newHostRoomPlayer = gameRoom.SetNewHostOrOwnerRoom()
+				player.isOwner = false
+			}
+			const response: PlayerDisconnectedResponse = new PlayerDisconnectedResponse(
+				PlayerDTO.CreateFromPlayer(player),
+				newHostRoomPlayer ? PlayerDTO.CreateFromPlayer(newHostRoomPlayer) : undefined,
+			)
+			if(socket === undefined){
+				response.disconnectReason = DISCONNECT_REASON.DOUBLE_LOGIN
+				this.EmitToSpecificRoom(SOCKET_GAME_EVENTS.PLAYER_DISCONNECTED, gameRoom.id, response)
+				console.log(`UserId: ${player.UID} | Socket disconnected - ${disconnectReason}`);
+			}else{
+				this.EmitToRoomAndSender(socket, SOCKET_GAME_EVENTS.PLAYER_DISCONNECTED, gameRoom.id, response);
+				console.log(`UserId: ${player.UID} | Socket ${socket.id} disconnected - ${disconnectReason}`);
+			}
 		}
-		const response: PlayerDisconnectedResponse = new PlayerDisconnectedResponse(
-			PlayerDTO.CreateFromPlayer(player),
-			newHostRoomPlayer ? PlayerDTO.CreateFromPlayer(newHostRoomPlayer) : undefined,
-		)
-		this.EmitToRoomAndSender(socket, SOCKET_GAME_EVENTS.PLAYER_DISCONNECTED, gameRoom.id, response);
-		console.log(`Socket ${socket.id} disconnected - ${disconnectReason}`);
 	}
 }

@@ -71,7 +71,9 @@ export async function ValidateJWT(jwt: string): Promise<IJwtValidation>
 				{ UUID: verifyResult?.UUID }
 			]
 		})
-		if(!user) throw new Error(JwtValidationError.OLDJWT)
+		if(!user) throw new Error(JwtValidationError.INVALID)
+		if(user.UUID !== verifyResult?.UUID) throw new Error(JwtValidationError.OLDJWT)
+
 		return { success: true, payload: jwtPayload as JwtPayload };
 	}
 	catch (error: any)
