@@ -1,36 +1,40 @@
 import '../ProfilePopup/ProfilePopUp.css'
 import {useSelector} from "react-redux";
 import {useEffect, useState} from "react";
+import GUEST_CONFIG from "../../enum/GuestConfigEnum.jsx";
 
 export default function RoundFinishedAlert() {
     const roundFinishedResult = useSelector(state => state.socketGameListenersStore.roundFinishedResult)
-    const userId = useSelector(state => state.userStore.userId)
-    const [maxRoundObject, setMaxRoundObject] = useState(null)
-    const [playerPointsObjectAtMaxRound, setPlayerPointsObjectAtMaxRound] = useState(null)
-    const [isWinner, setIsWinner] = useState(false)
-
-    useEffect(() => {
-        if(roundFinishedResult){
-            const maxRoundObj = roundFinishedResult.reduce((maxRound, currentRound) => {
-                return maxRound.roundNumber > currentRound.roundNumber ? maxRound : currentRound;
-            }, roundFinishedResult.at(0))
-            setMaxRoundObject(maxRoundObj)
-
-            const playerPointsObj = maxRoundObj.playersPoint.filter(a => a.playerId === userId).at(0)
-            setPlayerPointsObjectAtMaxRound(playerPointsObj)
-
-            const isWin = maxRoundObj.winnerPlayerIds.some(winner => userId === winner)
-            setIsWinner(isWin)
+    const userId = useSelector(state => state.userStore.userId) ?? GUEST_CONFIG.UID
+   
+    function FindCardsPointReceive(){
+        let result = ""
+        if(roundFinishedResult?.currentRound.playersPoint){
+            result = roundFinishedResult?.currentRound.playersPoint.find(p => p.playerId === userId)?.cardsPointReceive ?? ""
         }
-    }, [roundFinishedResult]);
-
+        return result
+    }
+    function FindGamePointReceive(){
+        let result = ""
+        if(roundFinishedResult?.currentRound.playersPoint){
+            result = roundFinishedResult?.currentRound.playersPoint.find(p => p.playerId === userId)?.gamePointReceive ?? ""
+        }
+        return result
+    }
+    function IsWinner(){
+        let result = false
+        if(roundFinishedResult?.currentRound.playersPoint){
+            result = roundFinishedResult?.currentRound.playersPoint.find(p => p.playerId === userId)?.isRoundWinner ?? false
+        }
+        return result
+    }
     return (
         <div className="popup">
             <div className="popup-inner">
-                <h1>{`Round ${maxRoundObject?.roundNumber}`}</h1>
-                <h1>{`You ${ isWinner ? "Win" : "Lose" }`}</h1>
-                <h2>{`Cards Point Received: ${playerPointsObjectAtMaxRound?.cardsPointReceive}`}</h2>
-                <h2>{`Game Point Received: ${playerPointsObjectAtMaxRound?.gamePointReceive}`}</h2>
+                <h1>{`Round ${roundFinishedResult?.currentRound.roundNumber}`}</h1>
+                <h1>{`You ${ IsWinner() ? "Win" : "Lose" }`}</h1>
+                <h2>{`Cards Point Received: ${FindCardsPointReceive()}`}</h2>
+                <h2>{`Game Point Received: ${FindGamePointReceive()}`}</h2>
                 <hr/>
                 <hr/>
                 <h3>Case 1 : ผู้ชนะการประมูลด้วย bidPoint ชนะเกม</h3>
