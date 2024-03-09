@@ -1,9 +1,16 @@
-import { Socket } from "socket.io";
-import { GameRoom } from "./GameRoom.js";
-import { FriendCardPlayer } from "../Player/FriendCardPlayer.js";
-import { FriendCardGameRound } from "./FriendCardGameRound.js";
-import { GAME_STATE } from "../../Enum/GameState.js";
-import {WinnerRoundResponse} from "../../Model/DTO/Response/WinnerRoundResponse.js";
+import {Socket} from "socket.io";
+import {GameRoom} from "./GameRoom.js";
+import {FriendCardPlayer} from "../Player/FriendCardPlayer.js";
+import {FriendCardGameRound} from "./FriendCardGameRound.js";
+import {GAME_STATE} from "../../Enum/GameState.js";
+import {
+    RoundResponseModel,
+    PlayerPointModel,
+    PlayersRoundPointModel,
+    RoundModel,
+    RoundResponse,
+    SummaryRoundModel, TotalGamePointModel
+} from "../../Model/DTO/Response/RoundResponse.js";
 import {CARD_AI_FORMAT, CardId, ColorType, TRUMP_SUIT_AI_FORMAT} from "../../Enum/CardConstant.js";
 import {GameFinishedDTO} from "../../Model/DTO/GameFinishedDTO.js";
 import {SOCKET_EVENT, SOCKET_GAME_EVENTS} from "../../Enum/SocketEvents.js";
@@ -11,8 +18,8 @@ import {WinnerTrickResponse} from "../../Model/DTO/Response/WinnerTrickResponse.
 import {CardPlayedDTO} from "../../Model/DTO/CardPlayedDTO.js";
 import {TrumpAndFriendDTO} from "../../Model/DTO/TrumpAndFriendDTO.js";
 import {AuctionPointDTO} from "../../Model/DTO/AuctionPointDTO.js";
-import {FindKeyByValue, RandomArrayElement} from "../../GameLogic/Utils/Tools.js";
-import {MatchModel, matchObject} from "../../Model/Entity/MatchData.js";
+import {RandomArrayElement} from "../../GameLogic/Utils/Tools.js";
+import {matchObject} from "../../Model/Entity/MatchData.js";
 import {BOT_CONFIG} from "../../Enum/BotConfig.js";
 import {BotAuction, BotPlayCard, BotSelectFriendCard, BotSelectTrumpSuit} from "../../Service/Bot/BotService.js";
 import {FriendCardGameRoundLogic} from "../../GameLogic/Game/FriendCardGameRoundLogic.js";
@@ -85,15 +92,57 @@ export class FriendCardGameRoom extends GameRoom
         const nextRoundNumberTemp = this.currentRoundNumber + 1
         return nextRoundNumberTemp >= this.totalNumberRound;
     }
-    public GetAllRoundResult(): WinnerRoundResponse[]{
-        const response: WinnerRoundResponse[] = []
+    public GenerateRoundResponse(): RoundResponseModel {
+        const currentRoundModel: RoundModel = this.CreateCurrentRoundModel()
+        const summaryRoundModel: SummaryRoundModel[] = this.CreateSummaryRoundModel()
+        const totalGamePointModel: TotalGamePointModel[] = this.CreateTotalGamePoint()
+        return new RoundResponseModel(currentRoundModel, summaryRoundModel, totalGamePointModel)
+    }
+    public CreateTotalGamePoint(): TotalGamePointModel[]{
+        const result: TotalGamePointModel[] = []
+        let first: boolean = true;
+        let highestPoint: number = 0
+        this.playersInGame.forEach(player => {
+            if(first) {
+                first = false;
+                highestPoint = player.GetTotalGamePoint()
+            }else{
+                if (highestPoint < player.GetTotalGamePoint()) highestPoint = player.GetTotalGamePoint()
+            }
+            result.push(new TotalGamePointModel(player.UID, player.username, player.GetTotalGamePoint(), false))
+        })
+        result.forEach(e => {
+            if(e.totalPoint === highestPoint) e.isHighestPoint = true
+        })
+        return result
+    }
+    public CreateCurrentRoundModel(): RoundModel {
+        const playerPointModels: PlayerPointModel[] = []
+        const currentGameRound: FriendCardGameRound = this.GetCurrentRoundGame()
+        this.playersInGame.forEach(player =>{
+            const playerId: string = player.UID;
+            const isRoundWinner: boolean = currentGameRound.GetRoundWinnerIds().some(id => id === player.UID)
+            const cardsPointReceive: number = player.GetRoundPoint(currentGameRound.GetRoundNumber());
+            const gamePointReceive: number = player.GetGamePoint(currentGameRound.GetRoundNumber());
+            playerPointModels.push(new PlayerPointModel(playerId, isRoundWinner, cardsPointReceive, gamePointReceive))
+        })
+        return new RoundModel(currentGameRound.GetRoundNumber() + 1, playerPointModels)
+    }
+    public CreateSummaryRoundModel(): SummaryRoundModel[]{
+        const summaryRoundModel: SummaryRoundModel[] = []
         this.roundsInGame.forEach(round => {
-            const roundFinishedInfo = round.GetRoundFinishedInfo()
-            if (roundFinishedInfo){
-                response.push(roundFinishedInfo)
+            if(round.GetRoundState() !== GAME_STATE.NOT_STARTED){
+                const playersRoundPointModel: PlayersRoundPointModel[] = []
+                this.playersInGame.forEach(player =>{
+                    const playerId: string = player.UID;
+                    const isRoundWinner: boolean = round.GetRoundWinnerIds().some(id => id === player.UID)
+                    const roundGamePoint: number = player.GetGamePoint(round.GetRoundNumber());
+                    playersRoundPointModel.push(new PlayersRoundPointModel(playerId, isRoundWinner, roundGamePoint))
+                })
+                summaryRoundModel.push(new SummaryRoundModel(round.GetRoundNumber() + 1, playersRoundPointModel))
             }
         })
-        return response
+        return summaryRoundModel
     }
     public DisconnectPlayer(player: FriendCardPlayer): void
     {
@@ -164,8 +213,8 @@ export class FriendCardGameRoom extends GameRoom
                 .then((biddingScore: string) => {
                     const botAuctionScore: number = parseInt(biddingScore, 10)
                     const botAuctionPass: boolean = botAuctionScore === 0
-                    console.log("botAuctionScore: " + botAuctionScore)
-                    console.log("botAuctionPass: " + botAuctionPass)
+                    // console.log("botAuctionScore: " + botAuctionScore)
+                    // console.log("botAuctionPass: " + botAuctionPass)
                     const player: FriendCardPlayer = this.GetCurrentRoundGame().GetCurrentPlayer()
                     this.AuctionProcessThenEmitEvent(botAuctionPass, botAuctionScore, player, socket)
                 })
@@ -177,9 +226,9 @@ export class FriendCardGameRoom extends GameRoom
     public BotSelectMainCardCallback(socket: Socket): void{
         if(!this.isNoPlayerInRoom) {
             const cardInHand: CardId[] = this.GetCurrentRoundGame().GetCurrentPlayer().GetHandCard().GetInDeck()
-            console.log("cardInHand: " + cardInHand.toString())
+            // console.log("cardInHand: " + cardInHand.toString())
             const cardsInHandAIFormat: number[] = FriendCardGameRoundLogic.GenerateCardIdsInHandAIFormat(cardInHand)
-            console.log("cardsInHandAIFormat: " + cardsInHandAIFormat.toString())
+            // console.log("cardsInHandAIFormat: " + cardsInHandAIFormat.toString())
             const botLevel: number = this.GetCurrentRoundGame().GetCurrentPlayer().GetBotLevel() ?? BOT_CONFIG.EASY_BOT
             BotSelectTrumpSuit(cardsInHandAIFormat, botLevel)
                 .then((trumpFromAI: string) => {
@@ -191,10 +240,10 @@ export class FriendCardGameRoom extends GameRoom
                             const friendCardServerFormat: CardId | undefined = CARD_AI_FORMAT.hasOwnProperty(friendCardFromAI)
                                 ? CARD_AI_FORMAT[friendCardFromAI] as CardId
                                 : undefined
-                            console.log("bot trumpFromAI: " + trumpFromAI)
-                            console.log("bot friendCardFromAI: " + friendCardFromAI)
-                            console.log("bot trumpServerFormat: " + trumpServerFormat)
-                            console.log("bot friendCardServerFormat: " + friendCardServerFormat)
+                            // console.log("bot trumpFromAI: " + trumpFromAI)
+                            // console.log("bot friendCardFromAI: " + friendCardFromAI)
+                            // console.log("bot trumpServerFormat: " + trumpServerFormat)
+                            // console.log("bot friendCardServerFormat: " + friendCardServerFormat)
                             if(trumpServerFormat && friendCardServerFormat) {
                                 const player: FriendCardPlayer = this.GetCurrentRoundGame().GetCurrentPlayer()
                                 this.SelectMainCardThenEmitEvent(trumpServerFormat, friendCardServerFormat, player, socket)
@@ -219,18 +268,18 @@ export class FriendCardGameRoom extends GameRoom
             const gameStateAIFormat: number[] = this.GenerateGameStateAIFormat(cardInHand)
             const botLevel: number = this.GetCurrentRoundGame().GetCurrentPlayer().GetBotLevel() ?? BOT_CONFIG.EASY_BOT
 
-            console.log("cardInHand: " + cardInHand.toString())
-            console.log("cardsInHandAIFormat: " + cardsInHandAIFormat.toString())
-            console.log("gameStateAIFormat: " + gameStateAIFormat.toString())
+            // console.log("cardInHand: " + cardInHand.toString())
+            // console.log("cardsInHandAIFormat: " + cardsInHandAIFormat.toString())
+            // console.log("gameStateAIFormat: " + gameStateAIFormat.toString())
 
             BotPlayCard(cardsInHandAIFormat, gameStateAIFormat, botLevel)
                 .then((cardAIFormat: string) => {
-                    console.log("cardAIFormat: " + cardAIFormat)
+                    // console.log("cardAIFormat: " + cardAIFormat)
                     const botCard: CardId | undefined = CARD_AI_FORMAT.hasOwnProperty(cardAIFormat)
                         ? CARD_AI_FORMAT[cardAIFormat] as CardId
                         : undefined
                     if(botCard){
-                        console.log("botCardID server: " + botCard)
+                        // console.log("botCardID server: " + botCard)
                         const player: FriendCardPlayer = this.GetCurrentRoundGame().GetCurrentPlayer()
                         this.PlayCardProcessThenEmitEvent(botCard, player, socket)
                     }else{
@@ -415,7 +464,7 @@ export class FriendCardGameRoom extends GameRoom
                         winnerId: winner.UID,
                         winnerName: winner.username,
                         winnerPoint: this.GetWinnerPoint(),
-                        roundsFinishedDetail: this.GetAllRoundResult()
+                        roundsFinishedDetail: this.GenerateRoundResponse()
                     }
                     this.EmitToRoomAndSender(socket, SOCKET_GAME_EVENTS.GAME_FINISHED, this.id, winnerResponse);
                 }
@@ -424,7 +473,7 @@ export class FriendCardGameRoom extends GameRoom
             }
             else if (this.IsCurrentRoundGameFinished())
             {
-                const roundFinishedResponse: WinnerRoundResponse[] = this.GetAllRoundResult()
+                const roundFinishedResponse: RoundResponseModel = this.GenerateRoundResponse()
                 this.NextRoundProcess(socket);
                 this.EmitToRoomAndSender(socket, SOCKET_GAME_EVENTS.ROUND_FINISHED, this.id, roundFinishedResponse);
             }

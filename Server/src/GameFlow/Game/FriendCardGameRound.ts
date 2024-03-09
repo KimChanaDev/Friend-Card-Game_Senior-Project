@@ -10,7 +10,12 @@ import {ShuffleArray} from "../../GameLogic/Utils/Tools.js";
 import {FriendCardGameRoundLogic} from "../../GameLogic/Game/FriendCardGameRoundLogic.js";
 import {WinnerTrickResponse} from "../../Model/DTO/Response/WinnerTrickResponse.js";
 import {PlayerPointInfo} from "../../Model/DTO/Response/PlayerPointInfo.js";
-import {WinnerRoundResponse} from "../../Model/DTO/Response/WinnerRoundResponse.js";
+import {
+    RoundResponseModel,
+    PlayerPointModel, PlayersRoundPointModel,
+    RoundModel,
+    RoundResponse, SummaryRoundModel
+} from "../../Model/DTO/Response/RoundResponse.js";
 import {FRIEND_TIMEOUT_CONFIG} from "../../Enum/TimeoutConfig.js";
 
 export class FriendCardGameRound
@@ -270,18 +275,8 @@ export class FriendCardGameRound
         }
         return friendPlayer;
     }
-    public GetRoundFinishedInfo(): WinnerRoundResponse | undefined {
-        if (this.gameplayState === GAME_STATE.FINISHED && this.roundState === GAME_STATE.FINISHED){
-            const winnerIds: string[] = this.roundWinnerIds;
-            const winnerPoint: number = this.roundWinnerPoint;
-            const roundNumber: number = this.roundNumber;
-            const playersPointInfo: PlayerPointInfo[] = this.CreatePlayerPointInfo()
-            return new WinnerRoundResponse(winnerIds, winnerPoint, roundNumber, playersPointInfo);
-        }
-        else {
-            return undefined
-        }
-    }
+    public GetRoundNumber(): number { return this.roundNumber }
+    public GetRoundWinnerIds(): string[] { return this.roundWinnerIds}
     public IsTrumpAndFriendNotUndefined(): boolean { return this.trumpColor !== undefined && this.auctionPoint !== undefined; }
     public GetPlayerInOrder(): FriendCardPlayer[] { return this.playersInOrder; }
     public GetCurrentTrickNumber(): number { return this.currentTrickNumber; }

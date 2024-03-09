@@ -16,7 +16,7 @@ import { PlayerDTO } from "../Model/DTO/PlayerDTO.js";
 import { GameRoom } from "../GameFlow/Game/GameRoom.js";
 import { Player } from "../GameFlow/Player/Player.js";
 import {WinnerTrickResponse} from "../Model/DTO/Response/WinnerTrickResponse.js";
-import {WinnerRoundResponse} from "../Model/DTO/Response/WinnerRoundResponse.js";
+import {RoundResponseModel, RoundResponse} from "../Model/DTO/Response/RoundResponse.js";
 import {EMOJI} from "../Enum/Emoji.js";
 import {GameFinishedDTO} from "../Model/DTO/GameFinishedDTO.js";
 import {TimerResponseDTO} from "../Model/DTO/Response/TImerResponseDTO.js";
@@ -172,7 +172,7 @@ export class FriendCardGameHandler extends SocketHandler
                             winnerId: winner.UID,
                             winnerName: winner.username,
                             winnerPoint: gameRoom.GetWinnerPoint(),
-                            roundsFinishedDetail: gameRoom.GetAllRoundResult()
+                            roundsFinishedDetail: gameRoom.GenerateRoundResponse()
                         }
                         super.EmitToRoomAndSender(socket, SOCKET_GAME_EVENTS.GAME_FINISHED, gameRoom.id, winnerResponse);
                     }
@@ -184,7 +184,7 @@ export class FriendCardGameHandler extends SocketHandler
                 {
                     console.log("in round finished")
                     gameRoom.GetCurrentRoundGame().GetCurrentPlayer().ClearTimer()
-                    const roundFinishedResponse: WinnerRoundResponse[] = gameRoom.GetAllRoundResult()
+                    const roundFinishedResponse: RoundResponseModel = gameRoom.GenerateRoundResponse()
                     gameRoom.NextRoundProcess(socket);
                     super.EmitToRoomAndSender(socket, SOCKET_GAME_EVENTS.ROUND_FINISHED, gameRoom.id, roundFinishedResponse);
                 }
