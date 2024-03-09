@@ -46,6 +46,7 @@ export default function SummaryScore({
     dispatch(DisconnectFromSocket());
     dispatch(ResetPlayersInGame());
     dispatch(ResetAllListenerState());
+    dispatch(ResetAllEmitterState())
     dispatch(SetPage({ pageState: PAGE_STATE.MENU }));
   }
   function HandleStayThisLobby() {

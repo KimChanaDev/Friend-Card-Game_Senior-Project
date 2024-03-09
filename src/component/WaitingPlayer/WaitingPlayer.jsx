@@ -6,7 +6,7 @@ import {ResetPlayersInGame} from "../../store/GameSlice.jsx";
 import {ResetAllListenerState} from "../../store/SocketGameListenersSlice.jsx";
 import {SetPage} from "../../store/PageStateSlice.jsx";
 import PAGE_STATE from "../../enum/PageStateEnum.jsx";
-import {EmitAddBotPlayer, EmitStartGame} from "../../store/SocketGameEmittersSlice.jsx";
+import {EmitAddBotPlayer, EmitStartGame, ResetAllEmitterState} from "../../store/SocketGameEmittersSlice.jsx";
 import { AddNStartBotButton,QuitBotButton } from "./WaitingPlayer.styled.ts";
 import BOT_LEVEL from "../../enum/BotLevelEnum.jsx";
 
@@ -35,6 +35,7 @@ export default function WaitingPlayer({isOpen}){
             dispatch(DisconnectFromSocket())
             dispatch(ResetPlayersInGame())
             dispatch(ResetAllListenerState())
+            dispatch(ResetAllEmitterState())
             dispatch(SetPage({ pageState: PAGE_STATE.MENU }))
         }
     }

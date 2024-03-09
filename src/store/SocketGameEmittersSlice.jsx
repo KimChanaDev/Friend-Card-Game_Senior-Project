@@ -119,6 +119,8 @@ const socketGameEmittersSlice = createSlice({
             state.selectMainCardStatus = null
             state.gameStateFromServer = null
             state.scoreCardIds = null
+            state.currentPlayerTimeoutId = ""
+            state.currentPlayerTimeout = null
         },
         ClearSelectMainCardStatus: (state, action) => {
             state.selectMainCardStatus = null
