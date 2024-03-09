@@ -55,14 +55,14 @@ export abstract class SocketHandler
 		socket.middlewareData = {};
 		next();
 	}
-	private static VerifyJwt(socket: Socket, next: SocketNextFunction): void
+	private static async VerifyJwt(socket: Socket, next: SocketNextFunction): Promise<void>
 	{
 		try
 		{
 			const isGuest: string = socket.handshake.query.isGuest as string
 			if(isGuest !== "true"){
 				HandlerValidation.HandshakeHasToken(socket);
-				const validateResult: IJwtValidation = ValidateJWT(socket.handshake.query.token as string);
+				const validateResult: IJwtValidation = await ValidateJWT(socket.handshake.query.token as string);
 				HandlerValidation.ValidateJWTSuccess(validateResult);
 				socket.middlewareData.jwt = validateResult.payload;
 			}

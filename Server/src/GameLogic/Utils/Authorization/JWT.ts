@@ -5,7 +5,7 @@ const { sign, verify } = pkg;
 import { readFileSync } from 'fs';
 import { PRIVATE_KEY_PATH, PUBLIC_KEY_PATH } from "../../../Configuration/GameConfiguration.js";
 import { JwtValidationError } from "../../../Enum/JwtValidationError.js";
-import { UserDataDocument } from "../../../Model/Entity/UserData.js";
+import {UserDataDocument, UserDataModel} from "../../../Model/Entity/UserData.js";
 
 let PRIVATE_KEY: string;
 let PUBLIC_KEY: string;
@@ -59,11 +59,19 @@ export function IssueJWTwithEmail(user: UserDataDocument): string {
 	});
 	return signedToken;
 }
-export function ValidateJWT(jwt: string): IJwtValidation
+export async function ValidateJWT(jwt: string): Promise<IJwtValidation>
 {
 	try
 	{
 		const jwtPayload: string | JwtPayload = verify(jwt, PUBLIC_KEY, { algorithms: ['RS256'] });
+		const verifyResult: JwtPayload = jwtPayload as JwtPayload
+		const user = await UserDataModel.findOne({
+			$and: [
+				{ firebaseId: verifyResult?.firebaseId },
+				{ UUID: verifyResult?.UUID }
+			]
+		})
+		if(!user) throw new Error(JwtValidationError.OLDJWT)
 		return { success: true, payload: jwtPayload as JwtPayload };
 	}
 	catch (error: any)
@@ -72,6 +80,8 @@ export function ValidateJWT(jwt: string): IJwtValidation
 			return { success: false, error: JwtValidationError.EXPIRED };
 		else if (error?.message === JwtValidationError.INVALID)
 			return { success: false, error: JwtValidationError.INVALID };
+		else if (error?.message === JwtValidationError.OLDJWT)
+			return { success: false, error: JwtValidationError.OLDJWT };
 		else
 			return { success: false, error: JwtValidationError.UNKNOWN };
 	}
