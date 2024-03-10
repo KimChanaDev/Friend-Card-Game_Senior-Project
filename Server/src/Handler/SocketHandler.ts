@@ -201,7 +201,7 @@ export abstract class SocketHandler
 	}
 
 	public static DisconnectedPlayer( gameRoom: GameRoom, player: Player, disconnectReason: string, socket: Socket | undefined): void{
-		if(SocketHandler.HasUserIdInConnectedUsers(player.UID)){
+		if(gameRoom.HasPlayerByUID(player.UID)){
 			SocketHandler.LeaveGameRoom(player.UID)
 			gameRoom.DisconnectPlayer(player);
 			let newHostRoomPlayer: Player | undefined
