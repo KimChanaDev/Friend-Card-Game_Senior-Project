@@ -33,6 +33,7 @@ export abstract class GameRoom
         this.gameState = GAME_STATE.NOT_STARTED
         this.winner = undefined
     }
+    public HasPlayerByUID(UID: string): boolean { return this.playersInGame.has(UID) }
     public GetPlayerByUID(UID: string): Player | undefined { return this.playersInGame.get(UID); }
     public GetAllPlayersDTO(): PlayerDTO[] { return Array.from(this.playersInGame.values()).map((player) => PlayerDTO.CreateFromPlayer(player)); }
     public AreAllPlayersReady(): boolean { return Array.from(this.playersInGame.values()).every((player) => player.GetIsReady()); }

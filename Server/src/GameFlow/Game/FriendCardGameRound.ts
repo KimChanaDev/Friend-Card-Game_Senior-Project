@@ -10,7 +10,12 @@ import {ShuffleArray} from "../../GameLogic/Utils/Tools.js";
 import {FriendCardGameRoundLogic} from "../../GameLogic/Game/FriendCardGameRoundLogic.js";
 import {WinnerTrickResponse} from "../../Model/DTO/Response/WinnerTrickResponse.js";
 import {PlayerPointInfo} from "../../Model/DTO/Response/PlayerPointInfo.js";
-import {WinnerRoundResponse} from "../../Model/DTO/Response/WinnerRoundResponse.js";
+import {
+    RoundResponseModel,
+    PlayerPointModel, PlayersRoundPointModel,
+    RoundModel,
+    RoundResponse, SummaryRoundModel
+} from "../../Model/DTO/Response/RoundResponse.js";
 import {FRIEND_TIMEOUT_CONFIG} from "../../Enum/TimeoutConfig.js";
 
 export class FriendCardGameRound
@@ -38,6 +43,7 @@ export class FriendCardGameRound
     private endTrickFlag: boolean = false;
     private readonly roundNumber: number;
     private readonly gameId: string;
+    private playerAuctionPass: string[] = [];
 
     constructor(roundNumber: number, gameId: string) {
         this.roundNumber = roundNumber;
@@ -57,7 +63,7 @@ export class FriendCardGameRound
 
         const timeout: number = isFromNextRoundProcess ? FRIEND_TIMEOUT_CONFIG.AUCTION_WITH_ROUND_FINISH_IN_SEC : FRIEND_TIMEOUT_CONFIG.AUCTION_IN_SEC
         if(this.GetCurrentPlayer().GetIsDisconnected()){
-            const actionBotDelay: number = 0
+            const actionBotDelay: number = isFromNextRoundProcess ? FRIEND_TIMEOUT_CONFIG.ROUND_FINISHED_POPUP_IN_SEC : 0
             this.GetCurrentPlayer().BotPlay(timeout, actionBotDelay, () => BotAuctionCallback(socket))
         }
         else{
@@ -76,13 +82,13 @@ export class FriendCardGameRound
         this.GetCurrentPlayer().ClearTimer()
         if (auctionPass)
         {
+            this.playerAuctionPass.push(this.GetCurrentPlayer().UID)
             this.stackPass++;
         }
         else
         {
             this.auctionPoint = newAuctionPoint;
             this.highestAuctionId = this.GetCurrentPlayer().UID;
-            this.stackPass = 0;
         }
         if(this.stackPass === 3 || this.auctionPoint === 100)
         {
@@ -96,7 +102,9 @@ export class FriendCardGameRound
                 this.GetCurrentPlayer().StartTimer(FRIEND_TIMEOUT_CONFIG.SELECT_MAIN_CARD_IN_SEC, () => SelectMainCardTimeOutCallback(socket))
             }
         }else{
-            this.currentPlayerNumber = FriendCardGameRoundLogic.NextPlayer(this.currentPlayerNumber, this.playersInOrder.length);
+            do{
+                this.currentPlayerNumber = FriendCardGameRoundLogic.NextPlayer(this.currentPlayerNumber, this.playersInOrder.length);
+            }while(this.playerAuctionPass.some(uid => uid === this.GetCurrentPlayer().UID));
             if(this.GetCurrentPlayer().GetIsDisconnected()){
                 const actionBotDelay: number = 0
                 this.GetCurrentPlayer().BotPlay(FRIEND_TIMEOUT_CONFIG.AUCTION_IN_SEC, actionBotDelay, () => BotAuctionCallback(socket))
@@ -270,18 +278,8 @@ export class FriendCardGameRound
         }
         return friendPlayer;
     }
-    public GetRoundFinishedInfo(): WinnerRoundResponse | undefined {
-        if (this.gameplayState === GAME_STATE.FINISHED && this.roundState === GAME_STATE.FINISHED){
-            const winnerIds: string[] = this.roundWinnerIds;
-            const winnerPoint: number = this.roundWinnerPoint;
-            const roundNumber: number = this.roundNumber;
-            const playersPointInfo: PlayerPointInfo[] = this.CreatePlayerPointInfo()
-            return new WinnerRoundResponse(winnerIds, winnerPoint, roundNumber, playersPointInfo);
-        }
-        else {
-            return undefined
-        }
-    }
+    public GetRoundNumber(): number { return this.roundNumber }
+    public GetRoundWinnerIds(): string[] { return this.roundWinnerIds}
     public IsTrumpAndFriendNotUndefined(): boolean { return this.trumpColor !== undefined && this.auctionPoint !== undefined; }
     public GetPlayerInOrder(): FriendCardPlayer[] { return this.playersInOrder; }
     public GetCurrentTrickNumber(): number { return this.currentTrickNumber; }

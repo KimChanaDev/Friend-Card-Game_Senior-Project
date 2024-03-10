@@ -3,5 +3,6 @@ export class PlayerDisconnectedResponse{
     constructor(
         public disconnectPlayer: PlayerDTO,
         public newHostPlayer?: PlayerDTO,
+        public disconnectReason?: string
     ) {}
 }

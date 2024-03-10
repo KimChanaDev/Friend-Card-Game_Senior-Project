@@ -27,7 +27,6 @@ export class FriendCardPlayer extends Player
 		setTimeout(() => {
 			callback()
 		}, delayInSec * 1000 );
-
 	}
 	public StartTimer(secTimeInTimer: number, callback: () => void): void {
 		this.ClearTimer()
