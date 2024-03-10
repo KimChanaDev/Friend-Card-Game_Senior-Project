@@ -14,6 +14,11 @@ import {
   Auction, CardPlayed, EmojiReceived, GameFinished, PlayerConnected, PlayerDisconnected,
   PlayerInGame, PlayerToggleReady, RoundFinished, SelectMainCard, StartGame, TrickFinished
 } from "../store/SocketGameListenersSlice.jsx";
+import {Logout} from "../store/UserSlice.tsx";
+import {SetPage} from "../store/PageStateSlice.jsx";
+import PAGE_STATE from "../enum/PageStateEnum.jsx";
+import {useCookies} from "react-cookie";
+import COOKIE from "../enum/CookieNameEnum.jsx";
 
 interface CreateGameModalProps {
   onBackdropClick: () => void;
@@ -28,6 +33,7 @@ const CreateGameModal: React.FC<CreateGameModalProps> = ({
   const dispatch = useDispatch()
   const [lobbyname, setLobbyname] = useState("");
   const [password, setPassword] = useState("");
+  const [cookies, setCookie, removeCookie] = useCookies([COOKIE.name]);
   const socketConnectionStatus = useSelector(
     (state) => state.socketStore.connectionStatus
   );
@@ -42,9 +48,17 @@ const CreateGameModal: React.FC<CreateGameModalProps> = ({
         })
       );
       StartGameListener()
-    }catch(e){
-      console.log("Create room failed: ", e)
-            alert(`Create room failed: ${e}`)
+    }catch(error: any){
+      if (error?.response?.status === 401) {
+        alert('Unauthorized! or Overlap logged in! please login again.')
+        console.error('Unauthorized! or Overlap logged in!');
+        dispatch(Logout())
+        removeCookie(COOKIE.name);
+        onBackdropClick();
+      }else{
+        console.error("Create room failed: ", error)
+        alert(`Create room failed: ${error}`)
+      }
     }
     console.log(lobbyname,password,userStore)
     setPassword("")
