@@ -134,7 +134,6 @@ const socketGameEmittersSlice = createSlice({
     },
     extraReducers: (builder) => {
         builder.addCase(EmitGetGameStateFromServer.fulfilled, (state,action) => {
-            console.log("timer: " + action.payload.currentPlayerTimeout)
             state.gameStateFromServer = action.payload
             state.currentPlayerTimeoutId = action.payload.currentPlayerId
             state.currentPlayerTimeout = action.payload.currentPlayerTimeout
@@ -154,7 +153,6 @@ const socketGameEmittersSlice = createSlice({
         builder.addCase(EmitGetTimeout.fulfilled, (state,action) => {
             state.currentPlayerTimeoutId = action.payload.playerId
             state.currentPlayerTimeout = action.payload.timer
-            console.log("Emit timeout: " + action.payload.timer)
         });
     },
 });

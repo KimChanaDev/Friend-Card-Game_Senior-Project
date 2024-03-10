@@ -62,7 +62,7 @@ export default function InGameInterface2()
         }
     })
     const cardInFiledMap = cardsInField.map((cardId)=> {
-        console.log("card",cardId)
+        // console.log("card",cardId)
         // console.log(cardsInField)
         // console.log(cardsInField.playerId)
         return  {
@@ -141,8 +141,19 @@ export default function InGameInterface2()
     /// Game Finished popup
     useEffect(() => {
         if (gameFinishedResult){
+            setDisableTimer(true)
+            setIsWaitingDelayLastCard(true)
             setTimeout(() => {
-                setIsShowGameFinishedPopup(true);
+                setIsShowRoundFinishedAlert(true);
+                const firstTimeout = setTimeout(() => {
+                    setIsShowRoundFinishedAlert(false);
+                    setIsWaitingDelayLastCard(false);
+                    setDisableTimer(false)
+                    setIsShowGameFinishedPopup(true);
+                }, GAME_DELAY_ENUM.ROUND_FINISHED_IN_SEC * 1000)
+                return () => {
+                    clearTimeout(firstTimeout);
+                }
             }, GAME_DELAY_ENUM.AFTER_LAST_CARD * 1000);
         }
     }, [gameFinishedResult]);
@@ -337,7 +348,6 @@ export default function InGameInterface2()
                         />)
                     }
                 </figure>
-
                 {
                     (isAfterMainCardSelected || isWaitingDelayLastCard) && <section className='mid'>
                             {cardInFiledMap.map((e, i)=><img key={i} src={e.src} alt=""  className='cardOnTable' style={{ border: getBorderColor(e.order) }} /> ) }
