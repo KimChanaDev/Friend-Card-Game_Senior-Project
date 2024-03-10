@@ -20,7 +20,7 @@ import BOT_LEVEL from "../enum/BotLevelEnum.jsx";
 PlayerCard2.propTypes = {
   socket: PropTypes.any
 }
-export default function  PlayerCard2({ name, score, isInLobby, isLeft, isBidding, isMax, bidScore, isPass, isPlay, isTop, role, isReady, isOwnerReadyButton, userId,imgUrl, isBot, botLevel, disableTimer,orderStyled}) {
+export default function  PlayerCard2({ name, isInLobby, isLeft, isBidding, isMax, bidScore, isPass, isTop, role, isReady, isOwnerReadyButton, userId,imgUrl, isBot, botLevel, disableTimer,orderStyled}) {
   const bidShowPosition = {right:isLeft&&'-2rem',left:!isLeft&&'-2rem'}
   const timerPosition = {bottom:isTop&&'-1rem',top:!isTop&&'-1rem'}
   const isOwnerRoom = useSelector(state => state.gameStore.playersInGame?.thisPlayer?.isOwner) ?? false

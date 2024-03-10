@@ -83,7 +83,6 @@ function Mainmanu({ setCookie, removeCookie }) {
     setIsProfileVisible((wasModalVisible) => !wasModalVisible);
   };
   const playWithBot = () => {
-    // const dispatch = useDispatch()
     dispatch(ConnectToSocket({token: undefined, gameId: undefined, password: undefined, isGuest: true}))
     StartGameListener()
   }

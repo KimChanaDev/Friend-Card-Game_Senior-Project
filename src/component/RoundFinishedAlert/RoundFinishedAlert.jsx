@@ -5,7 +5,9 @@ import GUEST_CONFIG from "../../enum/GuestConfigEnum.jsx";
 
 export default function RoundFinishedAlert() {
     const roundFinishedResult = useSelector(state => state.socketGameListenersStore.roundFinishedResult)
-    const userId = useSelector(state => state.userStore.userId) ?? GUEST_CONFIG.UID
+    const isJoinGuestMode = useSelector(state => state.gameStore.isJoinGuestMode);
+    const userIdCookie = useSelector(state => state.userStore.userId)
+    const userId = isJoinGuestMode ? GUEST_CONFIG.UID : userIdCookie
    
     function FindCardsPointReceive(){
         let result = ""

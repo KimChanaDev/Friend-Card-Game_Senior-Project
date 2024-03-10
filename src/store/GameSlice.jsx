@@ -2,6 +2,7 @@ import {createSlice} from '@reduxjs/toolkit'
 
 const initialState = {
     joinRoomDetail: null,
+    isJoinGuestMode: false,
     playersInGame: null,
 }
 
@@ -83,6 +84,10 @@ export const gameSlice = createSlice({
                     thisPlayer: newThisPlayer,
                 };
             }
+        },
+        SetIsJoinGuestMode: (state, action) => {
+            console.log("isGuest: " + action.payload.isGuest)
+            state.isJoinGuestMode = action.payload.isGuest
         }
     }
 })
@@ -94,6 +99,7 @@ export const {
     AddPlayersInGame,
     RemovePlayersInGame,
     SetNewHostRoom,
-    UpdatePlayerInGame
+    UpdatePlayerInGame,
+    SetIsJoinGuestMode,
 } = gameSlice.actions
 export default gameSlice.reducer

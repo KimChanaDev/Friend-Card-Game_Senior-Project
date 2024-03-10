@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { SetPage } from "../store/PageStateSlice.jsx";
 import PAGE_STATE from "../enum/PageStateEnum.jsx";
 import { DisconnectFromSocket } from "../store/SocketSlice.jsx";
-import { ResetPlayersInGame } from "../store/GameSlice.jsx";
+import {gameSlice, ResetPlayersInGame, SetIsJoinGuestMode} from "../store/GameSlice.jsx";
 import { ResetAllListenerState } from "../store/SocketGameListenersSlice.jsx";
 import { ResetAllEmitterState } from "../store/SocketGameEmittersSlice.jsx";
 export default function SummaryScore({
@@ -17,6 +17,9 @@ export default function SummaryScore({
     ) ?? [];
   const gameFinishResult = useSelector(
     (state) => state.socketGameListenersStore.gameFinishedResult
+  );
+  const isJoinGuestMode = useSelector(
+      (state) => state.gameStore.isJoinGuestMode
   );
 
   const [totalGamePointModel, setTotalGamePointModel] = useState(null);
@@ -45,8 +48,9 @@ export default function SummaryScore({
   function HandleBackToMenu() {
     dispatch(DisconnectFromSocket());
     dispatch(ResetPlayersInGame());
+    if (isJoinGuestMode) dispatch(SetIsJoinGuestMode({isGuest: false}))
     dispatch(ResetAllListenerState());
-    dispatch(ResetAllEmitterState())
+    dispatch(ResetAllEmitterState());
     dispatch(SetPage({ pageState: PAGE_STATE.MENU }));
   }
   function HandleStayThisLobby() {

@@ -6,7 +6,7 @@ import {EmitGetGameStateFromServer, SetGameState} from "./SocketGameEmittersSlic
 import {
     AddPlayersInGame,
     RemovePlayersInGame,
-    ResetPlayersInGame,
+    ResetPlayersInGame, SetIsJoinGuestMode,
     SetNewHostRoom,
     SetPlayersInGame,
     TogglePlayer,
@@ -62,10 +62,12 @@ export const PlayerDisconnected = createAsyncThunk(
             console.log("playerDisconnected: " + JSON.stringify(response))
             const state = getState()
             const myUserId = state.userStore.userId
+            const isJoinGuestMode = state.gameStore.isJoinGuestMode
             if(response.disconnectReason === DISCONNECT_REASON.DOUBLE_LOGIN && response.disconnectPlayer.id === myUserId){
                 alert("You are overlap logged in!")
                 dispatch(DisconnectFromSocket())
                 dispatch(ResetPlayersInGame())
+                if (isJoinGuestMode) dispatch(SetIsJoinGuestMode({isGuest: false}))
                 dispatch(ResetAllListenerState())
                 dispatch(ResetAllEmitterState())
                 dispatch(Logout())
@@ -86,6 +88,7 @@ export const PlayerDisconnected = createAsyncThunk(
                         alert("You are kicked from host")
                         dispatch(DisconnectFromSocket())
                         dispatch(ResetPlayersInGame())
+                        if (isJoinGuestMode) dispatch(SetIsJoinGuestMode({isGuest: false}))
                         dispatch(ResetAllListenerState())
                         dispatch(ResetAllEmitterState())
                         dispatch(SetPage({ pageState: PAGE_STATE.MENU }))
