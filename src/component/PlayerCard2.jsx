@@ -38,6 +38,7 @@ export default function  PlayerCard2({ name, isInLobby, isLeft, isBidding, isMax
   const gameplayState = useSelector(state => state.socketGameEmittersStore.gameStateFromServer?.gameplayState) ?? GAME_STATE.NOT_STARTED
   const winnerAuctionId = useSelector(state => state.socketGameListenersStore.winnerAuctionId)
   const winnerAuctionPoint = useSelector(state => state.socketGameListenersStore.winnerAuctionPoint)
+  const roundFinishedResult = useSelector(state => state.socketGameListenersStore.roundFinishedResult)
   const [isShowEmojiReceived, setIsShowEmojiReceived] = useState(false)
   const [timerId, setTimerId] = useState(null)
 
@@ -74,7 +75,11 @@ export default function  PlayerCard2({ name, isInLobby, isLeft, isBidding, isMax
 
   function HandleReady(){ dispatch(EmitToggleReady()) }
   function FindScore(){
-    return playersPoint.filter(player => player.playerId === userId)?.at(0)?.cardsPointReceive ?? 0
+    if(disableTimer && roundFinishedResult){
+      return roundFinishedResult.currentRound.playersPoint.find(player => player.playerId === userId)?.cardsPointReceive ?? 0
+    }else{
+      return playersPoint.filter(player => player.playerId === userId)?.at(0)?.cardsPointReceive ?? 0
+    }
   }
   function GenerateTeamIcon(){
     let result = ""
