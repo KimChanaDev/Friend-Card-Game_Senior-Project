@@ -43,6 +43,7 @@ export class FriendCardGameRound
     private endTrickFlag: boolean = false;
     private readonly roundNumber: number;
     private readonly gameId: string;
+    private playerAuctionPass: string[] = [];
 
     constructor(roundNumber: number, gameId: string) {
         this.roundNumber = roundNumber;
@@ -81,13 +82,13 @@ export class FriendCardGameRound
         this.GetCurrentPlayer().ClearTimer()
         if (auctionPass)
         {
+            this.playerAuctionPass.push(this.GetCurrentPlayer().UID)
             this.stackPass++;
         }
         else
         {
             this.auctionPoint = newAuctionPoint;
             this.highestAuctionId = this.GetCurrentPlayer().UID;
-            this.stackPass = 0;
         }
         if(this.stackPass === 3 || this.auctionPoint === 100)
         {
@@ -101,7 +102,9 @@ export class FriendCardGameRound
                 this.GetCurrentPlayer().StartTimer(FRIEND_TIMEOUT_CONFIG.SELECT_MAIN_CARD_IN_SEC, () => SelectMainCardTimeOutCallback(socket))
             }
         }else{
-            this.currentPlayerNumber = FriendCardGameRoundLogic.NextPlayer(this.currentPlayerNumber, this.playersInOrder.length);
+            do{
+                this.currentPlayerNumber = FriendCardGameRoundLogic.NextPlayer(this.currentPlayerNumber, this.playersInOrder.length);
+            }while(this.playerAuctionPass.some(uid => uid === this.GetCurrentPlayer().UID));
             if(this.GetCurrentPlayer().GetIsDisconnected()){
                 const actionBotDelay: number = 0
                 this.GetCurrentPlayer().BotPlay(FRIEND_TIMEOUT_CONFIG.AUCTION_IN_SEC, actionBotDelay, () => BotAuctionCallback(socket))
