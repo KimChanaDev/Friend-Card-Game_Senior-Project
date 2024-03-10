@@ -63,7 +63,7 @@ export class FriendCardGameRound
 
         const timeout: number = isFromNextRoundProcess ? FRIEND_TIMEOUT_CONFIG.AUCTION_WITH_ROUND_FINISH_IN_SEC : FRIEND_TIMEOUT_CONFIG.AUCTION_IN_SEC
         if(this.GetCurrentPlayer().GetIsDisconnected()){
-            const actionBotDelay: number = 0
+            const actionBotDelay: number = isFromNextRoundProcess ? FRIEND_TIMEOUT_CONFIG.ROUND_FINISHED_POPUP_IN_SEC : 0
             this.GetCurrentPlayer().BotPlay(timeout, actionBotDelay, () => BotAuctionCallback(socket))
         }
         else{
