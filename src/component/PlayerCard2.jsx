@@ -20,8 +20,7 @@ import BOT_LEVEL from "../enum/BotLevelEnum.jsx";
 PlayerCard2.propTypes = {
   socket: PropTypes.any
 }
-export default function  PlayerCard2({ name, score, isInLobby, isLeft, isBidding, isMax, bidScore, isPass, isPlay, isTop, role
-                      , isReady, isOwnerReadyButton, userId,imgUrl, isBot, botLevel, disableTimer,orderStyled}) {
+export default function  PlayerCard2({ name, isInLobby, isLeft, isBidding, isMax, bidScore, isPass, isTop, role, isReady, isOwnerReadyButton, userId,imgUrl, isBot, botLevel, disableTimer,orderStyled}) {
   const bidShowPosition = {right:isLeft&&'-2rem',left:!isLeft&&'-2rem'}
   const timerPosition = {bottom:isTop&&'-1rem',top:!isTop&&'-1rem'}
   const isOwnerRoom = useSelector(state => state.gameStore.playersInGame?.thisPlayer?.isOwner) ?? false
@@ -39,6 +38,7 @@ export default function  PlayerCard2({ name, score, isInLobby, isLeft, isBidding
   const gameplayState = useSelector(state => state.socketGameEmittersStore.gameStateFromServer?.gameplayState) ?? GAME_STATE.NOT_STARTED
   const winnerAuctionId = useSelector(state => state.socketGameListenersStore.winnerAuctionId)
   const winnerAuctionPoint = useSelector(state => state.socketGameListenersStore.winnerAuctionPoint)
+  const roundFinishedResult = useSelector(state => state.socketGameListenersStore.roundFinishedResult)
   const [isShowEmojiReceived, setIsShowEmojiReceived] = useState(false)
   const [timerId, setTimerId] = useState(null)
 
@@ -75,7 +75,11 @@ export default function  PlayerCard2({ name, score, isInLobby, isLeft, isBidding
 
   function HandleReady(){ dispatch(EmitToggleReady()) }
   function FindScore(){
-    return playersPoint.filter(player => player.playerId === userId)?.at(0)?.cardsPointReceive ?? 0
+    if(disableTimer && roundFinishedResult){
+      return roundFinishedResult.currentRound.playersPoint.find(player => player.playerId === userId)?.cardsPointReceive ?? 0
+    }else{
+      return playersPoint.filter(player => player.playerId === userId)?.at(0)?.cardsPointReceive ?? 0
+    }
   }
   function GenerateTeamIcon(){
     let result = ""
@@ -152,7 +156,7 @@ export default function  PlayerCard2({ name, score, isInLobby, isLeft, isBidding
           {/*UID*/}
           { /*!isGameStarted && */!isBot && !isGameStarted && <p className=''>{`UID ${userId.substring(userId.length - 8)}`}</p> }
           {/*score*/}
-          { isGameStarted && <p className=''>{`Score : ${FindScore()} ${winnerAuctionId === userId ? `|| WinBidPoint: ${winnerAuctionPoint}` : ""}`}</p> }
+          { isGameStarted && <p className=''>{`Score : ${FindScore()} ${winnerAuctionId === userId ? `【WinBid: ${winnerAuctionPoint}】` : ""}`}</p> }
           {/*ready button*/}
           { isInLobby && role !== PLAYER_ROLE.HOST && <button className="ready_button" onClick={HandleReady} disabled={!isOwnerReadyButton}>{isReady ? "Ready" : "Unready"}</button> }
         </div>

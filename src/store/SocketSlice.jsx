@@ -1,6 +1,7 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import { socketClient} from "../main.jsx";
 import SOCKET_STATUS from "../enum/SocketStatusEnum.jsx";
+import {SetIsJoinGuestMode} from "./GameSlice.jsx";
 
 const initialState = {
     connectionStatus: '',
@@ -12,6 +13,8 @@ export const ConnectToSocket = createAsyncThunk(
     'connectToSocket',
     async ({ token, gameId, password, isGuest }, { getState, dispatch }) => {
         return await socketClient.Connect(token, gameId, password, isGuest).then(() => {
+            if (isGuest) dispatch(SetIsJoinGuestMode({ isGuest: true }))
+            else dispatch(SetIsJoinGuestMode({ isGuest: false }))
             dispatch({ type: 'socket/SetRoomIdAndPasswordConnected', payload: { gameId, password } })
         })
     }

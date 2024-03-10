@@ -25,13 +25,13 @@ import PLAYER_ROLE from "../enum/PlayerRoleEnum.jsx";
 import {ClearSelectMainCardStatus, EmitCardPlayed} from "../store/SocketGameEmittersSlice.jsx";
 import {ClearCardInField, ClearStateForNextRound} from "../store/SocketGameListenersSlice.jsx";
 import GAME_DELAY_ENUM from "../enum/GameDelayEnum.jsx";
+import GUEST_CONFIG from "../enum/GuestConfigEnum.jsx";
 
 export default function InGameInterface2()
 {
-    const [msg, setFooEvents] = useState({});
-    const GameScore= msg['matchScore'] || []
-
-    const userId = useSelector(state => state.userStore.userId)
+    const isJoinGuestMode = useSelector(state => state.gameStore.isJoinGuestMode);
+    const userIdCookie = useSelector(state => state.userStore.userId)
+    const userId = isJoinGuestMode ? GUEST_CONFIG.UID : userIdCookie
     const playersInGame = useSelector(state => state.gameStore.playersInGame)
     const isGameStarted = useSelector(state => state.socketGameListenersStore.isGameStarted)
     const cardInHand = useSelector(state => state.socketGameEmittersStore.gameStateFromServer?.thisPlayer?.cardIds) ?? []
@@ -62,7 +62,7 @@ export default function InGameInterface2()
         }
     })
     const cardInFiledMap = cardsInField.map((cardId)=> {
-        console.log("card",cardId)
+        // console.log("card",cardId)
         // console.log(cardsInField)
         // console.log(cardsInField.playerId)
         return  {
@@ -141,8 +141,19 @@ export default function InGameInterface2()
     /// Game Finished popup
     useEffect(() => {
         if (gameFinishedResult){
+            setDisableTimer(true)
+            setIsWaitingDelayLastCard(true)
             setTimeout(() => {
-                setIsShowGameFinishedPopup(true);
+                setIsShowRoundFinishedAlert(true);
+                const firstTimeout = setTimeout(() => {
+                    setIsShowRoundFinishedAlert(false);
+                    setIsWaitingDelayLastCard(false);
+                    setDisableTimer(false)
+                    setIsShowGameFinishedPopup(true);
+                }, GAME_DELAY_ENUM.ROUND_FINISHED_IN_SEC * 1000)
+                return () => {
+                    clearTimeout(firstTimeout);
+                }
             }, GAME_DELAY_ENUM.AFTER_LAST_CARD * 1000);
         }
     }, [gameFinishedResult]);
@@ -180,14 +191,6 @@ export default function InGameInterface2()
     const HandlePlayCard = (id)=>{
         dispatch(EmitCardPlayed({cardId: id}))
     }
-
-    // const componentStyles = {
-    //     position: 'fixed',
-    //     top: 0,
-    //     left: 0,
-    //     width: '100%',
-    //     zIndex: 1000,
-    // };
     function FindPlayerBidScore(thisPlayerId){
         return playersAuctionDetail.filter(a => a.playerId === thisPlayerId)?.at(0)?.auctionPoint ?? null
     }
@@ -255,7 +258,6 @@ export default function InGameInterface2()
                                                                   bidScore={FindPlayerBidScore(playersInGame.players[2].id)}
                                                                   isPass={FindPlayerAuctionPass(playersInGame.players[2].id)}
                                                                   isTop={true}
-                                                                  score={GameScore[3]}
                                                                   role = {playersInGame.players[2].isOwner ? PLAYER_ROLE.HOST : PLAYER_ROLE.NORMAL}
                                                                   isOwnerReadyButton={playersInGame?.players[2]?.id === userId}
                                                                   isReady={playersInGame.players[2].isReady}
@@ -273,7 +275,6 @@ export default function InGameInterface2()
                                                                   isInLobby={!isGameStarted}
                                                                   bidScore={FindPlayerBidScore(playersInGame.players[1].id)}
                                                                   isPass={FindPlayerAuctionPass(playersInGame.players[1].id)}
-                                                                  score={GameScore[0]}
                                                                   role = {playersInGame.players[1].isOwner ? PLAYER_ROLE.HOST : PLAYER_ROLE.NORMAL}
                                                                   isOwnerReadyButton={playersInGame?.players[1]?.id === userId}
                                                                   isReady={playersInGame.players[1].isReady}
@@ -294,7 +295,6 @@ export default function InGameInterface2()
                                                                   bidScore={FindPlayerBidScore(playersInGame.players[3].id)}
                                                                   isPass={FindPlayerAuctionPass(playersInGame.players[3].id)}
                                                                   isTop={true}
-                                                                  score={GameScore[1]}
                                                                   role = {playersInGame.players[3].isOwner ? PLAYER_ROLE.HOST : PLAYER_ROLE.NORMAL}
                                                                   isOwnerReadyButton={playersInGame?.players[3]?.id === userId}
                                                                   isReady={playersInGame.players[3].isReady}
@@ -312,7 +312,6 @@ export default function InGameInterface2()
                                                                   isInLobby={!isGameStarted}
                                                                   bidScore={FindPlayerBidScore(playersInGame.players[0].id)}
                                                                   isPass={FindPlayerAuctionPass(playersInGame.players[0].id)}
-                                                                  score={GameScore[2]}
                                                                   role = {playersInGame.players[0].isOwner ? PLAYER_ROLE.HOST : PLAYER_ROLE.NORMAL}
                                                                   isOwnerReadyButton={playersInGame?.players[0]?.id === userId}
                                                                   isReady={playersInGame.players[0].isReady}
@@ -349,7 +348,6 @@ export default function InGameInterface2()
                         />)
                     }
                 </figure>
-
                 {
                     (isAfterMainCardSelected || isWaitingDelayLastCard) && <section className='mid'>
                             {cardInFiledMap.map((e, i)=><img key={i} src={e.src} alt=""  className='cardOnTable' style={{ border: getBorderColor(e.order) }} /> ) }
