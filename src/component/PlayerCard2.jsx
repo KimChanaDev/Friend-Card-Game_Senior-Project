@@ -141,11 +141,14 @@ export default function  PlayerCard2({ name, isInLobby, isLeft, isBidding, isMax
     return <img src={imagePath} alt="" style={{ order: isLeft ? 1 : 2, zIndex: isInLobby && 999 }} />
   }
   const getBorderColor = () => {
-    return orderStyled === 0 ? '2px solid #265073' : orderStyled === 1 ? '2px solid #7F27FF' : orderStyled === 2 ? '2px solid #944E63' :orderStyled === 3 ? '2px solid #D04848' : '2px solid black';
+    return orderStyled === 0 ? '2px solid #67a8e4' : orderStyled === 1 ? '2px solid #7F27FF' : orderStyled === 2 ? '2px solid #eb9dee' :orderStyled === 3 ? '2px solid #f3e962' : '2px solid black';
+  };
+  const getShadowColor = () => {
+    return orderStyled === 0 ? '10px 10px 1.3rem #67a8e4,inset -20px -20px 2rem #67a8e439' : orderStyled === 1 ? '-10px 8px 1.3rem #7F27FF,inset 20px -20px 2rem #7d27ff37' : orderStyled === 2 ? '-10px 8px 1.3rem #eb9dee,inset 20px -20px 2rem #eb9dee36' :orderStyled === 3 ? '10px 10px 1.3rem #f3e962,inset -20px -20px 2rem #f3e9623b' : '0 0 1rem #0000,inset 0 0 0.5rem #0000';
   };
   return (
     <>
-      <section className='profile ' onClick={() => PlayCardClicked()} style={{ border: getBorderColor() }}>
+      <section className='profile ' onClick={() => PlayCardClicked()} style={{ borderBottom: getBorderColor(), boxShadow:getShadowColor(),zIndex: 9999}}>
         {/*kick button*/}
         {userId !== ownerId && isInLobby && isLeft && isOwnerRoom && <button onClick={() => HandleKickPlayer()} className='kick_button_left' style={{ zIndex: 9999 }}>❌</button>}
         { GenerateProfileImage() }

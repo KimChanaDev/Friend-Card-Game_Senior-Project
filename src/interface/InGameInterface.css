@@ -168,5 +168,5 @@ figure.bot>img:hover{
   transform: translateY(-30px);
 }
 .cardOnTable{
-  border: 1px solid rgb(0, 174, 255);
+  border-radius: 8px;
 }

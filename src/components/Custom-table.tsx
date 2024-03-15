@@ -6,7 +6,7 @@ import { Header1, Header2 } from "../ModalPopup/ModalPopup.styled";
 import JoinGameModal from "../ModalPopup/JoinGameModal";
 import CreateGameModal from "../ModalPopup/CreateGameModal";
 import React from "react";
-
+import { MatchDetail } from "../entities/response";
 interface Props {
   headers: TableHeader[];
   data: TableData[];
@@ -141,22 +141,17 @@ function CustomTable({ headers, data, onFilterIdChange }: Props) {
   );
 }
 
-interface MatchData {
-  id: string;
-  score: number;
-  place: number;
-}
-
 interface HistoryProps {
-  data?: MatchData[];
+  data?: MatchDetail[];
 }
 
-const HistoryClick = (item: MatchData) => {
+const HistoryClick = (item: MatchDetail) => {
   alert(item.id);
 };
 
 const HistoryComponent: React.FC<HistoryProps> = ({ data = [] }) => {
   const recentData = data.slice().reverse().slice(0, 5);
+  console.log(data)
   return (
     <table>
       <tbody>
@@ -168,10 +163,10 @@ const HistoryComponent: React.FC<HistoryProps> = ({ data = [] }) => {
           >
             {/* <td>ID = {item.id} Score = {item.score} Place = {item.place}</td> */}
             <td>
-              {item.place < 3 ? (
+              {item.win ? (
                 <div className="result">
                   <img
-                    src="https://cdn.discordapp.com/attachments/406860361086795776/1201933444335018134/697f9062398a775a1b22a0bc75e8c8fd.png?ex=65cb9ebf&is=65b929bf&hm=044264e317a334a28a2a170f3ed1a7cc5ea0eb7ba83d4817f12aff0105bce25a&"
+                    src="/win.png"
                     alt="Win"
                   />
                   <div className="match-detail">
@@ -182,7 +177,7 @@ const HistoryComponent: React.FC<HistoryProps> = ({ data = [] }) => {
               ) : (
                 <div className="result">
                   <img
-                    src="https://cdn.discordapp.com/attachments/406860361086795776/1201967953512239114/0fb0ad7b7850d3feac6c89d18f3b7718.png?ex=65cbbee3&is=65b949e3&hm=0a6dcb8c1c2a6e7832ec3d360877d0b7872675ed8161054bebcee39b22511929&"
+                    src="/lose.png"
                     alt="Lose"
                   />
                   <div className="match-detail">

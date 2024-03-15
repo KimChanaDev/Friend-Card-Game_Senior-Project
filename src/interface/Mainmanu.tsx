@@ -119,7 +119,7 @@ function Mainmanu({ setCookie, removeCookie }) {
     };
     console.log("Info", userInfo);
     dispatch(Login(userInfo));
-    setCookie(COOKIE.name, userInfo, { path: "/" ,maxAge:86400});
+    setCookie(COOKIE.name, userInfo.token, { path: "/" ,maxAge:86400});
   }
   const onLoginRequest: LoginFunction = async ({ password, login }) => {
     try {
@@ -163,6 +163,11 @@ function Mainmanu({ setCookie, removeCookie }) {
 
   return (
     <div className="Mainmanu">
+      <section className="animateSnow">
+        <div id='snows'/>
+        <div id='snows2'/>
+        <div id='snows3'/>
+      </section>
       <div className="Nav">
         {userStore.isLogIn ? (
           /* // Render this when the user is logged in */

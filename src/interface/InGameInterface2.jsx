@@ -198,7 +198,10 @@ export default function InGameInterface2()
         return playersAuctionDetail.filter(a => a.playerId === thisPlayerId)?.at(0)?.isPass ?? false
     }
     function getBorderColor(orderStyled){ 
-        return orderStyled === 0 ? '2px solid #265073' : orderStyled === 1 ? '2px solid #7F27FF' : orderStyled === 2 ? '2px solid #944E63' :orderStyled === 3 ? '2px solid #D04848' : '2px solid black';
+        return orderStyled === 0 ? '1px solid #67a8e4' : orderStyled === 1 ? '1px solid #7F27FF' : orderStyled === 2 ? '1px solid #eb9dee' :orderStyled === 3 ? '1px solid #f3e962' : '1px solid black';    
+    }
+    function getShadowColor (orderStyled){
+        return orderStyled === 0 ? '0px 20px 1rem #67a8e4,inset 0 0 1.5rem #67a8e4' : orderStyled === 1 ? '0px 20px 1rem #7F27FF,inset 0 0 1rem #7F27FF' : orderStyled === 2 ? '0px 20px 1rem #eb9dee,inset 0 0 0.5rem #eb9dee' :orderStyled === 3 ? '0px 20px 1rem 1rem #f3e962,inset 0 0 0.5rem #f3e962' : '0 0 1rem #0000,inset 0 0 0.5rem #0000';
     }
     return (
         
@@ -349,8 +352,8 @@ export default function InGameInterface2()
                     }
                 </figure>
                 {
-                    (isAfterMainCardSelected || isWaitingDelayLastCard) && <section className='mid'>
-                            {cardInFiledMap.map((e, i)=><img key={i} src={e.src} alt=""  className='cardOnTable' style={{ border: getBorderColor(e.order) }} /> ) }
+                    (isAfterMainCardSelected || isWaitingDelayLastCard) && <section className='mid'> 
+                            {cardInFiledMap.map((e, i)=><img key={i} src={e.src} alt=""  className='cardOnTable' style={{ border: getBorderColor(2) , boxShadow:getShadowColor(2)}} /> ) }
                     </section>
                 }
                 < SlideBar />
@@ -360,3 +363,4 @@ export default function InGameInterface2()
 }
 
 //getBorderColor
+//border: getBorderColor(e.order) , boxShadow:getShadowColor(e.order)

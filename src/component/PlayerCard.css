@@ -36,14 +36,9 @@ section.profile{
     min-height: 150px;
     max-height: 150px;
     display:flex;
-    /* border: 1px solid rgba(241, 236, 236, 0.50);
-     */
-     /* border: 2px solid rgb(4, 42, 255); */
     border-radius: 9999px;
     background-color: rgba(241, 236, 236, 0.50);
-    /* background-color: rgba(241, 104, 104, 0.5); */
     position: relative;
-    
 }
 section.profile>button.kick_button_left{
     position: fixed;

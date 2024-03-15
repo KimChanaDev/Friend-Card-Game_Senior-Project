@@ -54,3 +54,34 @@ export async function PostCreateRoom(token, lobbyName, password) {
   });
   return response.data;
 }
+
+export async function UpdateData(token, newData) {
+  console.log("In UpdateData",newData)
+  const response = await axios.patch(`${serverPort}/userdata/profile`, newData, {
+    headers: {
+      authorization: token,
+    },
+  });
+  return response.data;
+}
+
+export async function GetProfile(token) {
+  const response = await axios.get(`${serverPort}/userdata/profile`, {
+    headers: {
+      authorization: token,
+    },
+  });
+  return response.data;
+}
+
+export async function GetHistory(token) {
+  // console.log("Token",token)
+  const response = await axios.get(`${serverPort}/userdata/history`, {
+    headers: {
+      authorization: token,
+    },
+  });
+  console.log(response.data)
+  return response.data;
+}
+

@@ -8,6 +8,7 @@ import Menu from "./interface/Menu.jsx"
 import InGameInterface2 from "./interface/InGameInterface2.jsx";
 import Loading from "./interface/Loading.jsx";
 import Mainmanu from './interface/Mainmanu.tsx';
+import { GetProfile } from "./service/Api/ApiService.jsx";
 
 
 function App2() {
@@ -17,20 +18,28 @@ function App2() {
     const dispatch = useDispatch()
 
     useEffect(() => {
-        if (cookies[COOKIE.name]){
-            dispatch(Login({
-                userId: cookies[COOKIE.name].userId,
-                username: cookies[COOKIE.name].username,
-                token: cookies[COOKIE.name].token,
-                imagePath: cookies[COOKIE.name].imagePath
-            }))
+        if (cookies[COOKIE.name]) {
+          (async () => {
+            try {
+              let userprofile = await GetProfile(cookies[COOKIE.name]);
+              dispatch(
+                Login({
+                  userId: userprofile.response.data.UID,
+                  username: userprofile.response.data.displayName,
+                  token: cookies[COOKIE.name],
+                  imagePath: userprofile.response.data.imagePath,
+                })
+              );
+            } catch (error) {
+              console.error('Error :', error.message);
+            }
+          })();
         }
-    }, [cookies, dispatch]);
+      }, [cookies, dispatch]);
 
     function RenderPage(){
         switch (pageState) {
             case PAGE_STATE.MENU:
-                // return ( <Menu setCookie={setCookie} removeCookie={removeCookie}/> )
                 return (<Mainmanu setCookie={setCookie} removeCookie={removeCookie}/>)
             case PAGE_STATE.IN_GAME_INTERFACE:
                 return ( <InGameInterface2 /> )
@@ -43,8 +52,6 @@ function App2() {
     return (
         <div className="app">
             {RenderPage()}
-            {/* <Mainmanu></Mainmanu> */}
-            {/* <InGameInterface2 /> */}
         </div>
     )
 }
