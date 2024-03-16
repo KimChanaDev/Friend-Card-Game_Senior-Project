@@ -179,10 +179,18 @@ export class FriendCardGameRoom extends GameRoom
         this.winner = winnerPlayer;
         this.winnerPoint = winnerPoint;
         super.SetFinishState();
+        this.SetUnreadyToAllPlayer();
         const isNotGuestRoom: boolean = this.owner.UID !== GUEST_CONFIG.UID
         if (isNotGuestRoom){
             this.SaveMatchHistory(winnerPlayer?.UID);
         }
+    }
+    private SetUnreadyToAllPlayer(): void{
+        this.playersInGame.forEach((player: FriendCardPlayer) => {
+            if(!player.GetIsDisconnected() || !player.isOwner){
+                player.SetIsReady(false)
+            }
+        })
     }
     public SaveMatchHistory(winnerPlayerUID: string | undefined): void{
         const userPlaces: FriendCardPlayer[] = Array.from(this.playersInGame.values());
