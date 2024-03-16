@@ -9,6 +9,8 @@ import PAGE_STATE from "../../enum/PageStateEnum.jsx";
 import {EmitAddBotPlayer, EmitStartGame, ResetAllEmitterState} from "../../store/SocketGameEmittersSlice.jsx";
 import { AddNStartBotButton,QuitBotButton } from "./WaitingPlayer.styled.ts";
 import BOT_LEVEL from "../../enum/BotLevelEnum.jsx";
+import { useState } from 'react'
+import SelectBot from "../SelectBot/SelectBot.jsx";
 
 WaitingPlayer.propTypes = {
     isOpen: PropTypes.bool,
@@ -18,14 +20,37 @@ export default function WaitingPlayer({isOpen}){
     const playersInGame = useSelector(state => state.gameStore.playersInGame)
     const isJoinGuestMode = useSelector(state => state.gameStore.isJoinGuestMode);
     const dispatch = useDispatch()
+   
+    const [isClickAddbot,setIsClickAddbot] = useState(false)
+    
     function AddBot(){
-        const inputBotLevel = prompt('Bot Level Here (0 for Easy, 1 for Medium, 2 for Hard)');
-        const inputBotLevelNumber = parseInt(inputBotLevel)
+        setIsClickAddbot(true)
+        // const inputBotLevel = prompt('Bot Level Here (0 for Easy, 1 for Medium, 2 for Hard)');
+        // const inputBotLevelNumber = parseInt(inputBotLevel)
+        // if(inputBotLevelNumber !== BOT_LEVEL.EASY_BOT && inputBotLevelNumber !== BOT_LEVEL.MEDIUM_BOT && inputBotLevelNumber !== BOT_LEVEL.HARD_BOT){
+        //     return
+        // }
+        // dispatch(EmitAddBotPlayer({botLevel: inputBotLevelNumber}))
+    }
+
+    // function inputBotLevelNumber(inputBotLevelNumber){
+    //     inputBotLevelNumber = parseInt(inputBotLevel)
+    //     if(inputBotLevelNumber !== BOT_LEVEL.EASY_BOT && inputBotLevelNumber !== BOT_LEVEL.MEDIUM_BOT && inputBotLevelNumber !== BOT_LEVEL.HARD_BOT){
+    //         return
+    //     }
+    //     dispatch(EmitAddBotPlayer({botLevel: inputBotLevelNumber}))
+    //     setIsClickAddbot(false)
+    // }
+
+    const inputBotLevelNumber = (inputBotLevelNumber)=>{
+        inputBotLevelNumber = parseInt(inputBotLevelNumber)
         if(inputBotLevelNumber !== BOT_LEVEL.EASY_BOT && inputBotLevelNumber !== BOT_LEVEL.MEDIUM_BOT && inputBotLevelNumber !== BOT_LEVEL.HARD_BOT){
             return
         }
         dispatch(EmitAddBotPlayer({botLevel: inputBotLevelNumber}))
-    }
+        setIsClickAddbot(false)
+      }
+
     function StartGame() {
         dispatch(EmitStartGame())
     }
@@ -44,7 +69,7 @@ export default function WaitingPlayer({isOpen}){
 
     return (
         <>
-            {isOpen && (
+            {isOpen && !isClickAddbot && (
                 <div className='menu_border'>
                     <p>
                         Waiting for Player
@@ -69,6 +94,12 @@ export default function WaitingPlayer({isOpen}){
                     </div>
                 </div>
             )}
+
+            {isOpen && isClickAddbot && (
+                <SelectBot func={inputBotLevelNumber}/>
+            )}
+
+
         </>
     )
 }

@@ -53,15 +53,6 @@ export default function RoundFinishedAlert() {
                 <h2>{`Game Point Received: ${FindGamePointReceive()}`}</h2>
                 <hr/>
                 <hr/>
-                <h3>Case 1 : ผู้ชนะการประมูลด้วย bidPoint ชนะเกม</h3>
-                <h3>ผู้ชนะเกม และ ชนะการประมูล ได้แต้มเท่ากับ bidPoint + cardsPoint</h3>
-                <h3>ผู้ชนะเกม และ ไม่ได้ชนะการประมูล ได้แต้มเท่ากับ bidPoint/2 + cardsPoint</h3>
-                <h3>ผู้แพ้ เสียแต้ม 100 - bidPoint</h3>
-                <hr/>
-                <h3>Case 2 : ผู้ชนะการประมูลด้วย bidPoint แพ้เกม</h3>
-                <h3>ผู้แพ้เกม และ ชนะการประมูล เสียแต้มเท่ากับ bidPoint</h3>
-                <h3>ผู้แพ้เกม และ ไม่ได้ชนะการประมูล เสียแต้มเท่ากับ bidPoint/2 - cardsPoint</h3>
-                <h3>ผู้ชนะ ได้แต้ม (cardsPoint ทั้งหมดของ Team)/2</h3>
             </div>
         </div>
     )
