@@ -196,7 +196,8 @@ export class FriendCardGameHandler extends SocketHandler
                 }
                 const cardPlayedDTO: CardPlayedDTO = {
                     playerId: player.UID,
-                    cardId: playedCard
+                    cardId: playedCard,
+                    order: gameRoom.GetCurrentRoundGame().GetPlayersInOrderIndex(player.UID)
                 };
                 SocketHandler.EmitToRoomAndSender(socket, SOCKET_GAME_EVENTS.CARD_PLAYED, gameRoom.id, cardPlayedDTO);
                 callback({
