@@ -156,7 +156,7 @@ export class FriendCardGameRoom extends GameRoom
             const matchModel: matchObject = {
                 id: this.id,
                 score: player.GetTotalGamePoint(),
-                place: 4,
+                place: 0,
                 win: false,
                 createdAt: new Date(Date.now()),
             };
