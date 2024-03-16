@@ -298,13 +298,19 @@ export class FriendCardGameRound
         }
         return result;
     }
+    public GetNameByUID(UID: string): string{
+        const player: FriendCardPlayer | undefined = this.playersInOrder.find(a => a.UID === UID)
+        return player ? player.username : "No name"
+    }
     public GetLatestWinnerTrickResponse(): WinnerTrickResponse | undefined{
         const latestTrick: number = this.currentTrickNumber - 1;
         const trickCardModel: TrickCardModel | undefined  = this.trickCardMap.get(latestTrick);
         if (trickCardModel && trickCardModel.winnerId && trickCardModel.winnerCard && trickCardModel.pointInTrick !== undefined) {
             const playersPoint: PlayerPointInfo[] = this.CreatePlayerPointInfo();
             const orderWinnerPosition: number = this.GetPlayersInOrderIndex(trickCardModel.winnerId)
+            const winnerUsername: string = this.GetNameByUID(trickCardModel.winnerId)
             return new WinnerTrickResponse(trickCardModel.winnerId
+                , winnerUsername
                 , trickCardModel.winnerCard
                 , trickCardModel.pointInTrick
                 , latestTrick
