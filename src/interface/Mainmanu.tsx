@@ -8,6 +8,7 @@ import LoginModal, { LoginFunction } from "../ModalPopup/LoginModal";
 import SignUpModal, { SignUpFunction } from "../ModalPopup/SignUPmodal";
 import LobbyModal from "../ModalPopup/LobbyListmodal";
 import ProfileModal from "../ModalPopup/ProfileModal";
+import HowtoPlayModal from "../ModalPopup/HowToPlayModal.tsx";
 import { LoginApiResponse, Userdata } from "../entities/response";
 import PropTypes from "prop-types";
 import { useDispatch, useSelector } from "react-redux";
@@ -36,17 +37,14 @@ function Mainmanu({ setCookie, removeCookie }) {
   const handleButtonClick = (buttonIndex: number) => {
     switch (buttonIndex) {
       case 1:
-        console.log(`Button 1 clicked`);
         toggleLobbyList();
         break;
       case 2:
-        console.log(`Button 2 clicked`);
         playWithBot()
-        console.log(userStore);
         break;
       case 3:
-        console.log(`Button 3 clicked`);
-        dispatch(Logout());
+        // dispatch(Logout());
+        toggleHowtoPlay()
         break;
       default:
         console.log(`Error`);
@@ -58,6 +56,7 @@ function Mainmanu({ setCookie, removeCookie }) {
   const [isSignUpVisible, setIsSignUpVisible] = useState<boolean>(false);
   const [isLobbyListVisible, setIsLobbyListVisible] = useState<boolean>(false);
   const [isProfileVisible, setIsProfileVisible] = useState<boolean>(false);
+  const [isHowtoPlayVisible, setIsHowtoPlayVisible] = useState<boolean>(false);
   // const [userData,setUserData] = useState<Userdata>()
   // const toggleModal = () =>{
   //   setIsModalVisible(wasModalVisible => !wasModalVisible)
@@ -68,6 +67,7 @@ function Mainmanu({ setCookie, removeCookie }) {
     setIsLoginVisible(false);
     setIsLobbyListVisible(false);
     setIsProfileVisible(false);
+    setIsHowtoPlayVisible(false);
   };
   const switmodal = () => {
     setIsLoginVisible((wasModalVisible) => !wasModalVisible);
@@ -81,6 +81,9 @@ function Mainmanu({ setCookie, removeCookie }) {
   };
   const toggleUserProfile = () => {
     setIsProfileVisible((wasModalVisible) => !wasModalVisible);
+  };
+  const toggleHowtoPlay = () => {
+    setIsHowtoPlayVisible((wasModalVisible) => !wasModalVisible);
   };
   const playWithBot = () => {
     dispatch(ConnectToSocket({token: undefined, gameId: undefined, password: undefined, isGuest: true}))
@@ -207,6 +210,10 @@ function Mainmanu({ setCookie, removeCookie }) {
           onBackdropClick={onBackdropClick}
           isModalVisible={isLobbyListVisible}
           userData={userStore}
+        />
+        <HowtoPlayModal 
+          onBackdropClick={onBackdropClick}
+          isModalVisible={isHowtoPlayVisible}
         />
       </div>
     </div>

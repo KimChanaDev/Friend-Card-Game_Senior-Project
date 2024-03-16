@@ -353,7 +353,7 @@ export default function InGameInterface2()
                 </figure>
                 {
                     (isAfterMainCardSelected || isWaitingDelayLastCard) && <section className='mid'> 
-                            {cardInFiledMap.map((e, i)=><img key={i} src={e.src} alt=""  className='cardOnTable' style={{ border: getBorderColor(2) , boxShadow:getShadowColor(2)}} /> ) }
+                            {cardInFiledMap.map((e, i)=><img key={i} src={e.src} alt=""  className='cardOnTable' style={{ border: getBorderColor(e.order) , boxShadow:getShadowColor(e.order)}} /> ) }
                     </section>
                 }
                 < SlideBar />
