@@ -27,6 +27,8 @@ const UpdateProfileModal: React.FC<UpdateProfileModalProps> = ({
   isModalVisible,
   onBackdropClick,
 }) => {
+  const { playButton } = Vfx()
+
   const dispatch = useDispatch();
   const userStore = useSelector((state) => state.userStore);
   const [NewDisplayname, setNewDisplayname] = useState<string | null>(null);

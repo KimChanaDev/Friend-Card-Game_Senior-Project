@@ -16,6 +16,7 @@ import EMOJI from "../enum/EmojiEnum.jsx";
 import GAME_DELAY_ENUM from "../enum/GameDelayEnum.jsx";
 import GAME_STATE from "../enum/GameStateEnum.jsx";
 import BOT_LEVEL from "../enum/BotLevelEnum.jsx";
+import Vfx from "../components/Vfx.jsx";
 
 PlayerCard2.propTypes = {
   socket: PropTypes.any
@@ -41,9 +42,12 @@ export default function  PlayerCard2({ name, isInLobby, isLeft, isBidding, isMax
   const roundFinishedResult = useSelector(state => state.socketGameListenersStore.roundFinishedResult)
   const [isShowEmojiReceived, setIsShowEmojiReceived] = useState(false)
   const [timerId, setTimerId] = useState(null)
+  
+  const { playEmoji } = Vfx()
 
   /// Show Emoji
   useEffect(() => {
+    playEmoji()
     if (emojiDetail && emojiDetail.some(player => player.playerId === userId) && isShowEmojiReceived === false ) {
       setIsShowEmojiReceived(true);
       setTimeout(() => {

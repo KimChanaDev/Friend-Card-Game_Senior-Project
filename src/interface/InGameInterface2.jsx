@@ -25,7 +25,7 @@ import PLAYER_ROLE from "../enum/PlayerRoleEnum.jsx";
 import {ClearSelectMainCardStatus, EmitCardPlayed} from "../store/SocketGameEmittersSlice.jsx";
 import {ClearCardInField, ClearStateForNextRound} from "../store/SocketGameListenersSlice.jsx";
 import GAME_DELAY_ENUM from "../enum/GameDelayEnum.jsx";
-<<<<<<< HEAD
+import GUEST_CONFIG from "../enum/GuestConfigEnum.jsx";
 import { ChangeBGM } from '../store/BGMSlice.jsx';
 import Vfx from '../components/Vfx.jsx';
 
@@ -33,19 +33,9 @@ export default function InGameInterface2()
 {
     const { playFlipCard, playTrick, playFriend } = Vfx();
 
-    const [msg, setFooEvents] = useState({});
-    const GameScore= msg['matchScore'] || []
-
-    const userId = useSelector(state => state.userStore.userId)
-=======
-import GUEST_CONFIG from "../enum/GuestConfigEnum.jsx";
-
-export default function InGameInterface2()
-{
     const isJoinGuestMode = useSelector(state => state.gameStore.isJoinGuestMode);
     const userIdCookie = useSelector(state => state.userStore.userId)
     const userId = isJoinGuestMode ? GUEST_CONFIG.UID : userIdCookie
->>>>>>> Frontend-tsx
     const playersInGame = useSelector(state => state.gameStore.playersInGame)
     const isGameStarted = useSelector(state => state.socketGameListenersStore.isGameStarted)
     const cardInHand = useSelector(state => state.socketGameEmittersStore.gameStateFromServer?.thisPlayer?.cardIds) ?? []
@@ -171,21 +161,8 @@ export default function InGameInterface2()
             setDisableTimer(true)
             setIsWaitingDelayLastCard(true)
             setTimeout(() => {
-<<<<<<< HEAD
                 playTrick();
                 setIsShowGameFinishedPopup(true);
-=======
-                setIsShowRoundFinishedAlert(true);
-                const firstTimeout = setTimeout(() => {
-                    setIsShowRoundFinishedAlert(false);
-                    setIsWaitingDelayLastCard(false);
-                    setDisableTimer(false)
-                    setIsShowGameFinishedPopup(true);
-                }, GAME_DELAY_ENUM.ROUND_FINISHED_IN_SEC * 1000)
-                return () => {
-                    clearTimeout(firstTimeout);
-                }
->>>>>>> Frontend-tsx
             }, GAME_DELAY_ENUM.AFTER_LAST_CARD * 1000);
         }
     }, [gameFinishedResult]);
@@ -227,6 +204,14 @@ export default function InGameInterface2()
         playFlipCard();
         dispatch(EmitCardPlayed({cardId: id}))
     }
+
+    // const componentStyles = {
+    //     position: 'fixed',
+    //     top: 0,
+    //     left: 0,
+    //     width: '100%',
+    //     zIndex: 1000,
+    // };
     function FindPlayerBidScore(thisPlayerId){
         return playersAuctionDetail.filter(a => a.playerId === thisPlayerId)?.at(0)?.auctionPoint ?? null
     }
