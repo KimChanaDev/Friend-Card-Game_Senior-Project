@@ -33,7 +33,7 @@ export class UserdataController extends ExpressRouter {
         this.router.get('/profile', JwtAuthMiddleware, this.Profile);
         this.router.get('/history', JwtAuthMiddleware, this.History);
         this.router.patch('/profile', JwtAuthMiddleware, this.UpdateProfile);
-        this.router.post('/resetpassword', JwtAuthMiddleware, this.ResetPassword);
+        this.router.get('/resetpassword', JwtAuthMiddleware, this.ResetPassword);
         // this.router.patch('/history', this.UpdateHistory); //For testing
     }
     private async RegisterUser(req: Request, res: Response, next: NextFunction): Promise<void> {
