@@ -25,9 +25,13 @@ import PLAYER_ROLE from "../enum/PlayerRoleEnum.jsx";
 import {ClearSelectMainCardStatus, EmitCardPlayed} from "../store/SocketGameEmittersSlice.jsx";
 import {ClearCardInField, ClearStateForNextRound} from "../store/SocketGameListenersSlice.jsx";
 import GAME_DELAY_ENUM from "../enum/GameDelayEnum.jsx";
+import { ChangeBGM } from '../store/BGMSlice.jsx';
+import Vfx from '../components/Vfx.jsx';
 
 export default function InGameInterface2()
 {
+    const { playFlipCard, playTrick, playFriend } = Vfx();
+
     const [msg, setFooEvents] = useState({});
     const GameScore= msg['matchScore'] || []
 
@@ -104,6 +108,17 @@ export default function InGameInterface2()
 
     const [disableTimer, setDisableTimer] = useState(false)
 
+    useEffect(() => {
+        if (isAfterMainCardSelected) { 
+            dispatch(ChangeBGM("InGame"))
+        }
+    }, [isAfterMainCardSelected])
+
+    useEffect(() => {
+        dispatch(ChangeBGM("InGameIntro"))
+        // dispatch(ChangeBGM("InGame"))
+    }, [])
+
     /// open scorecard
     useEffect(() => {
         if(scoreCardIds){
@@ -119,10 +134,12 @@ export default function InGameInterface2()
             setTimeout(() => {
                 setIsShowRoundFinishedAlert(true);
                 const firstTimeout = setTimeout(() => {
+                    playTrick();
                     setIsShowRoundFinishedAlert(false);
                     setIsShowSummaryScore(true)
                 }, GAME_DELAY_ENUM.ROUND_FINISHED_IN_SEC * 1000)
                 const secondTimeout  = setTimeout(() => {
+                    playTrick();
                     setIsShowSummaryScore(false);
                     setDisableTimer(false)
                     dispatch(ClearStateForNextRound())
@@ -142,6 +159,7 @@ export default function InGameInterface2()
     useEffect(() => {
         if (gameFinishedResult){
             setTimeout(() => {
+                playTrick();
                 setIsShowGameFinishedPopup(true);
             }, GAME_DELAY_ENUM.AFTER_LAST_CARD * 1000);
         }
@@ -150,6 +168,7 @@ export default function InGameInterface2()
     /// show friend appeared alert
     useEffect(() => {
         if(isFriendAppeared && isFriendAppearFirstTime ){
+            playFriend();
             setIsFriendAppearFirstTime(false);
             setIsShowFriendAppearedAlert(true);
             const timeoutId = setTimeout(() => {
@@ -161,10 +180,12 @@ export default function InGameInterface2()
 
     /// show trick finish alert on time limit
     useEffect(() => {
+        console.log('test')
         if(trickFinishedResult){
             setDisableTimer(true)
             setIsWaitingDelayLastCard(true)
             setTimeout(() => {
+                playTrick();
                 setIsWaitingDelayLastCard(false)
                 setIsShowTrickFinishedAlert(true);
                 const timeoutId = setTimeout(() => {
@@ -178,6 +199,7 @@ export default function InGameInterface2()
     }, [trickFinishedResult]);
 
     const HandlePlayCard = (id)=>{
+        playFlipCard();
         dispatch(EmitCardPlayed({cardId: id}))
     }
 

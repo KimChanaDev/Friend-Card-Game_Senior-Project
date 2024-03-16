@@ -1,6 +1,7 @@
 import React from "react";
 import "./Navbar.css"; // Import CSS file for styling
 import { UserState } from "../store/UserSlice";
+// import BGM from "./BGM";
 
 interface NavbarProps {
   onProfileCilck: () => void;
@@ -52,6 +53,7 @@ const Navbar: React.FC<NavbarProps> = ({ onProfileCilck ,userData}) => {
           <div className="setting-text">
             <span>Setting </span>
           </div>
+          {/* <BGM /> */}
         </div>
       </div>
     </div>

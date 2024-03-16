@@ -5,6 +5,7 @@ import { ChangePasswordButton, LogoutButton } from "./ModalPopup.styled";
 import { HistoryComponent } from "../components/Custom-table";
 import { UserState } from "../store/UserSlice";
 import UpdateProfileModal from "./UpdateProfileModal";
+import Vfx from "../components/Vfx";
 
 interface HistoryData {
   id: string;
@@ -26,6 +27,8 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
   UserLogout,
   userData,
 }) => {
+  const { playButton } = Vfx();
+
   const [data, setData] = useState<HistoryData[]>([]);
   const [isUpdateProfileVisible, setIsUpdateProfileVisible] = useState<boolean>(false);
 const [isUpdatePasswordVisible, setIsUpdatePasswordVisible] = useState<boolean>(false);
@@ -41,6 +44,7 @@ const UsernameClick = () => {
   setIsUpdateProfileVisible(true)
 };
 const ChangePassword = () => {
+  playButton();
   alert("Change Password");
   setIsUpdateProfileVisible(false)
   setIsUpdatePasswordVisible(true)

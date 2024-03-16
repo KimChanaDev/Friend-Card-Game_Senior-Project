@@ -23,10 +23,14 @@ import {
     PlayerInGame, PlayerToggleReady, RoundFinished, SelectMainCard, StartGame, TrickFinished
 } from "../../store/SocketGameListenersSlice.jsx";
 
+import Vfx from "../../components/Vfx.jsx";
+
 LobbyList.propTypes = {
     CloseLobbyList: PropTypes.func,
 }
 export default function LobbyList({CloseLobbyList}){
+    const { playButton } = Vfx();
+
     const [allRooms, setAllRooms] = useState([])
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(10);
@@ -88,7 +92,7 @@ export default function LobbyList({CloseLobbyList}){
         }
     }
     function OpenCreateLobbyPopup(){ setIsShowCreateLobbyPopup(true) }
-    function CloseCreateLobbyPopup(){ setIsShowCreateLobbyPopup(false) }
+    function CloseCreateLobbyPopup(){ playButton(); setIsShowCreateLobbyPopup(false) }
     function OpenSearchLobbyPopup(){ setIsShowSearchLobbyPopup(true) }
     function CloseSearchLobbyPopup(){ setIsShowSearchLobbyPopup(false) }
     function OpenIsShowPasswordPopup(){ setIsShowPasswordPopup(true) }

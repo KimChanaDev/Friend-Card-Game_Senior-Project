@@ -11,6 +11,8 @@ import { PageButton, CreateButton } from "../components/Custom-table.styled";
 import "./joinGameModal.css";
 import {useDispatch, useSelector} from "react-redux";
 
+import Vfx from "../components/Vfx";
+
 interface UpdateProfileModalProps {
   onBackdropClick: () => void;
   isModalVisible: boolean;
@@ -21,15 +23,18 @@ const UpdateProfileModal: React.FC<UpdateProfileModalProps> = ({
   isModalVisible,
   onBackdropClick,
 }) => {
+  const { playButton } = Vfx();
+
 const dispatch = useDispatch()
 const userStore = useSelector(state => state.userStore)
 const [NewDisplayname, setNewDisplayname] = useState("");
   const UpdateRequest = () => {
     console.log(NewDisplayname)
+    playButton();
     setNewDisplayname(" ")
   };
   const BackButton = () => {
-
+    playButton();
     onBackdropClick()
   }
   return (
