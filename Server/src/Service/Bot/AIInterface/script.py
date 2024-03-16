@@ -92,10 +92,8 @@ def bidding(card_ids,current_bid,difficulty):
         maxBidding = bot.minimumBidWhenSmallAndShort
     else:
         maxBidding  = bot.minimumBidWhenBigAndShort
-    
-    rand = random.random()
 
-    if rand > bot.probToContinueBidWhenCurrentBiddingExceedMinumum and current_bid > maxBidding:
+    if  current_bid > maxBidding:
         return 0
     else:
         return current_bid + 5

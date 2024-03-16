@@ -2,6 +2,7 @@ export enum GUEST_CONFIG
 {
     UID = "20000000",
     USERNAME = "GUEST",
+    DISPLAY_NAME = "GUEST",
     SOCKET_ID = "socketId",
     FIREBASE_ID = "firebaseId",
     ROOM_NAME = "guestRoom",

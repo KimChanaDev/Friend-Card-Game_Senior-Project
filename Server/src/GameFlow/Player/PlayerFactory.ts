@@ -10,6 +10,7 @@ export class PlayerFactory
 		gameType: GAME_TYPE,
 		id: string,
 		username: string,
+		displayName: string,
 		socketId: string,
 		isOwner: boolean,
 		firebaseId: string,
@@ -17,13 +18,14 @@ export class PlayerFactory
 	): Player
     {
         if (gameType === GAME_TYPE.FRIENDCARDGAME) 
-            return new FriendCardPlayer(id, username, socketId, isOwner, firebaseId, profileImagePath);
+            return new FriendCardPlayer(id, username, displayName, socketId, isOwner, firebaseId, profileImagePath);
         throw new BadRequestError();
 	}
 	public static CreateBotPlayerObject(
 		gameType: GAME_TYPE,
 		id: string,
 		username: string,
+		displayName: string,
 		socketId: string,
 		isOwner: boolean,
 		firebaseId: string,
@@ -32,7 +34,7 @@ export class PlayerFactory
 	): Player
 	{
 		if (gameType === GAME_TYPE.FRIENDCARDGAME)
-			return new FriendCardPlayer(id, username, socketId, isOwner, firebaseId, profileImagePath, botLevel);
+			return new FriendCardPlayer(id, username, displayName, socketId, isOwner, firebaseId, profileImagePath, botLevel);
 		throw new BadRequestError();
 	}
 	public static CreateGuestPlayerObject(
@@ -40,7 +42,7 @@ export class PlayerFactory
 	): Player
 	{
 		if (gameType === GAME_TYPE.FRIENDCARDGAME)
-			return new FriendCardPlayer(GUEST_CONFIG.UID, GUEST_CONFIG.USERNAME, GUEST_CONFIG.SOCKET_ID, true, GUEST_CONFIG.FIREBASE_ID, GUEST_CONFIG.IMAGE);
+			return new FriendCardPlayer(GUEST_CONFIG.UID, GUEST_CONFIG.USERNAME, GUEST_CONFIG.DISPLAY_NAME, GUEST_CONFIG.SOCKET_ID, true, GUEST_CONFIG.FIREBASE_ID, GUEST_CONFIG.IMAGE);
 		throw new BadRequestError();
 	}
 }

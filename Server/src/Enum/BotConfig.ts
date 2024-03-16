@@ -1,6 +1,7 @@
 export enum BOT_CONFIG
 {
     USERNAME = "BOT",
+    DISPLAY_NAME = "BOT",
     SOCKET_ID = "socketId",
     FIREBASE_ID = "firebaseId",
 

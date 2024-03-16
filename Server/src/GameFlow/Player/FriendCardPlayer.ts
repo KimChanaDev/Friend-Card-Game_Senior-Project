@@ -10,9 +10,9 @@ export class FriendCardPlayer extends Player
 	private startTime: number | null = null;
 	private totalTimeInSec: number | null = null;
 
-	constructor(id: string, username: string, socketId: string, isOwner: boolean, firebaseId: string, profileImagePath: string, botLevel?: number | undefined)
+	constructor(id: string, username: string, displayName: string, socketId: string, isOwner: boolean, firebaseId: string, profileImagePath: string, botLevel?: number | undefined)
     {
-		super(id, username, socketId, isOwner, firebaseId, profileImagePath, botLevel);
+		super(id, username, displayName, socketId, isOwner, firebaseId, profileImagePath, botLevel);
 	}
 	public BotPlay(totalTimer:number, delayInSec: number, callback: () => void): void {
 		this.ClearTimer()

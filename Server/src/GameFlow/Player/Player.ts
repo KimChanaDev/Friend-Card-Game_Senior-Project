@@ -7,6 +7,7 @@ export abstract class Player
 	protected constructor(
 		public readonly UID: string,
 		public readonly username: string,
+		public readonly displayName: string,
 		public readonly socketId: string,
 		public isOwner: boolean,
 		public readonly firebaseId: string,
