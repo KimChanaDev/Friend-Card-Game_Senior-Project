@@ -115,8 +115,8 @@ export abstract class SocketHandler
 				const newPlayer: Player = PlayerFactory.CreatePlayerObject(
 					gameRoom!.gameType,
 					user.UID,
-					user.displayName,
 					user.username,
+					user.displayName,
 					socket.id,
 					gameRoom!.owner.UID === user.UID,
 					jwtPayload!.firebaseId,
