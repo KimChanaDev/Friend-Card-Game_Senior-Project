@@ -43,6 +43,7 @@ export class FriendCardGameRoom extends GameRoom
     {
         this.InitRoundInGame();
         super.SetStartState();
+        this.playersInGame.forEach(a => a.ClearPlayerPoint())
         this.GetCurrentRoundGame().StartRoundProcess(false
             , this.GetAllPlayerAsArray()
             , socket
