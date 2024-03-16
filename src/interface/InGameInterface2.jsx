@@ -161,8 +161,17 @@ export default function InGameInterface2()
             setDisableTimer(true)
             setIsWaitingDelayLastCard(true)
             setTimeout(() => {
+                setIsShowRoundFinishedAlert(true);
                 playTrick();
-                setIsShowGameFinishedPopup(true);
+                const firstTimeout = setTimeout(() => {
+                    setIsShowRoundFinishedAlert(false);
+                    setIsWaitingDelayLastCard(false);
+                    setDisableTimer(false)
+                    setIsShowGameFinishedPopup(true);
+                }, GAME_DELAY_ENUM.ROUND_FINISHED_IN_SEC * 1000)
+                return () => {
+                    clearTimeout(firstTimeout);
+                }
             }, GAME_DELAY_ENUM.AFTER_LAST_CARD * 1000);
         }
     }, [gameFinishedResult]);
