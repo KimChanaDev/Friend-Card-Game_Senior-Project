@@ -49,6 +49,9 @@ export class FriendCardGameRound
         this.roundNumber = roundNumber;
         this.gameId = gameId;
     };
+    public GetPlayersInOrderIndex(UID: string): number{
+        return this.playersInOrder.findIndex(a => a.UID === UID)
+    }
     public StartRoundProcess(isFromNextRoundProcess: boolean
                              , initialPlayers : FriendCardPlayer[]
                              , socket: Socket
@@ -300,11 +303,13 @@ export class FriendCardGameRound
         const trickCardModel: TrickCardModel | undefined  = this.trickCardMap.get(latestTrick);
         if (trickCardModel && trickCardModel.winnerId && trickCardModel.winnerCard && trickCardModel.pointInTrick !== undefined) {
             const playersPoint: PlayerPointInfo[] = this.CreatePlayerPointInfo();
+            const orderWinnerPosition: number = this.GetPlayersInOrderIndex(trickCardModel.winnerId)
             return new WinnerTrickResponse(trickCardModel.winnerId
                 , trickCardModel.winnerCard
                 , trickCardModel.pointInTrick
                 , latestTrick
-                , playersPoint);
+                , playersPoint
+                , orderWinnerPosition);
         }
         else {
             return undefined;

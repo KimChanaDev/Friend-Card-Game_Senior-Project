@@ -7,7 +7,8 @@ export class WinnerTrickResponse{
         public winnerCardId: CardId,
         public winnerReceivePoint: number,
         public trickNumber: number,
-        public playersPoint: PlayerPointInfo[]
+        public playersPoint: PlayerPointInfo[],
+        public orderWinnerPosition: number
     ) {}
 }
 

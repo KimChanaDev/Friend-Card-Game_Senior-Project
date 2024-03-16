@@ -484,7 +484,8 @@ export class FriendCardGameRoom extends GameRoom
             }
             const cardPlayedDTO: CardPlayedDTO = {
                 playerId: player.UID,
-                cardId: playedCard
+                cardId: playedCard,
+                order: this.GetCurrentRoundGame().GetPlayersInOrderIndex(player.UID)
             };
             this.EmitToRoomAndSender(socket, SOCKET_GAME_EVENTS.CARD_PLAYED, this.id, cardPlayedDTO);
         }
