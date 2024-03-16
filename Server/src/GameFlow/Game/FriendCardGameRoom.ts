@@ -191,14 +191,15 @@ export class FriendCardGameRoom extends GameRoom
         let previousPoint: number | undefined = undefined;
         userPlaces.forEach((player, index) => {
             const isWinner: boolean = winnerPlayerUID === player.UID
+            const playerPoint: number = player.GetTotalGamePoint()
             const matchModel: matchObject = {
                 id: this.id,
-                score: player.GetTotalGamePoint(),
-                place: !previousPoint || previousPoint === player.GetTotalGamePoint() ? placeNumber : ++placeNumber,
+                score: playerPoint,
+                place: previousPoint === undefined || previousPoint === playerPoint ? placeNumber : ++placeNumber,
                 win: isWinner,
                 createdAt: new Date(Date.now()),
             };
-            previousPoint = player.GetTotalGamePoint()
+            previousPoint = playerPoint
             if(!player.GetIsDisconnected()){
                 FriendCardGameRepository.SaveMatchHistory(matchModel, isWinner, player)
             }
