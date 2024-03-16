@@ -281,7 +281,6 @@ export class FriendCardGameRoom extends GameRoom
                     if(botCard){
                         // console.log("botCardID server: " + botCard)
                         const player: FriendCardPlayer = this.GetCurrentRoundGame().GetCurrentPlayer()
-                        console.log("from bot play")
                         this.PlayCardProcessThenEmitEvent(botCard, player, socket)
                     }else{
                         console.error("botCard server null : " + botCard)
@@ -383,7 +382,6 @@ export class FriendCardGameRoom extends GameRoom
             const player: FriendCardPlayer = this.GetCurrentRoundGame().GetCurrentPlayer()
             const cardsCanPlay: CardId[] = this.GetCurrentRoundGame().CardsCanPlay(player)
             const randomCard: CardId = RandomArrayElement(cardsCanPlay)
-            console.log("from play timeout")
             this.PlayCardProcessThenEmitEvent(randomCard, player, socket)
         }
     }

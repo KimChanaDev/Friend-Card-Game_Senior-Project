@@ -166,7 +166,6 @@ export class FriendCardGameHandler extends SocketHandler
                 if(gameRoom.IsCurrentRoundGameFinished() && gameRoom.CheckGameFinished()){
                     console.log("in game finished")
                     gameRoom.GetCurrentRoundGame().GetCurrentPlayer().ClearTimer()
-                    console.log("from handler")
                     gameRoom.FinishGameProcess()
                     const winner: FriendCardPlayer | undefined = gameRoom.GetWinner()
                     if(winner){
