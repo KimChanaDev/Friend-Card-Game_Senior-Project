@@ -5,7 +5,7 @@ import { ChangePasswordButton, LogoutButton } from "./ModalPopup.styled";
 import { HistoryComponent } from "../components/Custom-table";
 import { UserState } from "../store/UserSlice";
 import UpdateProfileModal from "./UpdateProfileModal";
-import { GetHistory } from "../service/Api/ApiService";
+import { GetHistory, ChangePassword } from "../service/Api/ApiService";
 import { HistoryApiResponse, History, MatchDetail } from "../entities/response";
 import { useDispatch, useSelector } from "react-redux";
 
@@ -22,6 +22,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
   UserLogout,
   userData,
 }) => {
+  const [counter, setCounter] = React.useState(0);
   const [history, setData] = useState<History>();
   const [isUpdateProfileVisible, setIsUpdateProfileVisible] =
     useState<boolean>(false);
@@ -29,7 +30,6 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
     useState<boolean>(false);
 
   const PictureClick = () => {
-    console.log("isUpdateProfileVisible", isUpdateProfileVisible);
     setIsUpdatePasswordVisible(false);
     setIsUpdateProfileVisible(true);
   };
@@ -37,12 +37,19 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
     setIsUpdatePasswordVisible(false);
     setIsUpdateProfileVisible(false);
   };
+  const ChangePassClick = () => {
+    console.log(userStore.token)
+    ChangePassword(userStore.token);
+    setCounter(60)
+  };
   const userStore = useSelector((state) => state.userStore);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const responseData: HistoryApiResponse = await GetHistory(userStore.token);
+        const responseData: HistoryApiResponse = await GetHistory(
+          userStore.token
+        );
         setData(responseData.response.data);
       } catch (error) {
         console.error("Error fetching history data:", error);
@@ -51,6 +58,10 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
 
     fetchData();
   }, [isModalVisible]);
+
+  useEffect(() => {
+    counter > 0 && setTimeout(() => setCounter(counter - 1), 1000);
+  }, [counter]);
 
   return (
     <ModalRWD
@@ -64,14 +75,9 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
           <div className="Profile">
             <div className="UserInfo">
               <div className="Profile-Img" onClick={PictureClick}>
-                <img
-                  src={userData?.imagePath}
-                  alt="User Profile"
-                />
+                <img src={userData?.imagePath} alt="User Profile" />
                 <div className="Info">
-                  <span className="name">
-                    {userData?.username}
-                  </span>
+                  <span className="name">{userData?.username}</span>
                   <span className="uid">UID: {userData?.userId}</span>
                 </div>
               </div>
@@ -93,8 +99,15 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                   </span>
                 </div>
                 <div className="User-Button">
-                  <ChangePasswordButton onClick={PictureClick}>
-                    Update Profile
+                  <ChangePasswordButton
+                    onClick={ChangePassClick}
+                    disabled={counter !== 0}
+                  >
+                    {counter === 0 ? (
+                      "Change Password"
+                    ) : (
+                      <>Resend email {counter}s</>
+                    )}
                   </ChangePasswordButton>
                   <LogoutButton onClick={UserLogout}> Logout </LogoutButton>
                 </div>

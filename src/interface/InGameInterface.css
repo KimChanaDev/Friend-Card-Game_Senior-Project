@@ -169,4 +169,5 @@ figure.bot>img:hover{
 }
 .cardOnTable{
   border-radius: 8px;
+  /* z-index: 100; */
 }

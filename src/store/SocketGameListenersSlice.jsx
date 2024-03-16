@@ -126,6 +126,7 @@ export const CardPlayed = createAsyncThunk(
     'cardPlayed',
     async function (_, { getState, dispatch }) {
         return await socketClient.On(SOCKET_EVENT.CARD_PLAYED, (cardPlayDetail) => {
+            console.log(cardPlayDetail)
             dispatch({ type: 'socketGameListener/CardPlayed', payload: { cardPlayDetail: cardPlayDetail } })
             dispatch(EmitGetGameStateFromServer())
         });

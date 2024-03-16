@@ -146,12 +146,11 @@ interface HistoryProps {
 }
 
 const HistoryClick = (item: MatchDetail) => {
-  alert(item.id);
+
 };
 
 const HistoryComponent: React.FC<HistoryProps> = ({ data = [] }) => {
   const recentData = data.slice().reverse().slice(0, 5);
-  console.log(data)
   return (
     <table>
       <tbody>

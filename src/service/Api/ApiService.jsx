@@ -85,3 +85,12 @@ export async function GetHistory(token) {
   return response.data;
 }
 
+export async function ChangePassword(token) {
+  const response = await axios.get(`${serverPort}/userdata/resetpassword`,{
+    headers: {
+      authorization: token,
+    },
+  });
+  console.log(response.data)
+  return response.data
+}
