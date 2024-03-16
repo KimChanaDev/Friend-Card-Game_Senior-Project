@@ -20,8 +20,7 @@ import BOT_LEVEL from "../enum/BotLevelEnum.jsx";
 PlayerCard2.propTypes = {
   socket: PropTypes.any
 }
-export default function  PlayerCard2({ name, score, isInLobby, isLeft, isBidding, isMax, bidScore, isPass, isPlay, isTop, role
-                      , isReady, isOwnerReadyButton, userId,imgUrl, isBot, botLevel, disableTimer,orderStyled}) {
+export default function  PlayerCard2({ name, isInLobby, isLeft, isBidding, isMax, bidScore, isPass, isTop, role, isReady, isOwnerReadyButton, userId,imgUrl, isBot, botLevel, disableTimer,orderStyled}) {
   const bidShowPosition = {right:isLeft&&'-2rem',left:!isLeft&&'-2rem'}
   const timerPosition = {bottom:isTop&&'-1rem',top:!isTop&&'-1rem'}
   const isOwnerRoom = useSelector(state => state.gameStore.playersInGame?.thisPlayer?.isOwner) ?? false
@@ -39,6 +38,7 @@ export default function  PlayerCard2({ name, score, isInLobby, isLeft, isBidding
   const gameplayState = useSelector(state => state.socketGameEmittersStore.gameStateFromServer?.gameplayState) ?? GAME_STATE.NOT_STARTED
   const winnerAuctionId = useSelector(state => state.socketGameListenersStore.winnerAuctionId)
   const winnerAuctionPoint = useSelector(state => state.socketGameListenersStore.winnerAuctionPoint)
+  const roundFinishedResult = useSelector(state => state.socketGameListenersStore.roundFinishedResult)
   const [isShowEmojiReceived, setIsShowEmojiReceived] = useState(false)
   const [timerId, setTimerId] = useState(null)
 
@@ -75,7 +75,11 @@ export default function  PlayerCard2({ name, score, isInLobby, isLeft, isBidding
 
   function HandleReady(){ dispatch(EmitToggleReady()) }
   function FindScore(){
-    return playersPoint.filter(player => player.playerId === userId)?.at(0)?.cardsPointReceive ?? 0
+    if(disableTimer && roundFinishedResult){
+      return roundFinishedResult.currentRound.playersPoint.find(player => player.playerId === userId)?.cardsPointReceive ?? 0
+    }else{
+      return playersPoint.filter(player => player.playerId === userId)?.at(0)?.cardsPointReceive ?? 0
+    }
   }
   function GenerateTeamIcon(){
     let result = ""
@@ -137,11 +141,14 @@ export default function  PlayerCard2({ name, score, isInLobby, isLeft, isBidding
     return <img src={imagePath} alt="" style={{ order: isLeft ? 1 : 2, zIndex: isInLobby && 999 }} />
   }
   const getBorderColor = () => {
-    return orderStyled === 0 ? '2px solid #265073' : orderStyled === 1 ? '2px solid #7F27FF' : orderStyled === 2 ? '2px solid #944E63' :orderStyled === 3 ? '2px solid #D04848' : '2px solid black';
+    return orderStyled === 0 ? '2px solid #67a8e4' : orderStyled === 1 ? '2px solid #7F27FF' : orderStyled === 2 ? '2px solid #eb9dee' :orderStyled === 3 ? '2px solid #f3e962' : '2px solid black';
+  };
+  const getShadowColor = () => {
+    return orderStyled === 0 ? '10px 10px 1.3rem #67a8e4,inset -20px -20px 2rem #67a8e439' : orderStyled === 1 ? '-10px 8px 1.3rem #7F27FF,inset 20px -20px 2rem #7d27ff37' : orderStyled === 2 ? '-10px 8px 1.3rem #eb9dee,inset 20px -20px 2rem #eb9dee36' :orderStyled === 3 ? '10px 10px 1.3rem #f3e962,inset -20px -20px 2rem #f3e9623b' : '0 0 1rem #0000,inset 0 0 0.5rem #0000';
   };
   return (
     <>
-      <section className='profile ' onClick={() => PlayCardClicked()} style={{ border: getBorderColor() }}>
+      <section className='profile ' onClick={() => PlayCardClicked()} style={{ borderBottom: getBorderColor(), boxShadow:getShadowColor(),zIndex: 9999}}>
         {/*kick button*/}
         {userId !== ownerId && isInLobby && isLeft && isOwnerRoom && <button onClick={() => HandleKickPlayer()} className='kick_button_left' style={{ zIndex: 9999 }}>❌</button>}
         { GenerateProfileImage() }
@@ -152,7 +159,7 @@ export default function  PlayerCard2({ name, score, isInLobby, isLeft, isBidding
           {/*UID*/}
           { /*!isGameStarted && */!isBot && !isGameStarted && <p className=''>{`UID ${userId.substring(userId.length - 8)}`}</p> }
           {/*score*/}
-          { isGameStarted && <p className=''>{`Score : ${FindScore()} ${winnerAuctionId === userId ? `|| WinBidPoint: ${winnerAuctionPoint}` : ""}`}</p> }
+          { isGameStarted && <p className=''>{`Score : ${FindScore()} ${winnerAuctionId === userId ? `【WinBid: ${winnerAuctionPoint}】` : ""}`}</p> }
           {/*ready button*/}
           { isInLobby && role !== PLAYER_ROLE.HOST && <button className="ready_button" onClick={HandleReady} disabled={!isOwnerReadyButton}>{isReady ? "Ready" : "Unready"}</button> }
         </div>

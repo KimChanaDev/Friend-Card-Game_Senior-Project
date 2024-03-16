@@ -6,7 +6,7 @@ import {EmitGetGameStateFromServer, SetGameState} from "./SocketGameEmittersSlic
 import {
     AddPlayersInGame,
     RemovePlayersInGame,
-    ResetPlayersInGame,
+    ResetPlayersInGame, SetIsJoinGuestMode,
     SetNewHostRoom,
     SetPlayersInGame,
     TogglePlayer,
@@ -15,6 +15,9 @@ import {
 import {DisconnectFromSocket} from "./SocketSlice.jsx";
 import {SetPage} from "./PageStateSlice.jsx";
 import PAGE_STATE from "../enum/PageStateEnum.jsx";
+import {Logout} from "./UserSlice.tsx";
+import DISCONNECT_REASON from "../enum/DisconnectReason.jsx";
+import { ResetAllEmitterState } from "../store/SocketGameEmittersSlice.jsx";
 
 export const PlayerToggleReady = createAsyncThunk(
     'toggleReady',
@@ -59,27 +62,41 @@ export const PlayerDisconnected = createAsyncThunk(
             console.log("playerDisconnected: " + JSON.stringify(response))
             const state = getState()
             const myUserId = state.userStore.userId
-            if(state.socketGameListenersStore.isGameStarted){
-                if(response.disconnectPlayer.isBot){
-                    dispatch(UpdatePlayerInGame({ updatePlayer: response.disconnectPlayer}))
-                }else{
-                    dispatch(RemovePlayersInGame({player : response.disconnectPlayer}))
-                }
-                if(response.newHostPlayer){
-                    dispatch(SetNewHostRoom({player: response.newHostPlayer}))
-                }
-            }
-            else{
-                if(response.disconnectPlayer.id === myUserId){
-                    alert("You are kicked from host")
-                    dispatch(DisconnectFromSocket())
-                    dispatch(ResetPlayersInGame())
-                    dispatch(ResetAllListenerState())
-                    dispatch(SetPage({ pageState: PAGE_STATE.MENU }))
-                }else{
-                    dispatch(RemovePlayersInGame({player : response.disconnectPlayer}))
+            const isJoinGuestMode = state.gameStore.isJoinGuestMode
+            if(response.disconnectReason === DISCONNECT_REASON.DOUBLE_LOGIN && response.disconnectPlayer.id === myUserId){
+                alert("You are overlap logged in!")
+                dispatch(DisconnectFromSocket())
+                dispatch(ResetPlayersInGame())
+                if (isJoinGuestMode) dispatch(SetIsJoinGuestMode({isGuest: false}))
+                dispatch(ResetAllListenerState())
+                dispatch(ResetAllEmitterState())
+                dispatch(Logout())
+                dispatch(SetPage({ pageState: PAGE_STATE.MENU }))
+            }else{
+                if(state.socketGameListenersStore.isGameStarted){
+                    if(response.disconnectPlayer.isBot){
+                        dispatch(UpdatePlayerInGame({ updatePlayer: response.disconnectPlayer}))
+                    }else{
+                        dispatch(RemovePlayersInGame({player : response.disconnectPlayer}))
+                    }
                     if(response.newHostPlayer){
                         dispatch(SetNewHostRoom({player: response.newHostPlayer}))
+                    }
+                }
+                else{
+                    if(response.disconnectPlayer.id === myUserId){
+                        alert("You are kicked from host")
+                        dispatch(DisconnectFromSocket())
+                        dispatch(ResetPlayersInGame())
+                        if (isJoinGuestMode) dispatch(SetIsJoinGuestMode({isGuest: false}))
+                        dispatch(ResetAllListenerState())
+                        dispatch(ResetAllEmitterState())
+                        dispatch(SetPage({ pageState: PAGE_STATE.MENU }))
+                    }else{
+                        dispatch(RemovePlayersInGame({player : response.disconnectPlayer}))
+                        if(response.newHostPlayer){
+                            dispatch(SetNewHostRoom({player: response.newHostPlayer}))
+                        }
                     }
                 }
             }
@@ -109,6 +126,7 @@ export const CardPlayed = createAsyncThunk(
     'cardPlayed',
     async function (_, { getState, dispatch }) {
         return await socketClient.On(SOCKET_EVENT.CARD_PLAYED, (cardPlayDetail) => {
+            console.log(cardPlayDetail)
             dispatch({ type: 'socketGameListener/CardPlayed', payload: { cardPlayDetail: cardPlayDetail } })
             dispatch(EmitGetGameStateFromServer())
         });
@@ -213,6 +231,7 @@ const socketGameListenerSlice = createSlice({
     reducers: {
         ResetAllListenerState: (state) => {
             state.isGameStarted = false
+            state.playerInGameListenerResponseStatus = ''
             state.emojiDetail = null
             state.playersAuctionDetail = []
             state.highestAuctionPlayerId = null
@@ -226,7 +245,6 @@ const socketGameListenerSlice = createSlice({
             state.trickFinishedResult = null
             state.roundFinishedResult = null
             state.gameFinishedResult = null
-            state.playerInGameListenerResponseStatus = ''
         },
         ClearStateForNextRound: (state) => {
             state.playersAuctionDetail = [];

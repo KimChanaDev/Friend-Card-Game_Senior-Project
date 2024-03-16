@@ -25,6 +25,11 @@
     background-color: rgba(241, 236, 236, 0.50);
     border-radius: 90px;
     /* fill: rgba(241, 236, 236, 0.50); */
+    box-shadow: 4px 4px 15px rgba(10, 32, 73, 0.466);
+    transition: 0.2s ease-in-out;
+  }
+  .user-profile:hover{
+    filter: opacity(85%);
   }
   .user-profile img {
     width: 90px;

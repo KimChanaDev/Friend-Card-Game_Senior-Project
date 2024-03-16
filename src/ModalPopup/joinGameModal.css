@@ -28,3 +28,28 @@
     margin-top: -40px;
     width: 100%;
 }
+input[type="file"] {
+    display: none;
+}
+.profile-upload {
+    display: flex;
+    justify-content: center;
+    padding: 6px 12px;
+    cursor: pointer;
+}
+.profile-upload img {
+    /* width: 370px; */
+    width: 300px;
+    height: 300px;
+    border-radius: 100%;
+    overflow: hidden;
+    text-align: center;
+    object-fit: cover;
+    /* filter:grayscale(0.0); */
+    transition: 0.2s ease-in-out;
+    box-shadow: 0 0 1.5rem rgb(118, 185, 230);
+}
+.profile-upload img:hover {
+    box-shadow: 0 0 1rem rgb(3, 6, 8);
+    filter:opacity(0.8);
+}

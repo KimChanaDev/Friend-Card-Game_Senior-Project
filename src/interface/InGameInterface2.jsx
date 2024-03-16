@@ -25,6 +25,7 @@ import PLAYER_ROLE from "../enum/PlayerRoleEnum.jsx";
 import {ClearSelectMainCardStatus, EmitCardPlayed} from "../store/SocketGameEmittersSlice.jsx";
 import {ClearCardInField, ClearStateForNextRound} from "../store/SocketGameListenersSlice.jsx";
 import GAME_DELAY_ENUM from "../enum/GameDelayEnum.jsx";
+<<<<<<< HEAD
 import { ChangeBGM } from '../store/BGMSlice.jsx';
 import Vfx from '../components/Vfx.jsx';
 
@@ -36,6 +37,15 @@ export default function InGameInterface2()
     const GameScore= msg['matchScore'] || []
 
     const userId = useSelector(state => state.userStore.userId)
+=======
+import GUEST_CONFIG from "../enum/GuestConfigEnum.jsx";
+
+export default function InGameInterface2()
+{
+    const isJoinGuestMode = useSelector(state => state.gameStore.isJoinGuestMode);
+    const userIdCookie = useSelector(state => state.userStore.userId)
+    const userId = isJoinGuestMode ? GUEST_CONFIG.UID : userIdCookie
+>>>>>>> Frontend-tsx
     const playersInGame = useSelector(state => state.gameStore.playersInGame)
     const isGameStarted = useSelector(state => state.socketGameListenersStore.isGameStarted)
     const cardInHand = useSelector(state => state.socketGameEmittersStore.gameStateFromServer?.thisPlayer?.cardIds) ?? []
@@ -66,7 +76,7 @@ export default function InGameInterface2()
         }
     })
     const cardInFiledMap = cardsInField.map((cardId)=> {
-        console.log("card",cardId)
+        // console.log("card",cardId)
         // console.log(cardsInField)
         // console.log(cardsInField.playerId)
         return  {
@@ -158,9 +168,24 @@ export default function InGameInterface2()
     /// Game Finished popup
     useEffect(() => {
         if (gameFinishedResult){
+            setDisableTimer(true)
+            setIsWaitingDelayLastCard(true)
             setTimeout(() => {
+<<<<<<< HEAD
                 playTrick();
                 setIsShowGameFinishedPopup(true);
+=======
+                setIsShowRoundFinishedAlert(true);
+                const firstTimeout = setTimeout(() => {
+                    setIsShowRoundFinishedAlert(false);
+                    setIsWaitingDelayLastCard(false);
+                    setDisableTimer(false)
+                    setIsShowGameFinishedPopup(true);
+                }, GAME_DELAY_ENUM.ROUND_FINISHED_IN_SEC * 1000)
+                return () => {
+                    clearTimeout(firstTimeout);
+                }
+>>>>>>> Frontend-tsx
             }, GAME_DELAY_ENUM.AFTER_LAST_CARD * 1000);
         }
     }, [gameFinishedResult]);
@@ -202,22 +227,18 @@ export default function InGameInterface2()
         playFlipCard();
         dispatch(EmitCardPlayed({cardId: id}))
     }
-
-    // const componentStyles = {
-    //     position: 'fixed',
-    //     top: 0,
-    //     left: 0,
-    //     width: '100%',
-    //     zIndex: 1000,
-    // };
     function FindPlayerBidScore(thisPlayerId){
         return playersAuctionDetail.filter(a => a.playerId === thisPlayerId)?.at(0)?.auctionPoint ?? null
     }
     function FindPlayerAuctionPass(thisPlayerId){
         return playersAuctionDetail.filter(a => a.playerId === thisPlayerId)?.at(0)?.isPass ?? false
     }
-    function getBorderColor(orderStyled){ 
-        return orderStyled === 0 ? '2px solid #265073' : orderStyled === 1 ? '2px solid #7F27FF' : orderStyled === 2 ? '2px solid #944E63' :orderStyled === 3 ? '2px solid #D04848' : '2px solid black';
+    function getBorderColor(orderStyled){
+        console.log("Oreder ",orderStyled)
+        return orderStyled === 0 ? '1px solid #67a8e4' : orderStyled === 1 ? '1px solid #7F27FF' : orderStyled === 2 ? '1px solid #eb9dee' :orderStyled === 3 ? '1px solid #f3e962' : '1px solid black';    
+    }
+    function getShadowColor (orderStyled){
+        return orderStyled === 0 ? '0px 0px 1rem #67a8e4,inset 0 0 1.5rem #67a8e4' : orderStyled === 1 ? '0px 0px 1rem #7F27FF,inset 0 0 1rem #7F27FF' : orderStyled === 2 ? '0px 0px 1rem #eb9dee,inset 0 0 0.5rem #eb9dee' :orderStyled === 3 ? '0px 0px 1rem #f3e962,inset 0 0 0.5rem #f3e962' : '0 0 1rem #0000,inset 0 0 0.5rem #0000';
     }
     return (
         
@@ -277,7 +298,6 @@ export default function InGameInterface2()
                                                                   bidScore={FindPlayerBidScore(playersInGame.players[2].id)}
                                                                   isPass={FindPlayerAuctionPass(playersInGame.players[2].id)}
                                                                   isTop={true}
-                                                                  score={GameScore[3]}
                                                                   role = {playersInGame.players[2].isOwner ? PLAYER_ROLE.HOST : PLAYER_ROLE.NORMAL}
                                                                   isOwnerReadyButton={playersInGame?.players[2]?.id === userId}
                                                                   isReady={playersInGame.players[2].isReady}
@@ -295,7 +315,6 @@ export default function InGameInterface2()
                                                                   isInLobby={!isGameStarted}
                                                                   bidScore={FindPlayerBidScore(playersInGame.players[1].id)}
                                                                   isPass={FindPlayerAuctionPass(playersInGame.players[1].id)}
-                                                                  score={GameScore[0]}
                                                                   role = {playersInGame.players[1].isOwner ? PLAYER_ROLE.HOST : PLAYER_ROLE.NORMAL}
                                                                   isOwnerReadyButton={playersInGame?.players[1]?.id === userId}
                                                                   isReady={playersInGame.players[1].isReady}
@@ -316,7 +335,6 @@ export default function InGameInterface2()
                                                                   bidScore={FindPlayerBidScore(playersInGame.players[3].id)}
                                                                   isPass={FindPlayerAuctionPass(playersInGame.players[3].id)}
                                                                   isTop={true}
-                                                                  score={GameScore[1]}
                                                                   role = {playersInGame.players[3].isOwner ? PLAYER_ROLE.HOST : PLAYER_ROLE.NORMAL}
                                                                   isOwnerReadyButton={playersInGame?.players[3]?.id === userId}
                                                                   isReady={playersInGame.players[3].isReady}
@@ -334,7 +352,6 @@ export default function InGameInterface2()
                                                                   isInLobby={!isGameStarted}
                                                                   bidScore={FindPlayerBidScore(playersInGame.players[0].id)}
                                                                   isPass={FindPlayerAuctionPass(playersInGame.players[0].id)}
-                                                                  score={GameScore[2]}
                                                                   role = {playersInGame.players[0].isOwner ? PLAYER_ROLE.HOST : PLAYER_ROLE.NORMAL}
                                                                   isOwnerReadyButton={playersInGame?.players[0]?.id === userId}
                                                                   isReady={playersInGame.players[0].isReady}
@@ -371,10 +388,21 @@ export default function InGameInterface2()
                         />)
                     }
                 </figure>
-
                 {
-                    (isAfterMainCardSelected || isWaitingDelayLastCard) && <section className='mid'>
-                            {cardInFiledMap.map((e, i)=><img key={i} src={e.src} alt=""  className='cardOnTable' style={{ border: getBorderColor(e.order) }} /> ) }
+                    (isAfterMainCardSelected || isWaitingDelayLastCard) && <section className='mid'> 
+                            {cardInFiledMap.map((e, i)=>
+                            <img key={i} src={e.src} alt=""  className='cardOnTable' style={{
+                                border: getBorderColor(e.id.order),
+                                boxShadow: getShadowColor(e.id.order),
+                                // zIndex: 10000,
+                            }}/>
+                            ) }
+                             {/* {cardInFiledMap.map((e, i)=>
+                            <div className='shadowtest' key={i}>
+                                <img  src={e.src} alt=""  className='cardOnTable' style={{ border: getBorderColor(e.id.order) }} />
+                                <div className='borderShadow'></div>
+                            </div>
+                            ) } */}
                     </section>
                 }
                 < SlideBar />
@@ -384,3 +412,4 @@ export default function InGameInterface2()
 }
 
 //getBorderColor
+//border: getBorderColor(e.order) , boxShadow:getShadowColor(e.order)

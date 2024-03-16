@@ -40,7 +40,10 @@ export default class SocketClient {
             if (!this.socket) return reject('No socket connection.');
             const EmitCallback = (response) => {
                 if (response.error) {
-                    alert("Emit failed: " + response.error);
+                    if(response.error === "Not all players ready") alert("Not all players are ready");
+                    else if(response.error === "The first player cannot pass") alert("The first player cannot pass");
+                    else if(response.error === "Friend or Trump are not valid") alert("Friend or Trump are not valid");
+
                     console.error(response.error);
                     reject(response.error);
                 } else {

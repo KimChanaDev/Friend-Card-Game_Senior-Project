@@ -3,7 +3,12 @@ import ModalRWD from './ModalRWD';
 import {CustomTable} from '../components/Custom-table';
 import { lobbyTableHeaders , TableData} from '../config/table-data';
 import {GetRooms} from "../service/Api/ApiService.jsx";
-import { UserState } from "../store/UserSlice";
+import {Logout, UserState} from "../store/UserSlice";
+import {useDispatch} from "react-redux";
+import {SetPage} from "../store/PageStateSlice.jsx";
+import PAGE_STATE from "../enum/PageStateEnum.jsx";
+import {useCookies} from "react-cookie";
+import COOKIE from "../enum/CookieNameEnum.jsx";
 
 
 interface LobbyModalProps{
@@ -15,6 +20,8 @@ interface LobbyModalProps{
 const LobbyModal: React.FC<LobbyModalProps> =({isModalVisible,onBackdropClick,userData}) => {
     const [games, setGames] = React.useState<TableData[]>([]);
     const [filterId, setFilterId] = React.useState<string>("");
+    const dispatch = useDispatch()
+    const [cookies, setCookie, removeCookie] = useCookies([COOKIE.name]);
 
     useEffect(() => {
         async function fetchRooms() {
@@ -22,8 +29,16 @@ const LobbyModal: React.FC<LobbyModalProps> =({isModalVisible,onBackdropClick,us
             const rooms:TableData[] = await GetRooms(userData?.token);
             console.log(rooms);
             setGames(rooms); 
-          } catch (error) {
-            console.log('Fetch rooms failed: ', error);
+          } catch (error: any) {
+              if (error?.response?.status === 401) {
+                  alert('Unauthorized! or Overlap logged in! please login again.')
+                  console.error('Unauthorized! or Overlap logged in!');
+                  dispatch(Logout())
+                  removeCookie(COOKIE.name)
+                  onBackdropClick()
+              }else{
+                  console.error('Fetch rooms failed: ', error);
+              }
           }
         }
     

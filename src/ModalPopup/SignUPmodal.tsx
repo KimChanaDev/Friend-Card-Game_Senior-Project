@@ -29,7 +29,7 @@ const SignUpModal: React.FC<SignUpModalProps> =({isModalVisible,onBackdropClick,
     const [password, setPassword] = useState('');
     const [con_password, setConPassword] = useState('');
     const SignInRequest = () =>{
-        onSignUpRequested({username: username, password: password,con_password:con_password,email:email,image:"https://cdn.discordapp.com/attachments/406860361086795776/1200152089842696252/Version1.gif?ex=65c523bb&is=65b2aebb&hm=1cb911f347cd4e608d7077e1ff9ccc3f60a54d265872533728ca667850621082&"})
+        onSignUpRequested({username: username, password: password,con_password:con_password,email:email,image:"https://firebasestorage.googleapis.com/v0/b/friendcardgame.appspot.com/o/default%2Fguestacc.png?alt=media&token=2fc964d2-741a-4295-9c8c-2505f66073da"})
         setEmail('');
         setUsername('');
         setPassword('');

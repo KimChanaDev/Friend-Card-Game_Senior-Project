@@ -107,6 +107,7 @@ const CloseButton = styled.div`
   background-color: #c8c8c8;
   border-radius: 50%;
   cursor: pointer;
+  transition: 0.2s ease-in-out;
 
   & > * {
     opacity: 1;
@@ -156,6 +157,7 @@ export const Button = styled.button`
   min-width: 380px;
   min-height: 80px;
   padding: 8px 16px;
+  transition: 0.2s ease-in-out;
   //Text
   color: #FFF;
   text-align: center;
@@ -221,6 +223,7 @@ export const LogoutButton = styled.button`
   min-height: 70px;
   max-height: 80px;
   padding: 8px 16px;
+  transition: 0.2s ease-in-out;
   //Text
   color: #FFF;
   text-align: center;
@@ -229,7 +232,6 @@ export const LogoutButton = styled.button`
   font-style: normal;
   font-weight: 700;
   line-height: normal;
-
   &:hover {
     color: #375FC7;
     background-color: #081128;
@@ -249,6 +251,7 @@ export const ChangePasswordButton = styled.button`
   align-items: center;
   justify-content: center;
   min-width: 10px;
+  width: 270px;
   max-width: 300px;
   min-height: 70px;
   max-height: 80px;
@@ -261,11 +264,17 @@ export const ChangePasswordButton = styled.button`
   font-style: normal;
   font-weight: 700;
   line-height: normal;
+  transition: 0.2s ease-in-out;
 
-  &:hover {
+  &:hover:not(:disabled) {
     color: #375FC7;
     background-color: #081128;
     border-color: white;
+  }
+  &:disabled{
+    user-select: none;
+    cursor: not-allowed;
+    opacity: 0.7;
   }
 `;
 

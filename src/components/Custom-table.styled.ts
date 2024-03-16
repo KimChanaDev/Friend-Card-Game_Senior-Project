@@ -12,6 +12,7 @@ export const PageButton = styled.button`
   min-width: 150px;
   min-height: 30px;
   padding: 8px 16px;
+  transition: 0.2s ease-in-out;
   //Text
   color: #FFF;
   text-align: center;
@@ -40,6 +41,7 @@ export const CreateButton = styled.button`
   min-height: 30px;
   padding: 8px 16px;
   background-color: #04AA6D;
+  transition: 0.2s ease-in-out;
   //Text
   color: #FFF;
   text-align: center;

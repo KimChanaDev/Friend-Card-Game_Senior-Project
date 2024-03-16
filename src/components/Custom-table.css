@@ -161,23 +161,23 @@
   
   .match-detail span {
     margin-bottom: 10px;
-    
+    width: 230px;
    
   }
   .match-id {
     color: #ffffff;
     font-family: Inter;
-    font-size: 22px;
+    font-size: 20px;
     font-style: normal;
     font-weight: 700;
     line-height: normal;
-  
+    text-overflow:ellipsis;
   
   }
   .match-score {
     color: #FFFFFF99;
     font-family: Inter;
-    font-size: 20px;
+    font-size: 18px;
     font-style: normal;
     font-weight: 700;
     line-height: normal;
