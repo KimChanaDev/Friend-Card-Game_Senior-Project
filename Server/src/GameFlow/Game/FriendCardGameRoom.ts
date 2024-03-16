@@ -153,7 +153,7 @@ export class FriendCardGameRoom extends GameRoom
             GamesStore.getInstance.DeleteGameById(this.id);
         }
         const isNotGuestRoom: boolean = this.owner.UID !== GUEST_CONFIG.UID
-        if (isNotGuestRoom){
+        if (isNotGuestRoom && this.GetGameRoomState() === GAME_STATE.STARTED ){
             const matchModel: matchObject = {
                 id: this.id,
                 score: 0,
