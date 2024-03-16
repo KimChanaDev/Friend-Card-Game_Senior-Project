@@ -37,3 +37,14 @@ export class HistoryResponseDTO {
         }
     ) {}
 }
+
+export class ResetPasswordDTO {
+    constructor(
+        private respone: {
+            message: string,
+            data: {
+                email: string
+            }
+        }
+    ) {}
+}

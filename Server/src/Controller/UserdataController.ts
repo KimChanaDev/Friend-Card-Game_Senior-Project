@@ -6,7 +6,7 @@ import { UserDataModel } from "../Model/Entity/UserData.js";
 // import { InvalidCredentialsError, PasswordMismatchError, UserExistsError, InternalError, ResourceNotFoundError } from "../Error/ErrorException.js";
 // import { GenerateNewSaltAndHash, ValidatePassword } from "../GameLogic/Utils/Authorization/Password.js";
 import { IssueJWTwithEmail } from "../GameLogic/Utils/Authorization/JWT.js";
-import { HistoryResponseDTO, LoginWithEmailResponseDTO, ProfileResponseDTO } from "../Model/DTO/Response/LoginWithEmailResponseDTO.js";
+import { HistoryResponseDTO, LoginWithEmailResponseDTO, ProfileResponseDTO, ResetPasswordDTO } from "../Model/DTO/Response/LoginWithEmailResponseDTO.js";
 import { newFirebaseAuthMiddleware } from "../Middleware/FirebaseAuthMiddleware.js";
 import axios from "axios";
 import { isEmail } from "class-validator";
@@ -33,6 +33,7 @@ export class UserdataController extends ExpressRouter {
         this.router.get('/profile', JwtAuthMiddleware, this.Profile);
         this.router.get('/history', JwtAuthMiddleware, this.History);
         this.router.patch('/profile', JwtAuthMiddleware, this.UpdateProfile);
+        this.router.post('/resetpassword', JwtAuthMiddleware, this.ResetPassword);
         // this.router.patch('/history', this.UpdateHistory); //For testing
     }
     private async RegisterUser(req: Request, res: Response, next: NextFunction): Promise<void> {
@@ -583,6 +584,42 @@ export class UserdataController extends ExpressRouter {
                 } catch (deleteError) {
                     console.error('Error deleing user from Firebase', deleteError);
                 }
+            }
+        }
+    }
+
+    private async ResetPassword(req: Request, res: Response, next: NextFunction): Promise<void> {
+        try {
+            console.log('ResetPassword: ' + req);
+            const jwtPayload: string | JwtPayload | undefined = req.jwt;
+            if (jwtPayload && typeof jwtPayload === 'object') {
+                const user = await UserDataModel.findOne({
+                    firebaseId: jwtPayload.firebaseId,
+                });
+                if (!user) throw new Error('InvalidCredentialsError');
+                const { data: response } = await axios.post('https://identitytoolkit.googleapis.com/v1/accounts:sendOobCode?key=AIzaSyBCNyyTwo_RLCHrJD_xNnYHy8G67DDeKbw', {
+                    requestType: "PASSWORD_RESET",
+                    email: user.email,
+                })
+                const result = {
+                    message: 'reset password email was sent',
+                    data: {
+                        email: user.email,
+                    }
+                }
+                res.json(new ResetPasswordDTO(result))
+            } else {
+                console.log('Internal Error')
+                // return next(new InternalError());
+                throw new Error('InternalError')
+            }
+        } catch (err : any) {
+            if (err.message === 'InvalidCredentialsError') {
+                console.error(err.message);
+                res.status(401).json({ error: 'Invalid login credentials' });
+            } else {
+                console.error(err);
+                res.status(500).json({ error: 'Internal Server Error' });
             }
         }
     }
