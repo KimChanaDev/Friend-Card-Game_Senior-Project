@@ -110,7 +110,7 @@ export class FriendCardGameRoom extends GameRoom
             }else{
                 if (highestPoint < player.GetTotalGamePoint()) highestPoint = player.GetTotalGamePoint()
             }
-            result.push(new TotalGamePointModel(player.UID, player.username, player.GetTotalGamePoint(), false))
+            result.push(new TotalGamePointModel(player.UID, player.displayName, player.GetTotalGamePoint(), false))
         })
         result.forEach(e => {
             if(e.totalPoint === highestPoint) e.isHighestPoint = true
