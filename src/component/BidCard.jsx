@@ -2,8 +2,11 @@ import './BidCard.css'
 import {useState} from "react";
 import {useDispatch, useSelector} from "react-redux";
 import {EmitAuction} from "../store/SocketGameEmittersSlice.jsx";
+import Vfx from '../components/Vfx.jsx';
 
 function BidCard() {
+    const { playButton } = Vfx();
+
     const [selectedBid, setSelectedBid] = useState(null);
     const dispatch = useDispatch()
     const highestAuctionPoint = useSelector(state => state.socketGameListenersStore.highestAuctionPoint)
@@ -12,17 +15,18 @@ function BidCard() {
         setSelectedBid(bidValue);
     }
     function HandleConfirmClick () {
+        playButton();
         dispatch(EmitAuction({
             auctionPass: false,
             auctionPoint: selectedBid
         }))
     }
     function HandlePassClick(){
+        playButton();
         dispatch(EmitAuction({
             auctionPass: true
         }))
     }
-
 
     return (
         <>

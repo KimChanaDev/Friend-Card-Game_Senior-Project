@@ -3,7 +3,9 @@ import {useState} from "react";
 import {useDispatch, useSelector} from "react-redux";
 import {EmitSelectMainCard} from "../store/SocketGameEmittersSlice.jsx";
 import SOCKET_STATUS from "../enum/SocketStatusEnum.jsx";
+
 function SelectCard() {
+
     const cardValues = ['2', '3', '4', '5', '6', '7', '8', '9', 'J', 'Q', 'K', 'A'];
     const [friendCardSelected, setFriendCardSelected] = useState("")
     const [trumpSelected, setTrumpSelected] = useState("")

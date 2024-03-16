@@ -20,6 +20,8 @@ import PAGE_STATE from "../enum/PageStateEnum.jsx";
 import {useCookies} from "react-cookie";
 import COOKIE from "../enum/CookieNameEnum.jsx";
 
+import Vfx from "../components/Vfx.jsx";
+
 interface CreateGameModalProps {
   onBackdropClick: () => void;
   isModalVisible: boolean;
@@ -29,6 +31,8 @@ const CreateGameModal: React.FC<CreateGameModalProps> = ({
   isModalVisible,
   onBackdropClick,
 }) => {
+  const { playButton } = Vfx();
+
   const userStore = useSelector(state => state.userStore)
   const dispatch = useDispatch()
   const [lobbyname, setLobbyname] = useState("");
@@ -39,6 +43,7 @@ const CreateGameModal: React.FC<CreateGameModalProps> = ({
   );
   const CreateRequest = async () => {
     try{
+      playButton();
       const matchData = await PostCreateRoom(userStore.token, lobbyname, password)
       dispatch(
         ConnectToSocket({
@@ -65,6 +70,7 @@ const CreateGameModal: React.FC<CreateGameModalProps> = ({
     setLobbyname("")
   };
   const BackButton = () => {
+    playButton();
     setPassword("")
     setLobbyname("")
     onBackdropClick()

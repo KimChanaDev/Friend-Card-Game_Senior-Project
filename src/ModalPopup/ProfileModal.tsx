@@ -5,6 +5,7 @@ import { ChangePasswordButton, LogoutButton } from "./ModalPopup.styled";
 import { HistoryComponent } from "../components/Custom-table";
 import { UserState } from "../store/UserSlice";
 import UpdateProfileModal from "./UpdateProfileModal";
+import Vfx from "../components/Vfx";
 import { GetHistory, ChangePassword } from "../service/Api/ApiService";
 import { HistoryApiResponse, History, MatchDetail } from "../entities/response";
 import { useDispatch, useSelector } from "react-redux";
@@ -22,6 +23,8 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
   UserLogout,
   userData,
 }) => {
+  const { playButton } = Vfx();
+
   const [counter, setCounter] = React.useState(0);
   const [history, setData] = useState<History>();
   const [isUpdateProfileVisible, setIsUpdateProfileVisible] =

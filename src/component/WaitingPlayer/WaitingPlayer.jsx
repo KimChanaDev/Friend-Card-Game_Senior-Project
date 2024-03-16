@@ -9,6 +9,7 @@ import PAGE_STATE from "../../enum/PageStateEnum.jsx";
 import {EmitAddBotPlayer, EmitStartGame, ResetAllEmitterState} from "../../store/SocketGameEmittersSlice.jsx";
 import { AddNStartBotButton,QuitBotButton } from "./WaitingPlayer.styled.ts";
 import BOT_LEVEL from "../../enum/BotLevelEnum.jsx";
+import Vfx from "../../components/Vfx.jsx";
 import { useState } from 'react'
 import SelectBot from "../SelectBot/SelectBot.jsx";
 
@@ -16,14 +17,18 @@ WaitingPlayer.propTypes = {
     isOpen: PropTypes.bool,
 }
 export default function WaitingPlayer({isOpen}){
+    const { playButton } = Vfx();
+
     const isOwnerRoom = useSelector(state => state.gameStore.playersInGame?.thisPlayer?.isOwner) ?? false
     const playersInGame = useSelector(state => state.gameStore.playersInGame)
     const isJoinGuestMode = useSelector(state => state.gameStore.isJoinGuestMode);
     const dispatch = useDispatch()
+
    
     const [isClickAddbot,setIsClickAddbot] = useState(false)
     
     function AddBot(){
+        playButton();
         setIsClickAddbot(true)
         // const inputBotLevel = prompt('Bot Level Here (0 for Easy, 1 for Medium, 2 for Hard)');
         // const inputBotLevelNumber = parseInt(inputBotLevel)
@@ -52,10 +57,12 @@ export default function WaitingPlayer({isOpen}){
       }
 
     function StartGame() {
+        playButton();
         dispatch(EmitStartGame())
     }
 
     function QuitLobby(){
+        playButton();
         const response = confirm("Quit lobby")
         if(response) {
             dispatch(DisconnectFromSocket())

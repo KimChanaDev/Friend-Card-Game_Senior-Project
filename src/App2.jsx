@@ -1,13 +1,15 @@
 import {useDispatch, useSelector} from "react-redux";
 import PAGE_STATE from "./enum/PageStateEnum.jsx";
 import {useCookies} from "react-cookie";
-import {useEffect} from "react";
+import {useEffect, useState} from "react";
 import {Login} from "./store/UserSlice.tsx"
 import COOKIE from "./enum/CookieNameEnum.jsx";
 import Menu from "./interface/Menu.jsx"
 import InGameInterface2 from "./interface/InGameInterface2.jsx";
 import Loading from "./interface/Loading.jsx";
 import Mainmanu from './interface/Mainmanu.tsx';
+import { Volume2, VolumeX } from 'react-feather';
+import BGM from "./components/BGM.jsx";
 import { GetProfile } from "./service/Api/ApiService.jsx";
 
 
@@ -40,6 +42,7 @@ function App2() {
     function RenderPage(){
         switch (pageState) {
             case PAGE_STATE.MENU:
+                // return ( <Menu setCookie={setCookie} removeCookie={removeCookie}/> )
                 return (<Mainmanu setCookie={setCookie} removeCookie={removeCookie}/>)
             case PAGE_STATE.IN_GAME_INTERFACE:
                 return ( <InGameInterface2 /> )
@@ -51,6 +54,7 @@ function App2() {
     }
     return (
         <div className="app">
+            <BGM />
             {RenderPage()}
         </div>
     )

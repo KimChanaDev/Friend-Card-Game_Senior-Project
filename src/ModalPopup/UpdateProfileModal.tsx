@@ -17,6 +17,8 @@ import { UpdateData } from "../service/Api/ApiService";
 import { Login } from "../store/UserSlice.tsx";
 import { GetProfile } from "../service/Api/ApiService";
 import { LoginApiResponse } from "../entities/response";
+import Vfx from "../components/Vfx";
+
 interface UpdateProfileModalProps {
   onBackdropClick: () => void;
   isModalVisible: boolean;
@@ -25,13 +27,16 @@ const UpdateProfileModal: React.FC<UpdateProfileModalProps> = ({
   isModalVisible,
   onBackdropClick,
 }) => {
+  const { playButton } = Vfx()
+
   const dispatch = useDispatch();
   const userStore = useSelector((state) => state.userStore);
   const [NewDisplayname, setNewDisplayname] = useState<string | null>(null);
   const [imageUpload, setImageUpload] = useState<File | null>(null);
   const [imgaeDemo, setImageDemo] = useState<string | ArrayBuffer | null>(userStore.imagePath)
   const BackButton = () => {
-    setImageDemo(userStore.imagePath)
+    setImageDemo(userStore.imagePath);
+    playButton();
     onBackdropClick();
   };
   const FCG_Firestore = getStorage(firebaseApp);

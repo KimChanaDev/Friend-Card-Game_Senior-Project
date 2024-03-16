@@ -27,6 +27,8 @@ import {
   PlayerToggleReady, RoundFinished, SelectMainCard,
   StartGame, TrickFinished
 } from "../store/SocketGameListenersSlice.jsx";
+import { ChangeBGM } from "../store/BGMSlice.jsx";
+import Vfx from "../components/Vfx.jsx";
 
 Mainmanu.propTypes = {
   setCookie: PropTypes.func,
@@ -34,6 +36,10 @@ Mainmanu.propTypes = {
 };
 
 function Mainmanu({ setCookie, removeCookie }) {
+  const { playButton, playInterface } = Vfx();
+
+  // console.log(playButton)
+
   const handleButtonClick = (buttonIndex: number) => {
     switch (buttonIndex) {
       case 1:
@@ -49,6 +55,7 @@ function Mainmanu({ setCookie, removeCookie }) {
       default:
         console.log(`Error`);
     }
+    playButton()
   };
 
   // const [isModalVisible,setIsModalVisible] = useState<boolean>(false)
@@ -82,6 +89,13 @@ function Mainmanu({ setCookie, removeCookie }) {
   const toggleUserProfile = () => {
     setIsProfileVisible((wasModalVisible) => !wasModalVisible);
   };
+
+  useEffect(() => {
+    if (isLoginVisible || isSignUpVisible || isLobbyListVisible || isProfileVisible) {
+      playInterface();
+    }
+  }, [isLoginVisible, isSignUpVisible, isLobbyListVisible, isProfileVisible])
+
   const toggleHowtoPlay = () => {
     setIsHowtoPlayVisible((wasModalVisible) => !wasModalVisible);
   };
@@ -126,6 +140,7 @@ function Mainmanu({ setCookie, removeCookie }) {
   }
   const onLoginRequest: LoginFunction = async ({ password, login }) => {
     try {
+      playButton();
       onBackdropClick();
 
       const responseData: LoginApiResponse = await PostSignIn(login,password);
@@ -146,6 +161,7 @@ function Mainmanu({ setCookie, removeCookie }) {
     image,
   }) => {
     try {
+      playButton();
       onBackdropClick();
       const responseData: LoginApiResponse = await PostSignUp(username,password,email,con_password,image);
 
@@ -159,10 +175,15 @@ function Mainmanu({ setCookie, removeCookie }) {
   };
   const userLogout = () => {
     console.log("Logout");
+    playButton();
     dispatch(Logout());
     removeCookie(COOKIE.name);
     onBackdropClick();
   };
+
+  useEffect(() => {
+    dispatch(ChangeBGM("Menu"))
+  }, [])
 
   return (
     <div className="Mainmanu">

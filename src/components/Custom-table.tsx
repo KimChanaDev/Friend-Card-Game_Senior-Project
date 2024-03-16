@@ -6,6 +6,8 @@ import { Header1, Header2 } from "../ModalPopup/ModalPopup.styled";
 import JoinGameModal from "../ModalPopup/JoinGameModal";
 import CreateGameModal from "../ModalPopup/CreateGameModal";
 import React from "react";
+
+import Vfx from "./Vfx";
 import { MatchDetail } from "../entities/response";
 interface Props {
   headers: TableHeader[];
@@ -14,6 +16,8 @@ interface Props {
 }
 
 function CustomTable({ headers, data, onFilterIdChange }: Props) {
+  const { playButton } = Vfx();
+
   const [selectGame, setSelectGame] = React.useState<TableData>(); 
   const [isJoinVisible, setIsJoinVisible] = useState<boolean>(false);
   const [isCreateVisible, setIsCreateVisible] = useState<boolean>(false);
@@ -28,6 +32,7 @@ function CustomTable({ headers, data, onFilterIdChange }: Props) {
     setIsJoinVisible(false)
   };
   const createButtonClick =() =>{
+    playButton();
     setIsJoinVisible(false)
     setIsCreateVisible(true)
   }
@@ -68,12 +73,15 @@ function CustomTable({ headers, data, onFilterIdChange }: Props) {
     ));
   }
   const handleNextPage = () => {
+    playButton();
     setCurrentPage((prevPage) =>
       prevPage < totalPages ? prevPage + 1 : prevPage
     );
   };
 
   const handlePrevPage = () => {
+    playButton();
+    console.log('test')
     setCurrentPage((prevPage) => (prevPage > 1 ? prevPage - 1 : prevPage));
   };
 
