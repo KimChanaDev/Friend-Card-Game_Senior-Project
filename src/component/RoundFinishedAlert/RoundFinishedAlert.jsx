@@ -46,13 +46,13 @@ export default function RoundFinishedAlert() {
     }
     return (
         <div className="popup">
-            <div className="popup-inner">
-                <h1>{`Round ${currentRoundResult?.roundNumber}`}</h1>
-                <h1>{`You ${ IsWinner() ? "Win" : "Lose" }`}</h1>
+            <div className="popup-inner" style={{"textAlign":"center"}}>
+                <h1 style={{ "margin-bottom": 0 }}>{`Round ${currentRoundResult?.roundNumber}`}</h1>
+                <div style={{"display" : "flex", "justify-content": "center", "align-items": "center"}}>
+                    <h1 >{`You `}</h1>{IsWinner() ? <h1 style={{"color":"green"}}>{"Win"}</h1> : <h1 style={{"color":"red"}}>{"Lose"}</h1>}
+                </div>
                 <h2>{`Cards Point Received: ${FindCardsPointReceive()}`}</h2>
                 <h2>{`Game Point Received: ${FindGamePointReceive()}`}</h2>
-                <hr/>
-                <hr/>
             </div>
         </div>
     )
