@@ -2,7 +2,7 @@ import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import { socketClient} from "../main.jsx";
 import SOCKET_EVENT from "../enum/SocketEventEnum.jsx";
 import SOCKET_STATUS from "../enum/SocketStatusEnum.jsx";
-import {EmitGetGameStateFromServer, SetGameState} from "./SocketGameEmittersSlice.jsx";
+import {EmitGetGameStateFromServer, SetGameState, ResetAllEmitterState} from "./SocketGameEmittersSlice.jsx";
 import {
     AddPlayersInGame,
     RemovePlayersInGame,
@@ -17,7 +17,7 @@ import {SetPage} from "./PageStateSlice.jsx";
 import PAGE_STATE from "../enum/PageStateEnum.jsx";
 import {Logout} from "./UserSlice.tsx";
 import DISCONNECT_REASON from "../enum/DisconnectReason.jsx";
-import { ResetAllEmitterState } from "../store/SocketGameEmittersSlice.jsx";
+import {UnreadyPlayersForNewGame} from "./GameSlice.jsx";
 
 export const PlayerToggleReady = createAsyncThunk(
     'toggleReady',
@@ -153,6 +153,7 @@ export const GameFinished = createAsyncThunk(
     async function (_, { getState, dispatch }) {
         return await socketClient.On(SOCKET_EVENT.GAME_FINISHED, (result) =>{
             dispatch({ type: 'socketGameListener/GameFinished', payload: { result: result } })
+            dispatch(UnreadyPlayersForNewGame())
         });
     }
 );

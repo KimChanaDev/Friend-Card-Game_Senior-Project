@@ -118,8 +118,12 @@ export default function  PlayerCard2({ name, isInLobby, isLeft, isBidding, isMax
     }
   }
   function HandleKickPlayer(){
+<<<<<<< HEAD
     playButton()
     const response = confirm(`Kick player ${userId}?`)
+=======
+    const response = confirm(`Kick player ${name}?`)
+>>>>>>> Frontend-tsx
     if(response){
       dispatch(EmitKickPlayer({ userId: userId}))
     }
@@ -173,7 +177,7 @@ export default function  PlayerCard2({ name, isInLobby, isLeft, isBidding, isMax
         {userId !== ownerId && isInLobby && !isLeft && isOwnerRoom && <button onClick={() => HandleKickPlayer()} className='kick_button_right' style={{ zIndex: 9999 }}>❌</button>}
 
         {isBidding &&
-          <div className='bidScore' style={{ ...bidShowPosition,backgroundColor: isMax && '#FFA1A1' }}>
+          <div className='bidScore' style={{ ...bidShowPosition,backgroundColor: isMax && '#FFA1A1', "border": bidScore ? "2px solid #000": "" }}>
             {bidScore}
           </div>
         }

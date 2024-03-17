@@ -4,7 +4,6 @@ import {useCookies} from "react-cookie";
 import {useEffect, useState} from "react";
 import {Login} from "./store/UserSlice.tsx"
 import COOKIE from "./enum/CookieNameEnum.jsx";
-import Menu from "./interface/Menu.jsx"
 import InGameInterface2 from "./interface/InGameInterface2.jsx";
 import Loading from "./interface/Loading.jsx";
 import Mainmanu from './interface/Mainmanu.tsx';
