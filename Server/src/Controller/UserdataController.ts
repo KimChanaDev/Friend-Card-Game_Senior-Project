@@ -227,6 +227,15 @@ export class UserdataController extends ExpressRouter {
                         imagePath: updatedUser.imagePath,
                     }
                 }
+                if(SocketHandler.HasUserIdInConnectedUsers(updatedUser.UID)){
+                    console.log("at check HasUserId")
+                    const gameRoomIdAreConnect: string | undefined = SocketHandler.GetGameId(updatedUser.UID)
+                    if(gameRoomIdAreConnect){
+                        const gameRoom: GameRoom = GamesStore.getInstance.GetGameById(gameRoomIdAreConnect) as GameRoom;
+                        const player: Player = gameRoom.GetPlayerByUID(updatedUser.UID) as Player;
+                        SocketHandler.DisconnectedPlayer(gameRoom, player, "You have been double logged in", undefined)
+                    }
+                }
                 res.json(new LoginWithEmailResponseDTO(result))
             } else {
                 const { data: response } = await axios.post('https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=AIzaSyBCNyyTwo_RLCHrJD_xNnYHy8G67DDeKbw', {
@@ -270,12 +279,8 @@ export class UserdataController extends ExpressRouter {
                     console.log("at check HasUserId")
                     const gameRoomIdAreConnect: string | undefined = SocketHandler.GetGameId(updatedUser.UID)
                     if(gameRoomIdAreConnect){
-                        console.log("at check gameRoomIdAreConnect")
                         const gameRoom: GameRoom = GamesStore.getInstance.GetGameById(gameRoomIdAreConnect) as GameRoom;
                         const player: Player = gameRoom.GetPlayerByUID(updatedUser.UID) as Player;
-                        console.log("gameRoom: " + gameRoom)
-                        console.log("player: " + player)
-                        console.log("gameRoomIdAreConnect: " + gameRoomIdAreConnect)
                         SocketHandler.DisconnectedPlayer(gameRoom, player, "You have been double logged in", undefined)
                     }
                 }
