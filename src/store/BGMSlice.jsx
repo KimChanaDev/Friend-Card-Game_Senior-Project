@@ -8,14 +8,14 @@ export const BGMSlice = createSlice({
     name: "BGM",
     initialState,
     reducers: {
-        ChangeBGM: (state, action) => {
-            state.song = action.payload;
-        }
+        // ChangeBGM: (state, action) => {
+        //     state.song = action.payload;
+        // }
     }
 })
 
 export const {
-    ChangeBGM
+    // ChangeBGM
 } = BGMSlice.actions
 
 export default BGMSlice.reducer

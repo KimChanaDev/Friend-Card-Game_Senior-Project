@@ -42,8 +42,9 @@ export default function  PlayerCard2({ name, isInLobby, isLeft, isBidding, isMax
   const roundFinishedResult = useSelector(state => state.socketGameListenersStore.roundFinishedResult)
   const [isShowEmojiReceived, setIsShowEmojiReceived] = useState(false)
   const [timerId, setTimerId] = useState(null)
-  
-  const { playEmoji } = Vfx()
+  // const highestAuctionPoint = useSelector(state => state.socketGameListenersStore.highestAuctionPoint)
+
+  const { playEmoji, playButton } = Vfx()
 
   /// Show Emoji
   useEffect(() => {
@@ -71,11 +72,20 @@ export default function  PlayerCard2({ name, isInLobby, isLeft, isBidding, isMax
             else{
               dispatch(SetPlayerTimeout({time: decreaseTimeout}))
             }
+            // if (decreaseTimeout === 25 && !(gameRoundState === GAME_STATE.STARTED && gameplayState === GAME_STATE.NOT_STARTED)) {
+            //   playTimeout()
+            // }
           }, 1000) // 1 sec
       )
       setTimerId(newTimerId);
     }
   }, [playerTimeoutInStore]);
+
+  // useEffect(() => {
+  //   if (highestAuctionPoint) {
+  //     stopTimeout()
+  //   }
+  // }, [highestAuctionPoint])
 
   function HandleReady(){ dispatch(EmitToggleReady()) }
   function FindScore(){
@@ -197,9 +207,7 @@ export default function  PlayerCard2({ name, isInLobby, isLeft, isBidding, isMax
               {GenerateEmoji()}
             </div>
         }
-
       </section>
     </>
-
   )
 }

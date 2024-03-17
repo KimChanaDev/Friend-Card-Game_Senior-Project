@@ -12,6 +12,7 @@ import BOT_LEVEL from "../../enum/BotLevelEnum.jsx";
 import Vfx from "../../components/Vfx.jsx";
 import { useState } from 'react'
 import SelectBot from "../SelectBot/SelectBot.jsx";
+import { ChangeBGM } from "../../store/UserSlice.tsx";
 
 WaitingPlayer.propTypes = {
     isOpen: PropTypes.bool,
@@ -58,6 +59,7 @@ export default function WaitingPlayer({isOpen}){
 
     function StartGame() {
         playButton();
+        dispatch(ChangeBGM("InGame"))
         dispatch(EmitStartGame())
     }
 

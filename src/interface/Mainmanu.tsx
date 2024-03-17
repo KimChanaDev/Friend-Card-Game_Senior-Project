@@ -27,7 +27,8 @@ import {
   PlayerToggleReady, RoundFinished, SelectMainCard,
   StartGame, TrickFinished
 } from "../store/SocketGameListenersSlice.jsx";
-import { ChangeBGM } from "../store/BGMSlice.jsx";
+// import { ChangeBGM } from "../store/BGMSlice.jsx";
+import { ChangeBGM } from "../store/UserSlice.tsx";
 import Vfx from "../components/Vfx.jsx";
 
 Mainmanu.propTypes = {
