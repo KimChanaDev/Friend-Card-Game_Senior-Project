@@ -187,7 +187,7 @@ export class FriendCardGameRoom extends GameRoom
     }
     private SetUnreadyToAllPlayer(): void{
         this.playersInGame.forEach((player: FriendCardPlayer) => {
-            if(!player.GetIsDisconnected() || !player.isOwner){
+            if(!player.GetIsDisconnected() && !player.isOwner){
                 player.SetIsReady(false)
             }
         })
