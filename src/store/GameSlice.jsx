@@ -88,6 +88,14 @@ export const gameSlice = createSlice({
         SetIsJoinGuestMode: (state, action) => {
             console.log("isGuest: " + action.payload.isGuest)
             state.isJoinGuestMode = action.payload.isGuest
+        },
+        UnreadyPlayersForNewGame: (state) => {
+            if(state.playersInGame){
+                state.playersInGame.players.forEach(player => {
+                    if(!player.isOwner && !player.isBot) player.isReady = false
+                })
+                if(!state.playersInGame.thisPlayer.isOwner && !state.playersInGame.thisPlayer.isBot) state.playersInGame.thisPlayer.isReady = false
+            }
         }
     }
 })
@@ -101,5 +109,6 @@ export const {
     SetNewHostRoom,
     UpdatePlayerInGame,
     SetIsJoinGuestMode,
+    UnreadyPlayersForNewGame
 } = gameSlice.actions
 export default gameSlice.reducer

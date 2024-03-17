@@ -11,27 +11,28 @@ export default function TrickFinishedAlert(){
     }
 
     function mapCardIdtoSemanticName(cardID){
-        if (cardID.charAt(1) === 'C'){
-            return cardID.charAt(0) + ' ♣️'
+        if (cardID?.charAt(1) === 'C'){
+            return cardID?.charAt(0) + ' ♣️'
         }
             
-        else if (cardID.charAt(1) === 'S'){
-            return cardID.charAt(0) + ' ♠️'
+        else if (cardID?.charAt(1) === 'S'){
+            return cardID?.charAt(0) + ' ♠️'
         }
             
-        else if (cardID.charAt(1) === 'D'){
-            return cardID.charAt(0) +' ♦'
+        else if (cardID?.charAt(1) === 'D'){
+            return cardID?.charAt(0) +' ♦'
         }
             
-        else if (cardID.charAt(1) === 'H')
-            return cardID.charAt(0) + ' ♥️'
+        else if (cardID?.charAt(1) === 'H')
+            return cardID?.charAt(0) + ' ♥️'
     }
     return (
         <div className="popup">
             <div className="popup-inner" style={{"border": getBorderColor(trickFinishedResult?.orderWinnerPosition) ,
-                                                "boxShadow":getShadowColor(trickFinishedResult?.orderWinnerPosition)}} >
-                <h2>{`Trick number : ${(trickFinishedResult?.trickNumber ?? 998) + 1}`}</h2>
-                <h2>{`Winner name : ${trickFinishedResult?.winnerName}`}</h2>
+                                                "boxShadow":getShadowColor(trickFinishedResult?.orderWinnerPosition),
+                                                "textAlign":"center"}} >
+                <h1>{`Trick ${(trickFinishedResult?.trickNumber ?? 998) + 1}`}</h1>
+                <h2>{`Winner Name : ${trickFinishedResult?.winnerName}`}</h2>
                 <h2>{`Winner Card : ${mapCardIdtoSemanticName(trickFinishedResult?.winnerCardId)}`}</h2>
                 <h2 style={{"color":"red"}}>{`Point Received : ${trickFinishedResult?.winnerReceivePoint}`}</h2>
 
