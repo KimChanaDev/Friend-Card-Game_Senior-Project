@@ -109,11 +109,11 @@ export default function InGameInterface2()
 
     const [disableTimer, setDisableTimer] = useState(false)
 
-    useEffect(() => {
-        if (isAfterMainCardSelected) { 
-            dispatch(ChangeBGM("InGame"))
-        }
-    }, [isAfterMainCardSelected])
+    // useEffect(() => {
+    //     if (isAfterMainCardSelected) { 
+    //         dispatch(ChangeBGM("InGame"))
+    //     }
+    // }, [isAfterMainCardSelected])
 
     useEffect(() => {
         dispatch(ChangeBGM("InGameIntro"))
@@ -130,6 +130,7 @@ export default function InGameInterface2()
     useEffect(() => {
         if (cardsInField && cardsInField?.length !== 0) {
             playFlipCard()
+            // stopTimeout()
         }
     }, [cardsInField])
 

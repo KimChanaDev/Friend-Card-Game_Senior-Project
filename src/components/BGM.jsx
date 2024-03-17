@@ -95,7 +95,7 @@ const BGM = () => {
     }
 
     return (
-        <div className="volume-and-text">
+        <div className="volume-and-text" style={{ marginLeft: '5px' }}>
             {BGMState.volume === 0 ? (
                 <VolumeX onClick={VolumeAdjust} />
             ) : BGMState.volume <= 0.25 ? (

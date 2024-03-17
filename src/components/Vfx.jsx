@@ -17,13 +17,17 @@ const Vfx = () => {
     const [playFriend] = useSound("Friend_appear.mp3", { volume: BGMState.volume, interrupt, soundEnabled })
     const [playInterface] = useSound("Interface.mp3", { volume: BGMState.volume, interrupt, soundEnabled })
 
+    const [playTimeout, { stop: stopTimeout }] = useSound("Clock.mp3", { volume: BGMState.volume, interrupt, soundEnabled, playbackRate: 2 })
+
     const exportsFuction = {
         playButton,
         playFlipCard,
         playEmoji,
         playTrick,
         playFriend,
-        playInterface
+        playInterface,
+        playTimeout,
+        stopTimeout
     }
 
     return exportsFuction
