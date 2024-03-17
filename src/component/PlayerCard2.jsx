@@ -43,7 +43,7 @@ export default function  PlayerCard2({ name, isInLobby, isLeft, isBidding, isMax
   const [isShowEmojiReceived, setIsShowEmojiReceived] = useState(false)
   const [timerId, setTimerId] = useState(null)
   
-  const { playEmoji } = Vfx()
+  const { playEmoji, playButton } = Vfx()
 
   /// Show Emoji
   useEffect(() => {
@@ -118,6 +118,7 @@ export default function  PlayerCard2({ name, isInLobby, isLeft, isBidding, isMax
     }
   }
   function HandleKickPlayer(){
+    playButton()
     const response = confirm(`Kick player ${userId}?`)
     if(response){
       dispatch(EmitKickPlayer({ userId: userId}))

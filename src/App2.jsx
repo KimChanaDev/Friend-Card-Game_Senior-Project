@@ -12,7 +12,6 @@ import { Volume2, VolumeX } from 'react-feather';
 import BGM from "./components/BGM.jsx";
 import { GetProfile } from "./service/Api/ApiService.jsx";
 
-
 function App2() {
 
     const pageState = useSelector(state => state.pageStateStore.pageState)

@@ -1,137 +1,118 @@
-import { Volume1, Volume2, VolumeX } from 'react-feather';
-import { useState, useEffect } from 'react';
+import { useDispatch, useSelector } from "react-redux"
+import { useState, useEffect } from "react"
+import { ChangeVolume } from '../store/UserSlice.tsx';
 import { Slider } from '@mui/material';
-import { useSelector } from 'react-redux';
+import { Volume1, Volume2, VolumeX } from 'react-feather';
+import useSound from 'use-sound'
+
 import './MovingText.css'
 
-import useSound from 'use-sound';
-
 const BGM = () => {
-    // const [muted, setMuted] = useState(true)
-    const BGMState = useSelector(state => state.BGMStore)
+    const dispatch = useDispatch()
+    const BGMState = useSelector(state => state.userStore)
 
-    const [volume, setVolume] = useState(0)
-    const [loop, setLoop] = useState(true)
-    const [interrupt, setInterrupt] = useState(true)
-    // url dynamic ไม่ได้ (ไปอ่านใน github->issue เอาเอง (npm use-sound))
-    // const [play, { sound }] = useSound(BGMState.song, { volume, interrupt, loop, soundEnabled })
-    const [menuSelector, setMenuSelector] = useState(0)
-
-    const [currentTime, setCurrentTime] = useState(0);
-
-    const onend = () => {
-        setMenuSelector(Math.floor(Math.random() * 3) + 1)
-    }
-
-    const [playMenu1, { stop: stopMenu1 }] = useSound("Main menu (Dunes).mp3", { volume, interrupt, onend })
-    const [playMenu2, { stop: stopMenu2 }] = useSound("Honeydew Cabin.mp3", { volume, interrupt, onend })
-    const [playMenu3, { stop: stopMenu3 }] = useSound("Honeydew Snow.mp3", { volume, interrupt, onend })
-
-    // console.log(duration1 + " " + duration2 + " " + duration3)
-
-    const [playInGameIntro, { stop: stopInGameIntro }] = useSound("InGameIntro.wav", { volume: volume / 8, interrupt, loop })
-    const [playInGame, { stop: stopInGame, sound: soundInGame }] = useSound("InGame.mp3", { volume: volume / 4, interrupt, loop })
+    const loop = true
+    const interrupt = true
 
     const [prevVolume, setPrevVolume] = useState(0.5)
-
     const [displayName, setDisplayName] = useState("")
 
     const stopAllSong = () => {
-        stopMenu1();
-        stopMenu2();
-        stopMenu3();
-        stopInGameIntro();
-        stopInGame();
+        return new Promise((resolve) => {
+            console.log("Stop all song")
+            stopMenu1()
+            stopMenu2()
+            stopMenu3()
+            stopInGameIntro()
+            stopInGame()
+            resolve()
+        })
     }
 
-    useEffect(() => {
-        switch (menuSelector) {
-            case 1:
-                setDisplayName("Main menu (Dunes).mp3")
-                playMenu1()
-                // setCurrentTime(duration1)
-                break;
-            case 2:
-                setDisplayName("Honeydew Cabin.mp3")
-                playMenu2()
-                // setCurrentTime(duration2)
-                break;
-            case 3:
-                setDisplayName("Honeydew Snow.mp3")
-                playMenu3()
-                // setCurrentTime(duration3)
-                break;
-            default:
-                break;
-        }
-    }, [menuSelector])
+    const playMenuBGM = async (name) => {
+        console.log(name)
+        setTimeout(() => {
+            stopAllSong()
+            console.log("Randomly choose song")
+            const randomSelector = Math.floor(Math.random() * 3) + 1
+            switch (randomSelector){
+                case 1:
+                    console.log("Playing Honeydew Bark.mp3")
+                    setDisplayName("Honeydew Bark.mp3")
+                    playMenu1()
+                    break;
+                case 2:
+                    console.log("Playing Honeydew Cabin.mp3")
+                    setDisplayName("Honeydew Cabin.mp3")
+                    playMenu2()
+                    break;
+                case 3:
+                    console.log("Playing Honeydew Snow.mp3")
+                    setDisplayName("Honeydew Snow.mp3")
+                    playMenu3()
+                    break;
+                default:
+                    console.log("Unknow song")
+                    break;
+            }
+        }, 1000)
+    }
+
+    const [playMenu1, { stop: stopMenu1, duration: duration1 }] = useSound("Honeydew Bark.mp3", { volume: BGMState.volume, interrupt, onend: () => playMenuBGM("1") })
+    const [playMenu2, { stop: stopMenu2, duration: duration2 }] = useSound("Honeydew Cabin.mp3", { volume: BGMState.volume, interrupt, onend: () => playMenuBGM("2") })
+    const [playMenu3, { stop: stopMenu3, duration: duration3 }] = useSound("Honeydew Snow.mp3", { volume: BGMState.volume, interrupt, onend: () => playMenuBGM("3") })
+    const [playInGameIntro, { stop: stopInGameIntro, duration: duration4 }] = useSound("Shuffling.mp3", { volume: BGMState.volume / 4, interrupt, loop })
+    const [playInGame, { stop: stopInGame, sound: soundInGame, duration: duration5 }] = useSound("Honeydew Hideaway.mp3", { volume: BGMState.volume, interrupt, loop })
 
     useEffect(() => {
-        stopAllSong();
-        if (BGMState.song === "Menu" && playMenu1 && playMenu2 && playMenu3) {
-            // setDisplayName("Main Menu (Dunes)")
-            // stopInGame();
-            // stopInGameIntro();
-            // playMenu1()
-            onend()
-        } else if (BGMState.song === "InGame" && playInGame) {
-            setDisplayName("Main Menu (Dunes)")
-            // stopMenu();
-            // stopInGameIntro();
-            playInGame();
-            soundInGame.fade(volume / 8, volume / 4, 10000);
-        } else if (BGMState.song === "InGameIntro" && playInGameIntro) {
-            setDisplayName("Main Menu (Dunes)")
-            // stopMenu();
-            // stopInGame();
-            playInGameIntro();
+        const playSongs = async () => {
+            if (BGMState.song === "Menu" && duration1 && duration2 && duration3) {
+                await playMenuBGM("First")
+            } else if (BGMState.song === "InGameIntro" && duration4) {
+                await stopAllSong()
+                setDisplayName("Shuffling.mp3")
+                playInGameIntro()
+            } else if (BGMState.song === "InGame" && duration5) {
+                await stopAllSong()
+                setDisplayName("Honeydew Hideaway.mp3")
+                playInGame()
+            }
         }
-    }, [BGMState.song, playMenu1, playMenu2, playMenu3, playInGameIntro, playInGame])
+        playSongs()
+    }, [BGMState.song, duration1, duration2, duration3, duration4, duration5])
 
-    // useEffect(() => {
-    //     if (BGMState.song) {
-    //         console.log("Current BGM: " + BGMState.song)
-    //         play();
-    //     }
-    // }, [play, sound, BGMState])
-    
     const VolumeAdjust = () => {
-        if (volume == 0) {
-            // setMuted(false);
-            // setVolume(0.75);
-            setVolume(prevVolume);
+        if (BGMState.volume == 0) {
+            dispatch(ChangeVolume(prevVolume))
         } else {
-            // setMuted(true);
-            setPrevVolume(volume)
-            setVolume(0);
+            setPrevVolume(BGMState.volume)
+            dispatch(ChangeVolume(0))
         }
     }
 
     const handleChange = (event, newValue) => {
-        setVolume(newValue);
+        dispatch(ChangeVolume(newValue))
     }
 
     return (
-        <>
-            <div className="volume-and-text">
-                {volume === 0 ? (
-                    <VolumeX onClick={VolumeAdjust} />
-                ) : volume <= 0.25 ? (
-                    <Volume1 onClick={VolumeAdjust} />
-                ) : (
-                    <Volume2 onClick={VolumeAdjust} />
-                )}
-                <p className="moving-text">Now playing: <span className="song-title">{displayName}</span></p>
-            </div>
-            
+        <div className="volume-and-text">
+            {BGMState.volume === 0 ? (
+                <VolumeX onClick={VolumeAdjust} />
+            ) : BGMState.volume <= 0.25 ? (
+                <Volume1 onClick={VolumeAdjust} />
+            ) : (
+                <Volume2 onClick={VolumeAdjust} />
+            )}
+            <p className="moving-text">Now playing: <span className="song-title">{displayName}</span></p>
             <Slider
                 size="small"
-                value={volume}
+                value={BGMState.volume}
                 max={0.5}
                 step={0.01}
                 onChange={handleChange}
+                style={{ width: '5%', marginLeft: '5px' }}
             />
-        </>
+        </div>
     )
 }
 

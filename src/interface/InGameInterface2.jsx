@@ -26,7 +26,8 @@ import {ClearSelectMainCardStatus, EmitCardPlayed} from "../store/SocketGameEmit
 import {ClearCardInField, ClearStateForNextRound} from "../store/SocketGameListenersSlice.jsx";
 import GAME_DELAY_ENUM from "../enum/GameDelayEnum.jsx";
 import GUEST_CONFIG from "../enum/GuestConfigEnum.jsx";
-import { ChangeBGM } from '../store/BGMSlice.jsx';
+// import { ChangeBGM } from '../store/BGMSlice.jsx';
+import { ChangeBGM } from '../store/UserSlice.tsx';
 import Vfx from '../components/Vfx.jsx';
 
 export default function InGameInterface2()
@@ -125,6 +126,12 @@ export default function InGameInterface2()
             setIsShowScoreCard(true)
         }
     }, [scoreCardIds]);
+
+    useEffect(() => {
+        if (cardsInField && cardsInField?.length !== 0) {
+            playFlipCard()
+        }
+    }, [cardsInField])
 
     /// Show Summary Score, RoundFinishedAlert when Finished Round
     useEffect(() => {

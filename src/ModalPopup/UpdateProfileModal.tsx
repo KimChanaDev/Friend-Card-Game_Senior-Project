@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import ModalRWD from "./ModalRWD";
 import InputWithIcon from "./InputWithIcon";
 import { InputTitle, InputContainer } from "./ModalPopup.styled";
@@ -27,7 +27,7 @@ const UpdateProfileModal: React.FC<UpdateProfileModalProps> = ({
   isModalVisible,
   onBackdropClick,
 }) => {
-  const { playButton } = Vfx()
+  const { playButton, playInterface } = Vfx()
 
   const dispatch = useDispatch();
   const userStore = useSelector((state) => state.userStore);
@@ -69,6 +69,7 @@ const UpdateProfileModal: React.FC<UpdateProfileModalProps> = ({
     });
   };
   const ConfirmUpdate = async () => {
+    playButton()
     const newData: { imagePath?: string; displayName?: string } = {};
     if (imageUpload === null && NewDisplayname === "") {
       onBackdropClick();
@@ -115,6 +116,12 @@ const UpdateProfileModal: React.FC<UpdateProfileModalProps> = ({
     }
     
   };
+
+  useEffect(() => {
+    if (isModalVisible) {
+      playInterface()
+    }
+  }, [isModalVisible])
 
   return (
     <ModalRWD

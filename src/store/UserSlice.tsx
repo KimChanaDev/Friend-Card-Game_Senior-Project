@@ -6,6 +6,8 @@ export interface UserState {
   token: string | undefined;
   imagePath: string | undefined;
   isLogIn: boolean;
+  song: string | undefined;
+  volume: number;
 }
 
 export interface LoginPayload {
@@ -21,6 +23,8 @@ const initialState: UserState = {
   token: undefined,
   imagePath: undefined,
   isLogIn: false,
+  song: undefined,
+  volume: 0
 };
 
 export const userSlice = createSlice({
@@ -42,8 +46,14 @@ export const userSlice = createSlice({
       state.imagePath = undefined;
       state.isLogIn = false;
     },
+    ChangeBGM: (state, action) => {
+      state.song = action.payload;
+    },
+    ChangeVolume: (state, action) => {
+      state.volume = action.payload;
+    }
   },
 });
 
-export const { Login, Logout } = userSlice.actions;
+export const { Login, Logout, ChangeBGM, ChangeVolume } = userSlice.actions;
 export default userSlice.reducer;
