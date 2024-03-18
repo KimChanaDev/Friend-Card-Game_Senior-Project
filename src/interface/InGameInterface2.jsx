@@ -109,7 +109,7 @@ export default function InGameInterface2()
     const [isShowScoreCard, setIsShowScoreCard] = useState(false)
     const [isShowGameFinishedPopup, setIsShowGameFinishedPopup] = useState(false)
     const [disableTimer, setDisableTimer] = useState(false)
-    const [isHowtoPlayVisible, setHowtoPlayVisible] = useState(false)
+    const [isHowtoPlayVisible, setHowtoPlayVisible] = useState(true)
     const onBackdropClick = () => {
         setHowtoPlayVisible(false)
       };

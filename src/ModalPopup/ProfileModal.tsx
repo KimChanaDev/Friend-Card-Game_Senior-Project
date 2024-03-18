@@ -49,18 +49,19 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
   const userStore = useSelector((state) => state.userStore);
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const responseData: HistoryApiResponse = await GetHistory(
-          userStore.token
-        );
-        setData(responseData.response.data);
-      } catch (error) {
-        console.error("Error fetching history data:", error);
-      }
-    };
-
-    fetchData();
+    if (userStore.token){
+      const fetchData = async () => {
+        try {
+          const responseData: HistoryApiResponse = await GetHistory(
+            userStore.token
+          );
+          setData(responseData.response.data);
+        } catch (error) {
+          console.error("Error fetching history data:", error);
+        }
+      };
+      fetchData();
+    }
   }, [isModalVisible]);
 
   useEffect(() => {
