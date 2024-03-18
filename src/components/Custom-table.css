@@ -1,18 +1,22 @@
 .custom-table {
-    width: 1000px;
+    width: 100%;
     background-color: white;
     border-collapse: separate;
     border: 1px solid #dddddd;
-    /* color: black; */
     text-align: center;
     -ms-user-select: none;
     -webkit-user-select: none;
     user-select: none;
 }
+.custom-table table{
+    width: 100%;
+    background-color: white;
+}
 .custom-table thead{
     padding: 5px;
     background-color: #153486;
     color: white;
+    width: 100%;
 } 
 .custom-table tbody tr td {
     overflow-x: hidden;
@@ -79,6 +83,7 @@
     font-size: 30px;
     font-style: normal;
     font-weight: 600;
+    width: 1000px;
 }
 .create-footer{
     /* display: flex; */

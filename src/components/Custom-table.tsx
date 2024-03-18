@@ -106,10 +106,13 @@ function CustomTable({ headers, data, onFilterIdChange }: Props) {
           </form>
         </div>
       </div>
-      <table className="custom-table">
-        <thead>{renderHeader(headers)}</thead>
-        <tbody>{renderTableData(currentPageData)}</tbody>
-      </table>
+      <div className="custom-table">
+        <table >
+          <thead>{renderHeader(headers)}</thead>
+          <tbody>{renderTableData(currentPageData)}</tbody>
+        </table>
+      </div>
+      
       <div className="table-footer">
         <div className="create-footer">
           <CreateButton onClick={createButtonClick}>Create</CreateButton>

@@ -9,6 +9,7 @@ import {SetPage} from "../store/PageStateSlice.jsx";
 import PAGE_STATE from "../enum/PageStateEnum.jsx";
 import {useCookies} from "react-cookie";
 import COOKIE from "../enum/CookieNameEnum.jsx";
+import "./LobbyListmodal.css"
 
 
 interface LobbyModalProps{
@@ -84,9 +85,9 @@ const LobbyModal: React.FC<LobbyModalProps> =({isModalVisible,onBackdropClick,us
         header2=''
         message=' '
         content = {
-            <> 
+            <div className='lobbylist'> 
                  <CustomTable headers={lobbyTableHeaders} data={games.filter(game => game.id.includes(filterId))} onFilterIdChange={handleFilterIdChange}/>
-            </>
+            </div>
         }
     />)
 }
