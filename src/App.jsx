@@ -9,7 +9,7 @@ import FirebaseInterface from "./interface/FirebaseInterface"
 
 // import CardTable from "./component/CardTable"
 function App() {  
-  console.log('haha')
+  // console.log('haha')
 
   return (
     <>

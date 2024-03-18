@@ -65,7 +65,7 @@ const CreateGameModal: React.FC<CreateGameModalProps> = ({
         alert(`Create room failed: ${error}`)
       }
     }
-    console.log(lobbyname,password,userStore)
+    // console.log(lobbyname,password,userStore)
     setPassword("")
     setLobbyname("")
   };

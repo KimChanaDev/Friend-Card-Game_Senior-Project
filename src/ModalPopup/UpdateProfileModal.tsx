@@ -56,7 +56,7 @@ const UpdateProfileModal: React.FC<UpdateProfileModalProps> = ({
         .then((snapshot) => {
           getDownloadURL(snapshot.ref)
             .then((url) => {
-              console.log(url);
+              // console.log(url);
               resolve(url); // ส่งค่า URL กลับด้วย resolve
             })
             .catch((error) => {
@@ -98,7 +98,7 @@ const UpdateProfileModal: React.FC<UpdateProfileModalProps> = ({
       onBackdropClick();
       return;
     } catch (error) {
-      console.log("Error to update profile");
+      // console.log("Error to update profile");
     }
   };
   const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -108,7 +108,7 @@ const UpdateProfileModal: React.FC<UpdateProfileModalProps> = ({
       setImageUpload(file);
       const reader = new FileReader();
         reader.onloadend = () => {
-            console.log(reader.result);
+            // console.log(reader.result);
             setImageDemo(reader.result)
             // Logs data:<type>;base64,wL2dvYWwgbW9yZ...
         };

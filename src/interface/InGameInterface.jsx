@@ -50,7 +50,7 @@ function InGameInterface()
       id : e
     }
   })
-  console.log(cardInfield)
+  // console.log(cardInfield)
   const cardinfiled_map = cardInfield.map((e)=>"..\\public\\SVG-cards-1.3\\" + dictCard[e+1])
   const friendCard_map = dictCard[friendCard+1]
   const trumpCard_map = suites[trumpCard]
@@ -70,11 +70,11 @@ function InGameInterface()
     function onFooEvent(value) {
       setFooEvents(value);
      
-      console.log(value)
-      console.log('msg rec')
+      // console.log(value)
+      // console.log('msg rec')
     }
     function moveEvent(res,id) {
-      console.log(currentCard)
+      // console.log(currentCard)
       if (res['isLegal']){
         setCardInHand((current) => current.filter((card) => card != res['id']))
       }

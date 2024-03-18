@@ -42,7 +42,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
   };
   const ChangePassClick = () => {
     playButton()
-    console.log(userStore.token)
+    // console.log(userStore.token)
     ChangePassword(userStore.token);
     setCounter(60)
   };
