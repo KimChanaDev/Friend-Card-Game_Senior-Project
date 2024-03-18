@@ -39,20 +39,20 @@ const Navbar: React.FC<NavbarProps> = ({ onProfileCilck ,userData}) => {
           )}
         </div>
       </div>
-      <div className="right">
-        <div className="setting">
-          <a href="#">
-            <img
-              src="/setting.png"
-              alt="User Profile"
-            />
-          </a>
-          <div className="setting-text">
-            <span>Setting </span>
-          </div>
-          {/* <BGM /> */}
-        </div>
-      </div>
+      {/*<div className="right">*/}
+      {/*  <div className="setting">*/}
+      {/*    <a href="#">*/}
+      {/*      <img*/}
+      {/*        src="/setting.png"*/}
+      {/*        alt="User Profile"*/}
+      {/*      />*/}
+      {/*    </a>*/}
+      {/*    <div className="setting-text">*/}
+      {/*      <span>Setting </span>*/}
+      {/*    </div>*/}
+      {/*    /!* <BGM /> *!/*/}
+      {/*  </div>*/}
+      {/*</div>*/}
     </div>
   );
 };

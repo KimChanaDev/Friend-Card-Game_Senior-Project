@@ -19,6 +19,7 @@ const Overlay = styled.div`
   align-items: center;
   justify-content: center;
   z-index: 1;
+  padding-top: 5rem;
 `
 
 const stopPropagation: MouseEventHandler<HTMLDivElement> = e => {
