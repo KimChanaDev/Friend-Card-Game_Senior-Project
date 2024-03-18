@@ -153,6 +153,7 @@ export const GameFinished = createAsyncThunk(
     async function (_, { getState, dispatch }) {
         return await socketClient.On(SOCKET_EVENT.GAME_FINISHED, (result) =>{
             dispatch({ type: 'socketGameListener/GameFinished', payload: { result: result } })
+            dispatch({ type: 'socketGameListener/SetFinishedGameState'})
             dispatch(UnreadyPlayersForNewGame())
         });
     }
@@ -264,6 +265,7 @@ const socketGameListenerSlice = createSlice({
             state.roundFinishedResult = null;
         },
         StartGame: (state, action) => { state.isGameStarted = action.payload.isGameStarted },
+        SetFinishedGameState: (state) => { state.isGameStarted = false },
         Auction: (state, action) => {
             const {playerId, isPass, auctionPoint, highestAuctionPlayerId, highestAuctionPoint} = action.payload.result
             if (state.playersAuctionDetail.some(player => player.playerId === playerId)){

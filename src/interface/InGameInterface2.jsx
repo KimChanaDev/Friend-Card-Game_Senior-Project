@@ -106,7 +106,6 @@ export default function InGameInterface2()
     const [isShowRoundFinishedAlert, setIsShowRoundFinishedAlert] = useState(false)
     const [isShowScoreCard, setIsShowScoreCard] = useState(false)
     const [isShowGameFinishedPopup, setIsShowGameFinishedPopup] = useState(false)
-
     const [disableTimer, setDisableTimer] = useState(false)
 
     // useEffect(() => {
@@ -246,7 +245,7 @@ export default function InGameInterface2()
         
         <div className='background-image' >
 
-            { isGameStarted ? <WaitingPlayer isOpen={false}/> : <WaitingPlayer isOpen={true} /> }
+            { isGameStarted || isShowGameFinishedPopup ? <WaitingPlayer isOpen={false}/> : <WaitingPlayer isOpen={true} /> }
             
 
             <div className="content">
