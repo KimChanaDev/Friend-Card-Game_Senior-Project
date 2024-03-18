@@ -7,8 +7,16 @@ export function ValidationMiddleware(type: ClassConstructor<object>): RequestHan
 	return (req: Request, res: Response, next: NextFunction): void => {
 		validate(plainToClass(type, req.body)).then((errors: ValidationError[]) => {
 			if (errors.length > 0) {
-				console.log(`Validation error on ${type.name}`, errors);
-				next(new BadRequestError());
+				console.error(`Validation error on ${type.name}: `, errors);
+				const errorTypes = ['minLength', 'maxLength', 'matches', 'isString', 'isInt', 'isEnum', 'isEmail'];
+				const errorMessages: string[] = [];
+				for (const errorType of errorTypes) {
+					const errorMessage: string | undefined = errors?.at(0)?.constraints?.[errorType];
+					if (errorMessage) {
+						errorMessages.push(errorMessage);
+					}
+				}
+				res.status(400).json({error: errorMessages})
 			} else {
 				next();
 			}
