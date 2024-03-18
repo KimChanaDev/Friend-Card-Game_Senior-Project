@@ -2,16 +2,13 @@
     cursor: pointer;
     display:flex;
     width: 70%;
-    background-color:#2A324D;
+    background-color:#162345;
     border-top-left-radius:3rem ;
     border-bottom-left-radius: 3rem;
     justify-content:flex-end;
     align-items: center;
     overflow: hidden;
-}
-.slide_bar>button .left_arrow{
-   padding-left: 13rem;
-    color: white;
+    /* box-shadow: 2px 0px 1rem black; */
 }
 .arrow {
     border: solid rgb(249, 249, 249);

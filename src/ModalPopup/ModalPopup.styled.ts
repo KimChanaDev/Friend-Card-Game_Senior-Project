@@ -20,10 +20,9 @@ export const DesktopModalContainer = styled(ModalContainer)`
   border-radius: 7px;
   box-shadow: 0 0 32px rgba(0, 0, 0, 0.5);
   padding: 40px;
-  /* width: 100%; */
   min-width: 450px;
   max-width: 1300px;
-  max-height: 800px;
+  max-height: 700px;
   overflow-y: auto;
   overflow-x: hidden;
   position: relative;
