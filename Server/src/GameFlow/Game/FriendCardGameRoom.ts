@@ -28,7 +28,7 @@ import {HandlerValidation} from "../../Handler/HandlerValidation.js";
 import {FriendCardGameRepository} from "../../Repository/FriendCardGameRepository.js";
 import {GamesStore} from "./GameStore.js";
 import {GUEST_CONFIG} from "../../Enum/GuestConfig.js";
-
+import {IEmojiCoolDown} from "../../Model/IEmojiCoolDown.js";
 export class FriendCardGameRoom extends GameRoom
 {
     protected winner?: FriendCardPlayer | undefined;
@@ -38,7 +38,7 @@ export class FriendCardGameRoom extends GameRoom
     private currentRoundNumber: number = 0;
     private isNoPlayerInRoom: boolean = false
     private readonly totalNumberRound: number = 4;
-
+    public emojiCoolDown: IEmojiCoolDown[] = [];
     public StartGameProcess(socket: Socket): void
     {
         this.InitRoundInGame();
@@ -162,6 +162,28 @@ export class FriendCardGameRoom extends GameRoom
                 createdAt: new Date(Date.now()),
             };
             FriendCardGameRepository.SaveMatchHistory(matchModel, false, player)
+        }
+    }
+    private UserHasEmojiCoolDown(UID: string): boolean{
+        return this.emojiCoolDown.some(a => a.playerId === UID)
+    }
+    private ClearEmojiCoolDown(UID: string): void {
+        if(this.UserHasEmojiCoolDown(UID)){
+            this.emojiCoolDown = this.emojiCoolDown.filter(a => a.playerId !== UID)
+        }
+    }
+    public SetEmojiCoolDown(UID: string): boolean{
+        if(!this.UserHasEmojiCoolDown(UID)) {
+            const newCoolDown: IEmojiCoolDown = {
+                playerId: UID,
+                coolDown: setTimeout(() => {
+                    this.ClearEmojiCoolDown(UID)
+                }, 2000)
+            }
+            this.emojiCoolDown.push(newCoolDown)
+            return true
+        }else{
+            return false
         }
     }
     public FinishGameProcess(): void

@@ -234,12 +234,18 @@ export class FriendCardGameHandler extends SocketHandler
         socket.on(SOCKET_GAME_EVENTS.EMOJI, (emoji: EMOJI, callback: (result: BaseResponseDTO) => void) => {
             try
             {
-                const response = {
-                    playerId: player.UID,
-                    emoji: emoji
+                const isCanSendEmoji: boolean = gameRoom.SetEmojiCoolDown(player.UID)
+                if(isCanSendEmoji){
+                    const response = {
+                        playerId: player.UID,
+                        emoji: emoji
+                    }
+                    SocketHandler.EmitToRoomAndSender(socket, SOCKET_GAME_EVENTS.EMOJI, gameRoom.id, response);
+                    callback({ success: true } as BaseResponseDTO);
                 }
-                SocketHandler.EmitToRoomAndSender(socket, SOCKET_GAME_EVENTS.EMOJI, gameRoom.id, response);
-                callback({ success: true } as BaseResponseDTO);
+                else{
+                    callback({ success: false, error: "Cool down!" } as BaseResponseDTO);
+                }
             }catch (error: any)
             {
                 callback({ success: false, error: error?.message } as BaseResponseDTO);
