@@ -61,8 +61,8 @@ const CreateGameModal: React.FC<CreateGameModalProps> = ({
         removeCookie(COOKIE.name);
         onBackdropClick();
       }else{
-        console.error("Create room failed: ", error)
-        alert(`Create room failed: ${error}`)
+        console.error("Create room failed: ", JSON.stringify(error?.response?.data?.error))
+        alert(`Create room failed: ${JSON.stringify(error?.response?.data?.error)}`)
       }
     }
     // console.log(lobbyname,password,userStore)

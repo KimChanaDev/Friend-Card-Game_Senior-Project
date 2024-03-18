@@ -139,20 +139,22 @@ function Mainmanu({ setCookie, removeCookie }) {
     dispatch(Login(userInfo));
     setCookie(COOKIE.name, userInfo.token, { path: "/" ,maxAge:86400});
   }
-  const onLoginRequest: LoginFunction = async ({ password, login }) => {
-    try {
-      playButton();
-      onBackdropClick();
-
-      const responseData: LoginApiResponse = await PostSignIn(login,password);
-      // console.log(responseData);
-      SaveUserData(responseData.response.data);
-    } catch (error) {
-      onBackdropClick();
-      console.error("Login failed:", error);
-      alert("Login failed:");
-    }
-    // console.log("Login Status => ",isUserLogin)
+  const onLoginRequest: LoginFunction = async ({ password, login }): Promise<void> => {
+    return new Promise(async (resolve, reject) => {
+      try {
+        playButton();
+        const responseData: LoginApiResponse = await PostSignIn(login,password);
+        // console.log(responseData);
+        SaveUserData(responseData.response.data);
+        onBackdropClick();
+        resolve()
+      } catch (error: any) {
+        console.error("Login failed: ", JSON.stringify(error?.response?.data?.error))
+        alert(`Login failed: ${JSON.stringify(error?.response?.data?.error)}`)
+        reject()
+      }
+      // console.log("Login Status => ",isUserLogin)
+    })
   };
   const onSignUpRequest: SignUpFunction = async ({
     password,
@@ -160,19 +162,22 @@ function Mainmanu({ setCookie, removeCookie }) {
     email,
     con_password,
     image,
-  }) => {
-    try {
-      playButton();
-      onBackdropClick();
-      const responseData: LoginApiResponse = await PostSignUp(username,password,email,con_password,image);
-
-      // setUserData(responseData.response.data)
-      SaveUserData(responseData.response.data);
-    } catch (error) {
-      onBackdropClick();
-      console.error("register failed:", error);
-      alert("register failed:");
-    }
+  }): Promise<void> => {
+    return new Promise(async (resolve, reject) => {
+      try {
+        playButton();
+        const responseData: LoginApiResponse = await PostSignUp(username,password,email,con_password,image);
+        // setUserData(responseData.response.data)
+        SaveUserData(responseData.response.data);
+        onBackdropClick();
+        resolve()
+      } catch (error: any) {
+        // onBackdropClick();
+        console.error("Register failed: ", JSON.stringify(error?.response?.data?.error))
+        alert(`Register failed: ${JSON.stringify(error?.response?.data?.error)}`)
+        reject()
+      }
+    })
   };
   const userLogout = () => {
     // console.log("Logout");

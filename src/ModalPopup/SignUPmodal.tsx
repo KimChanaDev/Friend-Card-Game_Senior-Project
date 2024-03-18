@@ -30,10 +30,12 @@ const SignUpModal: React.FC<SignUpModalProps> =({isModalVisible,onBackdropClick,
     const [con_password, setConPassword] = useState('');
     const SignInRequest = () =>{
         onSignUpRequested({username: username, password: password,con_password:con_password,email:email,image:"https://firebasestorage.googleapis.com/v0/b/friendcardgame.appspot.com/o/default%2Fguestacc.png?alt=media&token=2fc964d2-741a-4295-9c8c-2505f66073da"})
-        setEmail('');
-        setUsername('');
-        setPassword('');
-        setConPassword('');
+            .then(()=> {
+                setEmail('');
+                setUsername('');
+                setPassword('');
+                setConPassword('');
+            })
     }
     return (<ModalRWD
         onBackdropClick={onBackdropClick}
@@ -42,7 +44,7 @@ const SignUpModal: React.FC<SignUpModalProps> =({isModalVisible,onBackdropClick,
         header2='Up'
         message=' '
         content = {
-            <>  
+            <>
                 <InputContainer>
                     <InputTitle>Username</InputTitle>
                     <InputWithIcon type="text"
@@ -56,25 +58,25 @@ const SignUpModal: React.FC<SignUpModalProps> =({isModalVisible,onBackdropClick,
                     <InputTitle>Email</InputTitle>
                     <InputWithIcon type="email"
                     value={email}
-                    onChange={(e) => setEmail(e.target.value)} 
+                    onChange={(e) => setEmail(e.target.value)}
                     icon={
                         <img src="/email.svg" alt="SignUpIcon" width = "24px"/>
                     }/>
                 </InputContainer>
                 <InputContainer>
                     <InputTitle>Password</InputTitle>
-                    <InputWithIcon type="password" 
+                    <InputWithIcon type="password"
                     value={password}
-                    onChange={(e) => setPassword(e.target.value)} 
+                    onChange={(e) => setPassword(e.target.value)}
                     icon={
                         <img src="/padlock.svg" alt="PasswordIcon" width = "24px"/>
                     }/>
                 </InputContainer>
                 <InputContainer>
                     <InputTitle>Confirm Password</InputTitle>
-                    <InputWithIcon type="password" 
+                    <InputWithIcon type="password"
                     value={con_password}
-                    onChange={(e) => setConPassword(e.target.value)} 
+                    onChange={(e) => setConPassword(e.target.value)}
                     icon={
                         <img src="/padlock.svg" alt="PasswordIcon" width = "24px"/>
                     }/>

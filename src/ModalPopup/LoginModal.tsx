@@ -25,8 +25,10 @@ const LoginModal: React.FC<LoginModalProps> =({isModalVisible,onBackdropClick,sw
     const [password, setPassword] = useState('');
     const SignInRequest = () =>{
         onLoginRequested({login: login, password: password})
-        setLogin('');
-        setPassword('');
+            .then(() => {
+                setLogin('');
+                setPassword('');
+            })
     }
     return (<ModalRWD
         onBackdropClick={onBackdropClick}
