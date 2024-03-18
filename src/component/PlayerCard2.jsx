@@ -48,8 +48,8 @@ export default function  PlayerCard2({ name, isInLobby, isLeft, isBidding, isMax
 
   /// Show Emoji
   useEffect(() => {
-    playEmoji()
     if (emojiDetail && emojiDetail.some(player => player.playerId === userId) && isShowEmojiReceived === false ) {
+      playEmoji()
       setIsShowEmojiReceived(true);
       setTimeout(() => {
         setIsShowEmojiReceived(false);
