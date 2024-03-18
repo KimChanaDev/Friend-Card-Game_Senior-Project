@@ -7,10 +7,14 @@ import { DisconnectFromSocket } from "../store/SocketSlice.jsx";
 import {gameSlice, ResetPlayersInGame, SetIsJoinGuestMode} from "../store/GameSlice.jsx";
 import { ResetAllListenerState } from "../store/SocketGameListenersSlice.jsx";
 import { ResetAllEmitterState } from "../store/SocketGameEmittersSlice.jsx";
+import Vfx from "../components/Vfx.jsx";
+
 export default function SummaryScore({
   isShowButton,
   setIsShowGameFinishedPopup,
 }) {
+  const { playButton } = Vfx()
+
   const roundFinishedResult =
     useSelector(
       (state) => state.socketGameListenersStore.roundFinishedResult
@@ -46,6 +50,7 @@ export default function SummaryScore({
       : "";
   }
   function HandleBackToMenu() {
+    playButton()
     dispatch(DisconnectFromSocket());
     dispatch(ResetPlayersInGame());
     if (isJoinGuestMode) dispatch(SetIsJoinGuestMode({isGuest: false}))
@@ -54,6 +59,7 @@ export default function SummaryScore({
     dispatch(SetPage({ pageState: PAGE_STATE.MENU }));
   }
   function HandleStayThisLobby() {
+    playButton()
     dispatch(ResetAllEmitterState());
     dispatch(ResetAllListenerState());
     setIsShowGameFinishedPopup(false);

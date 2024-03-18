@@ -41,6 +41,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
     setIsUpdateProfileVisible(false);
   };
   const ChangePassClick = () => {
+    playButton()
     console.log(userStore.token)
     ChangePassword(userStore.token);
     setCounter(60)
