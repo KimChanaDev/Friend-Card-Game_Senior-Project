@@ -29,6 +29,8 @@ import GUEST_CONFIG from "../enum/GuestConfigEnum.jsx";
 // import { ChangeBGM } from '../store/BGMSlice.jsx';
 import { ChangeBGM } from '../store/UserSlice.tsx';
 import Vfx from '../components/Vfx.jsx';
+import HowtoPlayModal from "../ModalPopup/HowToPlayModal.tsx";
+import zIndex from '@mui/material/styles/zIndex';
 
 export default function InGameInterface2()
 {
@@ -107,7 +109,10 @@ export default function InGameInterface2()
     const [isShowScoreCard, setIsShowScoreCard] = useState(false)
     const [isShowGameFinishedPopup, setIsShowGameFinishedPopup] = useState(false)
     const [disableTimer, setDisableTimer] = useState(false)
-
+    const [isHowtoPlayVisible, setHowtoPlayVisible] = useState(false)
+    const onBackdropClick = () => {
+        setHowtoPlayVisible(false)
+      };
     // useEffect(() => {
     //     if (isAfterMainCardSelected) { 
     //         dispatch(ChangeBGM("InGame"))
@@ -398,15 +403,11 @@ export default function InGameInterface2()
                                 // zIndex: 10000,
                             }}/>
                             ) }
-                             {/* {cardInFiledMap.map((e, i)=>
-                            <div className='shadowtest' key={i}>
-                                <img  src={e.src} alt=""  className='cardOnTable' style={{ border: getBorderColor(e.id.order) }} />
-                                <div className='borderShadow'></div>
-                            </div>
-                            ) } */}
                     </section>
                 }
                 < SlideBar />
+                <HowtoPlayModal onBackdropClick={onBackdropClick}
+          isModalVisible={isHowtoPlayVisible} ></HowtoPlayModal>
             </div>
         </div>
     )

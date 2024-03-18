@@ -25,16 +25,11 @@ const BaseModalWrapper: React.FC<Props> = ({content,onBackdropClick,isModalVisib
     }
 
     return (<Modal onBackdropClick={onBackdropClick}> 
-        <ContainerComponent>
-            {/* <CloseButtonComponent onClick={onBackdropClick}> */}
-                {/* <CloseSign /> */}
-            {/* </CloseButtonComponent> */}
+        <ContainerComponent >
             <span>
                 <Header1> {header1} </Header1>
                 <Header2> {header2} </Header2>
             </span>
-            
-            
             {message && <Message> {message} </Message>}
             {content}
         </ContainerComponent>

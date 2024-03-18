@@ -9,13 +9,11 @@ const ModalRWD: React.FC<ModalRWDProps> = (props) => {
       {
         matches => matches ? (
           <BaseModalWrapper
-            // CloseButtonComponent={DesktopCloseButton}
             ContainerComponent={DesktopModalContainer}
             {...props}
           />
         ) : (
           <BaseModalWrapper 
-          // CloseButtonComponent={MobileCloseButton}
           ContainerComponent={MobileModalContainer}
           {...props}
           />
