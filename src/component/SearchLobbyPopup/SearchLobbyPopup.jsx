@@ -25,7 +25,7 @@ export default function SearchLobbyPopUp({CloseSearchLobbyPopup}) {
             dispatch(SetJoinRoomDetail(joinRoomDetail))
             CloseSearchLobbyPopup()
         }catch (e) {
-            console.log("Join room failed: ", e)
+            // console.log("Join room failed: ", e)
             alert(`Join room failed: ${e}`)
         }
     }

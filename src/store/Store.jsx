@@ -26,7 +26,7 @@ export function GetStores(){
             (state) => {return state},
             //     (state) => {return state.gameStore},
             (stores) => {
-                console.log('Memoized store selector');
+                // console.log('Memoized store selector');
                 return {stores}
             })
     )

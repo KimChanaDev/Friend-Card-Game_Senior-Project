@@ -4,14 +4,14 @@ import axios from 'axios'
 function Task({ token }) {
     const [tasks, setTasks] = useState([])
     const fetchData = async (token) => {
-        console.log(token)
+        // console.log(token)
         const response = await axios.get('http://localhost:3000/users/tasks', {
             headers: {
                 'Authorization': `Bearer ${token}`
             }
         })
         setTasks(response.data.tasks)
-        console.log(response.data)
+        // console.log(response.data)
     }
     useEffect(() => {
         if (token) {
@@ -20,7 +20,7 @@ function Task({ token }) {
     }, [])
 
     useEffect(() => {
-        console.log(tasks)
+        // console.log(tasks)
     }, [tasks])
 
     return (

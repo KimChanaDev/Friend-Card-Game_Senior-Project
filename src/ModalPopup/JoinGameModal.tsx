@@ -47,9 +47,9 @@ const JoinGameModal: React.FC<JoinGameModalProps> = ({
   const [password, setPassword] = useState("");
   
   const JoinRequest = () => {
-    console.log("Token : ", userStore.token);
-    console.log("gameID : ", matchData?.id);
-    console.log("Password : ", password);
+    // console.log("Token : ", userStore.token);
+    // console.log("gameID : ", matchData?.id);
+    // console.log("Password : ", password);
     dispatch(
       ConnectToSocket({
         token: userStore.token,
