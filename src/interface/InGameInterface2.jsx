@@ -198,7 +198,7 @@ export default function InGameInterface2()
 
     /// show trick finish alert on time limit
     useEffect(() => {
-        console.log('test')
+        // console.log('test')
         if(trickFinishedResult){
             setDisableTimer(true)
             setIsWaitingDelayLastCard(true)
@@ -235,7 +235,7 @@ export default function InGameInterface2()
         return playersAuctionDetail.filter(a => a.playerId === thisPlayerId)?.at(0)?.isPass ?? false
     }
     function getBorderColor(orderStyled){
-        console.log("Oreder ",orderStyled)
+        // console.log("Oreder ",orderStyled)
         return orderStyled === 0 ? '1px solid #67a8e4' : orderStyled === 1 ? '1px solid #7F27FF' : orderStyled === 2 ? '1px solid #eb9dee' :orderStyled === 3 ? '1px solid #f3e962' : '1px solid black';    
     }
     function getShadowColor (orderStyled){

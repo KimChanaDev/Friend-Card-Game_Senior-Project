@@ -2,7 +2,7 @@ import axios from "axios";
 import { serverPort } from "../../config/server-config.jsx";
 
 export async function PostSignIn(username, password) {
-  console.log("sent to " + serverPort);
+  // console.log("sent to " + serverPort);
   const response = await axios.post(`${serverPort}/userdata/login`, {
     username: username,
     password: password,
@@ -11,7 +11,7 @@ export async function PostSignIn(username, password) {
 }
 
 export async function PostSignUp(username, password, email, con_password, img) {
-  console.log("sent to " + serverPort);
+  // console.log("sent to " + serverPort);
   const response = await axios.post(`${serverPort}/userdata/register`, {
     username: username,
     password: password,
@@ -56,7 +56,7 @@ export async function PostCreateRoom(token, lobbyName, password) {
 }
 
 export async function UpdateData(token, newData) {
-  console.log("In UpdateData",newData)
+  // console.log("In UpdateData",newData)
   const response = await axios.patch(`${serverPort}/userdata/profile`, newData, {
     headers: {
       authorization: token,
@@ -81,7 +81,7 @@ export async function GetHistory(token) {
       authorization: token,
     },
   });
-  console.log(response.data)
+  // console.log(response.data)
   return response.data;
 }
 
@@ -91,6 +91,6 @@ export async function ChangePassword(token) {
       authorization: token,
     },
   });
-  console.log(response.data)
+  // console.log(response.data)
   return response.data
 }

@@ -25,7 +25,7 @@ export default function CreateLobbyPopUp({CloseCreateLobbyPopup}) {
             dispatch(SetJoinRoomDetail(joinRoomDetail))
             CloseCreateLobbyPopup()
         }catch (e){
-            console.log("Create room failed: ", e)
+            // console.log("Create room failed: ", e)
             alert(`Create room failed: ${e}`)
         }
     }

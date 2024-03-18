@@ -54,7 +54,7 @@ function Mainmanu({ setCookie, removeCookie }) {
         toggleHowtoPlay()
         break;
       default:
-        console.log(`Error`);
+        // console.log(`Error`);
     }
     playButton()
   };
@@ -135,7 +135,7 @@ function Mainmanu({ setCookie, removeCookie }) {
       token: user?.jwt,
       imagePath: user?.imagePath,
     };
-    console.log("Info", userInfo);
+    // console.log("Info", userInfo);
     dispatch(Login(userInfo));
     setCookie(COOKIE.name, userInfo.token, { path: "/" ,maxAge:86400});
   }
@@ -145,7 +145,7 @@ function Mainmanu({ setCookie, removeCookie }) {
       onBackdropClick();
 
       const responseData: LoginApiResponse = await PostSignIn(login,password);
-      console.log(responseData);
+      // console.log(responseData);
       SaveUserData(responseData.response.data);
     } catch (error) {
       onBackdropClick();
@@ -175,7 +175,7 @@ function Mainmanu({ setCookie, removeCookie }) {
     }
   };
   const userLogout = () => {
-    console.log("Logout");
+    // console.log("Logout");
     playButton();
     dispatch(Logout());
     removeCookie(COOKIE.name);

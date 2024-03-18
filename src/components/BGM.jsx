@@ -1,5 +1,5 @@
 import { useDispatch, useSelector } from "react-redux"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { ChangeVolume } from '../store/UserSlice.tsx';
 import { Slider } from '@mui/material';
 import { Volume1, Volume2, VolumeX } from 'react-feather';
@@ -13,73 +13,66 @@ const BGM = () => {
 
     const loop = true
     const interrupt = true
+    const soundEnabled = true
+    const menuSongs = ["Honeydew Bark.mp3", "Honeydew Cabin.mp3", "Honeydew Snow.mp3"]
 
     const [prevVolume, setPrevVolume] = useState(0.5)
     const [displayName, setDisplayName] = useState("")
+    const [startMenuBGM, setStartMenuBGM] = useState(false)
 
     const stopAllSong = () => {
-        return new Promise((resolve) => {
-            console.log("Stop all song")
-            stopMenu1()
-            stopMenu2()
-            stopMenu3()
-            stopInGameIntro()
-            stopInGame()
-            resolve()
-        })
+        stopMenu1()
+        stopMenu2()
+        stopMenu3()
+        stopInGameIntro()
+        stopInGame()
     }
 
-    const playMenuBGM = async (name) => {
-        console.log(name)
-        setTimeout(() => {
-            stopAllSong()
-            console.log("Randomly choose song")
-            const randomSelector = Math.floor(Math.random() * 3) + 1
-            switch (randomSelector){
-                case 1:
-                    console.log("Playing Honeydew Bark.mp3")
-                    setDisplayName("Honeydew Bark.mp3")
-                    playMenu1()
-                    break;
-                case 2:
-                    console.log("Playing Honeydew Cabin.mp3")
-                    setDisplayName("Honeydew Cabin.mp3")
-                    playMenu2()
-                    break;
-                case 3:
-                    console.log("Playing Honeydew Snow.mp3")
-                    setDisplayName("Honeydew Snow.mp3")
-                    playMenu3()
-                    break;
-                default:
-                    console.log("Unknow song")
-                    break;
-            }
-        }, 1000)
-    }
-
-    const [playMenu1, { stop: stopMenu1, duration: duration1 }] = useSound("Honeydew Bark.mp3", { volume: BGMState.volume, interrupt, onend: () => playMenuBGM("1") })
-    const [playMenu2, { stop: stopMenu2, duration: duration2 }] = useSound("Honeydew Cabin.mp3", { volume: BGMState.volume, interrupt, onend: () => playMenuBGM("2") })
-    const [playMenu3, { stop: stopMenu3, duration: duration3 }] = useSound("Honeydew Snow.mp3", { volume: BGMState.volume, interrupt, onend: () => playMenuBGM("3") })
+    const [playMenu1, { stop: stopMenu1, duration: duration1 }] = useSound(menuSongs[0], { volume: BGMState.volume, interrupt, soundEnabled, onend: () => { setTimeout(() => { setDisplayName(menuSongs[1]) }, 1000) } })
+    const [playMenu2, { stop: stopMenu2, duration: duration2 }] = useSound(menuSongs[1], { volume: BGMState.volume, interrupt, soundEnabled, onend: () => { setTimeout(() => { setDisplayName(menuSongs[2]) }, 1000) } })
+    const [playMenu3, { stop: stopMenu3, duration: duration3 }] = useSound(menuSongs[2], { volume: BGMState.volume, interrupt, soundEnabled, onend: () => { setTimeout(() => { setDisplayName(menuSongs[0]) }, 1000) } })
     const [playInGameIntro, { stop: stopInGameIntro, duration: duration4 }] = useSound("Shuffling.mp3", { volume: BGMState.volume / 4, interrupt, loop })
     const [playInGame, { stop: stopInGame, sound: soundInGame, duration: duration5 }] = useSound("Honeydew Hideaway.mp3", { volume: BGMState.volume, interrupt, loop })
 
     useEffect(() => {
-        const playSongs = async () => {
+        const playSongs = () => {
             if (BGMState.song === "Menu" && duration1 && duration2 && duration3) {
-                await playMenuBGM("First")
+                setStartMenuBGM(true)
             } else if (BGMState.song === "InGameIntro" && duration4) {
-                await stopAllSong()
+                stopAllSong()
+                setStartMenuBGM(false)
                 setDisplayName("Shuffling.mp3")
                 playInGameIntro()
             } else if (BGMState.song === "InGame" && duration5) {
-                await stopAllSong()
+                stopAllSong()
+                setStartMenuBGM(false)
                 setDisplayName("Honeydew Hideaway.mp3")
                 playInGame()
             }
         }
         playSongs()
     }, [BGMState.song, duration1, duration2, duration3, duration4, duration5])
+
+    useEffect(() => {
+        if (startMenuBGM) {
+            setDisplayName(menuSongs[0])
+        }
+    }, [startMenuBGM])
+
+    useEffect(() => {
+        // console.log("Current displayName: " + displayName)
+        switch (displayName) {
+            case menuSongs[0]:
+                playMenu1()
+                break;
+            case menuSongs[1]:
+                playMenu2()
+                break;
+            case menuSongs[2]:
+                playMenu3()
+                break;
+        }
+    }, [displayName])
 
     const VolumeAdjust = () => {
         if (BGMState.volume == 0) {

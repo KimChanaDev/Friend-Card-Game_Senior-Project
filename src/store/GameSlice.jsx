@@ -86,7 +86,7 @@ export const gameSlice = createSlice({
             }
         },
         SetIsJoinGuestMode: (state, action) => {
-            console.log("isGuest: " + action.payload.isGuest)
+            // console.log("isGuest: " + action.payload.isGuest)
             state.isJoinGuestMode = action.payload.isGuest
         },
         UnreadyPlayersForNewGame: (state) => {

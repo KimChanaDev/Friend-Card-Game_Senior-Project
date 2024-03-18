@@ -88,7 +88,7 @@ export default function LobbyList({CloseLobbyList}){
             const rooms = await GetRooms(token)
             setAllRooms(rooms)
         }catch(error){
-            console.log("Fetch rooms failed: ", error)
+            // console.log("Fetch rooms failed: ", error)
         }
     }
     function OpenCreateLobbyPopup(){ setIsShowCreateLobbyPopup(true) }

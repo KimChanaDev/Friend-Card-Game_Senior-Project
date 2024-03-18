@@ -28,7 +28,7 @@ export default function AuthenticationPopup({CloseAuthenticationPopup, setCookie
             CloseAuthenticationPopup()
         }catch (e){
             alert("Sign in failed: " + e)
-            console.log("Sign in failed: " + e)
+            // console.log("Sign in failed: " + e)
         }
     }
     async function HandleSignUp(e){
@@ -39,7 +39,7 @@ export default function AuthenticationPopup({CloseAuthenticationPopup, setCookie
             CloseAuthenticationPopup()
         }catch (e){
             alert("Sign up failed: " + e)
-            console.log("Sign up failed: " + e)
+            // console.log("Sign up failed: " + e)
         }
     }
     function SaveUserData(user){

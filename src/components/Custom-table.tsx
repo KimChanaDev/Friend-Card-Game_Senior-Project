@@ -22,7 +22,7 @@ function CustomTable({ headers, data, onFilterIdChange }: Props) {
   const [isJoinVisible, setIsJoinVisible] = useState<boolean>(false);
   const [isCreateVisible, setIsCreateVisible] = useState<boolean>(false);
   const handleClick = (item: TableData) => {
-    console.log(item);
+    // console.log(item);
     setSelectGame(item)
     setIsCreateVisible(false)
     setIsJoinVisible(true)
@@ -81,7 +81,7 @@ function CustomTable({ headers, data, onFilterIdChange }: Props) {
 
   const handlePrevPage = () => {
     playButton();
-    console.log('test')
+    // console.log('test')
     setCurrentPage((prevPage) => (prevPage > 1 ? prevPage - 1 : prevPage));
   };
 

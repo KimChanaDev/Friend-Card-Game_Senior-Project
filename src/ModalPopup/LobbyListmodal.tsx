@@ -28,7 +28,7 @@ const LobbyModal: React.FC<LobbyModalProps> =({isModalVisible,onBackdropClick,us
         async function fetchRooms() {
           try {
             const rooms:TableData[] = await GetRooms(userData?.token);
-            console.log(rooms);
+            // console.log(rooms);
             setGames(rooms); 
           } catch (error: any) {
               if (error?.response?.status === 401) {
