@@ -176,9 +176,9 @@ export default function InGameInterface2()
                 playTrick();
                 const firstTimeout = setTimeout(() => {
                     setIsShowRoundFinishedAlert(false);
+                    setIsShowGameFinishedPopup(true);
                     setIsWaitingDelayLastCard(false);
                     setDisableTimer(false)
-                    setIsShowGameFinishedPopup(true);
                 }, GAME_DELAY_ENUM.ROUND_FINISHED_IN_SEC * 1000)
                 return () => {
                     clearTimeout(firstTimeout);
@@ -249,7 +249,7 @@ export default function InGameInterface2()
         
         <div className='background-image' >
 
-            { isGameStarted || isShowGameFinishedPopup ? <WaitingPlayer isOpen={false}/> : <WaitingPlayer isOpen={true} /> }
+            { (!isGameStarted && !isShowGameFinishedPopup && !isWaitingDelayLastCard) ? <WaitingPlayer isOpen={true}/> : <WaitingPlayer isOpen={false} /> }
             
 
             <div className="content">
