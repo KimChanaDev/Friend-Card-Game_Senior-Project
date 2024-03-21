@@ -36,7 +36,6 @@ const BGM = () => {
 
     useEffect(() => {
         const playSongs = () => {
-            console.log(BGMState.song)
             if (BGMState.song === "Menu" && duration1 && duration2 && duration3) {
                 setStartMenuBGM(true)
             } else if (BGMState.song === "InGameIntro" && duration4) {
