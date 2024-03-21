@@ -59,7 +59,7 @@ const LoginModal: React.FC<LoginModalProps> =({isModalVisible,onBackdropClick,sw
                 </InputContainer>
                 <ButtonContainer>
                     <Button onClick={SignInRequest}>Sign In</Button>
-                    <div onClick={switchToSignUpModal}>Forgot your password ?</div>
+                    <div onClick={switchToSignUpModal}>Don't have any account?</div>
                     <a onClick={switchToSignUpModal}>Create Account </a>
                 </ButtonContainer>
             </>

@@ -1,6 +1,7 @@
 import React, { MouseEventHandler } from 'react'
 import ReactDOM from "react-dom";
 import styled from 'styled-components'
+import {Header1,Header2,Message,DesktopCloseButton,CloseSign} from "./ModalPopup.styled"
 
 interface ModalProps {
     onBackdropClick: () => void;

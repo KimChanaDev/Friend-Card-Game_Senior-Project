@@ -100,14 +100,14 @@ export const CloseSign = styled.div`
 
 
 const CloseButton = styled.div`
-  position: absolute;
+  position: sticky;
   width: ${CLOSE_BUTTON_SIZE}px;
   height: ${CLOSE_BUTTON_SIZE}px;
-  background-color: #c8c8c8;
+  /* background-color: #c8c8c8; */
   border-radius: 50%;
   cursor: pointer;
   transition: 0.2s ease-in-out;
-
+  
   & > * {
     opacity: 1;
   }
@@ -119,13 +119,13 @@ const CloseButton = styled.div`
 
 
 export const DesktopCloseButton = styled(CloseButton)`
-  top: -${CLOSE_BUTTON_SIZE / 2}px;
-  left: calc(100% - ${CLOSE_BUTTON_SIZE / 2}px);
+  top: 0%;
+  left: 100%;
 `;
 
 export const MobileCloseButton = styled(CloseButton)`
   top: -${CLOSE_BUTTON_SIZE / 2}px;
-  left: calc(100% - ${CLOSE_BUTTON_SIZE * 1.5 + 10}px);
+  left: calc(100% - ${CLOSE_BUTTON_SIZE * 1.5 + 20}px);
 `;
 
 export const ButtonContainer = styled.div`

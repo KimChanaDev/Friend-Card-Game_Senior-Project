@@ -28,7 +28,7 @@ const HowtoPlayModal: React.FC<HowtoPlayModalProps> = ({
     fetchData();
   }, [isModalVisible]);
   const images: string[] = Array.from(
-    { length: 14 },
+    { length: 16 },
     (_, index) => `/HowToPlay/htp${index + 1}.png`
   );
   return (
