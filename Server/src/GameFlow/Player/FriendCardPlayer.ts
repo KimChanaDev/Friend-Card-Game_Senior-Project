@@ -48,6 +48,11 @@ export class FriendCardPlayer extends Player
 			this.totalTimeInSec = null;
 		}
 	}
+	public ClearTimerKeepTimeRemaining(): void {
+		if (this.timer) {
+			clearTimeout(this.timer);
+		}
+	}
 	public GetTimeRemaining(): number | undefined {
 		if (this.startTime && this.timer && this.totalTimeInSec) {
 			const currentTime = Date.now();

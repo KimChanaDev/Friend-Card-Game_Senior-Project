@@ -1,4 +1,4 @@
-import {Socket} from "socket.io";
+import {Namespace, Socket} from "socket.io";
 import {CardId, ColorType, ShapeType} from "../../Enum/CardConstant.js";
 import {GAME_STATE} from "../../Enum/GameState.js";
 import {ActionsDTO} from "../../Model/DTO/ActionsDTO.js";
@@ -54,9 +54,9 @@ export class FriendCardGameRound
     }
     public StartRoundProcess(isFromNextRoundProcess: boolean
                              , initialPlayers : FriendCardPlayer[]
-                             , socket: Socket
-                             , AuctionTimeOutCallback: (socket: Socket) => void
-                             , BotAuctionCallback: (socket: Socket) => void
+                             , socket: Socket | Namespace
+                             , AuctionTimeOutCallback: (socket: Socket | Namespace) => void
+                             , BotAuctionCallback: (socket: Socket | Namespace) => void
     ): void {
         if (initialPlayers.length !== 4) throw new Error("Players are not equal to 4");
         this.playersInOrder = initialPlayers;
@@ -75,11 +75,11 @@ export class FriendCardGameRound
     }
     public AuctionProcess(auctionPass: boolean
                           , newAuctionPoint: number
-                          , socket: Socket
-                          , AuctionTimeOutCallback: (socket: Socket) => void
-                          , SelectMainCardTimeOutCallback: (socket: Socket) => void
-                          , BotAuctionCallback: (socket: Socket) => void
-                          , BotSelectMainCardCallback: (socket: Socket) => void
+                          , socket: Socket | Namespace
+                          , AuctionTimeOutCallback: (socket: Socket | Namespace) => void
+                          , SelectMainCardTimeOutCallback: (socket: Socket | Namespace) => void
+                          , BotAuctionCallback: (socket: Socket | Namespace) => void
+                          , BotSelectMainCardCallback: (socket: Socket | Namespace) => void
     ): void
     {
         this.GetCurrentPlayer().ClearTimer()
@@ -136,9 +136,9 @@ export class FriendCardGameRound
     public SetTrumpAndFriendProcess(trumpColor: ColorType
                                     , friendCard: CardId
                                     , player: FriendCardPlayer
-                                    , socket:Socket
-                                    , PlayCardTimeOutCallback: (socket: Socket) => void
-                                    , BotPlayCardCallback: (socket: Socket) => void
+                                    , socket:Socket | Namespace
+                                    , PlayCardTimeOutCallback: (socket: Socket | Namespace) => void
+                                    , BotPlayCardCallback: (socket: Socket | Namespace) => void
     ): void {
         this.trumpColor = trumpColor;
         this.friendCard = friendCard;
@@ -160,9 +160,9 @@ export class FriendCardGameRound
     
     public PlayCardProcess(cardId: CardId
                            , playerId: string
-                           , socket: Socket
-                           , PlayCardTimeOutCallback: (socket: Socket) => void
-                           , BotPlayCardCallback: (socket: Socket) => void
+                           , socket: Socket | Namespace
+                           , PlayCardTimeOutCallback: (socket: Socket | Namespace) => void
+                           , BotPlayCardCallback: (socket: Socket | Namespace) => void
     ): CardId {
         let removeCard: CardId;
         const leaderCardId: CardId | undefined  = this.trickCardMap.get(this.currentTrickNumber)?.detail.at(0)?.cardId;
@@ -218,9 +218,9 @@ export class FriendCardGameRound
     private TrickFinishedProcess(
         leaderColor: ColorType
         , currentTrickCardModel: TrickCardModel
-        , PlayCardTimeOutCallback: (socket: Socket) => void
-        , socket: Socket
-        , BotPlayCardCallback: (socket: Socket) => void
+        , PlayCardTimeOutCallback: (socket: Socket | Namespace) => void
+        , socket: Socket | Namespace
+        , BotPlayCardCallback: (socket: Socket | Namespace) => void
     ): void
     {
         this.GetCurrentPlayer().ClearTimer()

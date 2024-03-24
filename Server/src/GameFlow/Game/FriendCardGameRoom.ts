@@ -1,4 +1,4 @@
-import {Socket} from "socket.io";
+import {Namespace, Socket} from "socket.io";
 import {GameRoom} from "./GameRoom.js";
 import {FriendCardPlayer} from "../Player/FriendCardPlayer.js";
 import {FriendCardGameRound} from "./FriendCardGameRound.js";
@@ -79,7 +79,7 @@ export class FriendCardGameRoom extends GameRoom
         this.GetAllPlayerAsArray().forEach(a => playerIds.push(a.UID));
         return playerIds;
     }
-    public NextRoundProcess(socket: Socket): void
+    public NextRoundProcess(socket: Socket | Namespace): void
     {
         this.currentRoundNumber++;
         this.GetCurrentRoundGame().StartRoundProcess(true
@@ -235,7 +235,7 @@ export class FriendCardGameRoom extends GameRoom
             }
         })
     }
-    public BotAuctionCallback(socket: Socket): void{
+    public BotAuctionCallback(socket: Socket | Namespace): void{
         if(!this.isNoPlayerInRoom){
             const cardInHand: CardId[] = this.GetCurrentRoundGame().GetCurrentPlayer().GetHandCard().GetInDeck()
             const cardsInHandAIFormat: number[] = FriendCardGameRoundLogic.GenerateCardIdsInHandAIFormat(cardInHand)
@@ -255,7 +255,7 @@ export class FriendCardGameRoom extends GameRoom
                 })
         }
     }
-    public BotSelectMainCardCallback(socket: Socket): void{
+    public BotSelectMainCardCallback(socket: Socket | Namespace): void{
         if(!this.isNoPlayerInRoom) {
             const cardInHand: CardId[] = this.GetCurrentRoundGame().GetCurrentPlayer().GetHandCard().GetInDeck()
             // console.log("cardInHand: " + cardInHand.toString())
@@ -293,7 +293,7 @@ export class FriendCardGameRoom extends GameRoom
                 })
         }
     }
-    public BotPlayCardCallback(socket: Socket): void{
+    public BotPlayCardCallback(socket: Socket | Namespace): void{
         if(!this.isNoPlayerInRoom) {
             const cardInHand: CardId[] = this.GetCurrentRoundGame().GetCurrentPlayer().GetHandCard().GetInDeck()
             const cardsInHandAIFormat: number[] = FriendCardGameRoundLogic.GenerateCardIdsInHandAIFormat(cardInHand)
@@ -383,7 +383,7 @@ export class FriendCardGameRoom extends GameRoom
         }
         return FriendCardGameRoundLogic.GenerateAllCardPlayedAsTrumpAIFormatBit(allCardPlayedAsTrump)
     }
-    public AuctionTimeOutCallback(socket: Socket): void{
+    public AuctionTimeOutCallback(socket: Socket | Namespace): void{
         if(!this.isNoPlayerInRoom){
             console.log("Auto auction")
             let auctionPass: boolean
@@ -399,7 +399,7 @@ export class FriendCardGameRoom extends GameRoom
             this.AuctionProcessThenEmitEvent(auctionPass, auctionPoint, player, socket)
         }
     }
-    public SelectMainCardTimeOutCallback(socket: Socket): void{
+    public SelectMainCardTimeOutCallback(socket: Socket | Namespace): void{
         if(!this.isNoPlayerInRoom){
             console.log("Auto Select Main Card")
             const player: FriendCardPlayer = this.GetCurrentRoundGame().GetCurrentPlayer()
@@ -408,7 +408,7 @@ export class FriendCardGameRoom extends GameRoom
             this.SelectMainCardThenEmitEvent(color, card, player, socket)
         }
     }
-    public PlayCardTimeOutCallback(socket: Socket): void{
+    public PlayCardTimeOutCallback(socket: Socket | Namespace): void{
         if(!this.isNoPlayerInRoom){
             console.log("Auto Play Card")
             const player: FriendCardPlayer = this.GetCurrentRoundGame().GetCurrentPlayer()
@@ -417,7 +417,7 @@ export class FriendCardGameRoom extends GameRoom
             this.PlayCardProcessThenEmitEvent(randomCard, player, socket)
         }
     }
-    private SelectMainCardThenEmitEvent(trumpColor: ColorType, friendCard: CardId, player: FriendCardPlayer, socket: Socket): void {
+    private SelectMainCardThenEmitEvent(trumpColor: ColorType, friendCard: CardId, player: FriendCardPlayer, socket: Socket | Namespace): void {
         try {
             HandlerValidation.GameAndRoundAndGameplayStarted(this);
             HandlerValidation.IsWinnerAuction(this, player);
@@ -443,7 +443,7 @@ export class FriendCardGameRoom extends GameRoom
             console.error("Error SelectMainCardThenEmitEvent method: " + error.toString())
         }
     }
-    private AuctionProcessThenEmitEvent(auctionPass: boolean, auctionPoint: number, player: FriendCardPlayer, socket: Socket): void {
+    private AuctionProcessThenEmitEvent(auctionPass: boolean, auctionPoint: number, player: FriendCardPlayer, socket: Socket | Namespace): void {
         try {
             HandlerValidation.GameAndRoundStarted(this);
             HandlerValidation.IsGamePlayNotStarted(this);
@@ -475,7 +475,7 @@ export class FriendCardGameRoom extends GameRoom
             console.error("Error AuctionProcessThenEmitEvent method: " + error.toString())
         }
     }
-    private PlayCardProcessThenEmitEvent(cardToPlay: CardId, player: FriendCardPlayer, socket: Socket): void {
+    private PlayCardProcessThenEmitEvent(cardToPlay: CardId, player: FriendCardPlayer, socket: Socket | Namespace): void {
         try
         {
             HandlerValidation.AlreadySetTrumpAndFriend(this);
@@ -525,7 +525,7 @@ export class FriendCardGameRoom extends GameRoom
             console.error("Error PlayCardProcessThenEmitEvent method: " + error.toString())
         }
     }
-    private EmitToRoomAndSender(socket: Socket, event: SOCKET_EVENT, gameId: string, ...args: any[]): void
+    private EmitToRoomAndSender(socket: Socket | Namespace, event: SOCKET_EVENT, gameId: string, ...args: any[]): void
     {
         socket.to(gameId).emit(event, ...args);
         socket.emit(event, ...args);

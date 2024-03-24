@@ -24,6 +24,9 @@ import {UserDataModel} from "../Model/Entity/UserData.js";
 import {InvalidCredentialsError} from "../Error/ErrorException.js";
 import {GameFactory} from "../GameFlow/Game/GameFactory.js";
 import {DISCONNECT_REASON} from "../Enum/DisconnectReason.js";
+import {GAME_STATE} from "../Enum/GameState.js";
+import {FriendCardGameRoom} from "../GameFlow/Game/FriendCardGameRoom.js";
+import {FriendCardPlayer} from "../GameFlow/Player/FriendCardPlayer.js";
 
 export type SocketNextFunction = (err?: ExtendedError | undefined) => void;
 type UserGameMap = { [UID: string]: string };
@@ -221,6 +224,35 @@ export abstract class SocketHandler
 			}else{
 				this.EmitToRoomAndSender(socket, SOCKET_GAME_EVENTS.PLAYER_DISCONNECTED, gameRoom.id, response);
 				console.log(`UserId: ${player.UID} | Socket ${socket.id} disconnected - ${disconnectReason}`);
+			}
+			this.BotActionAfterDisconnect(gameRoom, player, socket)
+		}
+	}
+	private static BotActionAfterDisconnect(gameRoom: GameRoom, player: Player, socket: Socket | undefined): void{
+		if (gameRoom instanceof FriendCardGameRoom && player instanceof FriendCardPlayer && gameRoom.GetCurrentRoundGame()){
+			const playerTurn: boolean = gameRoom.GetCurrentRoundGame().IsPlayerTurn(player.UID)
+			if(playerTurn){
+				player.ClearTimerKeepTimeRemaining()
+				const auctionPhase: boolean = gameRoom.GetGameRoomState() === GAME_STATE.STARTED
+					&& gameRoom.GetCurrentRoundGame().GetRoundState() === GAME_STATE.STARTED
+					&& gameRoom.GetCurrentRoundGame().GetGameplayState() !== GAME_STATE.STARTED
+				const selectMainCardPhase: boolean = gameRoom.GetGameRoomState() === GAME_STATE.STARTED
+					&& gameRoom.GetCurrentRoundGame().GetRoundState() === GAME_STATE.STARTED
+					&& gameRoom.GetCurrentRoundGame().GetGameplayState() === GAME_STATE.STARTED
+					&& !gameRoom.GetCurrentRoundGame().IsTrumpAndFriendNotUndefined()
+				const isWinnerAuction: boolean = gameRoom.GetCurrentRoundGame().GetHighestAuctionPlayer()?.UID === player.UID
+				const playCardPhase: boolean = gameRoom.GetGameRoomState() === GAME_STATE.STARTED
+					&& gameRoom.GetCurrentRoundGame().GetRoundState() === GAME_STATE.STARTED
+					&& gameRoom.GetCurrentRoundGame().GetGameplayState() === GAME_STATE.STARTED
+					&& gameRoom.GetCurrentRoundGame().IsTrumpAndFriendNotUndefined()
+				const socketIo = socket ? socket : SocketHandler.io.of(GAME_TYPE.FRIENDCARDGAME)
+				if(auctionPhase){
+					gameRoom.BotAuctionCallback(socketIo)
+				}else if (selectMainCardPhase && isWinnerAuction){
+					gameRoom.BotSelectMainCardCallback(socketIo)
+				}else if (playCardPhase){
+					gameRoom.BotPlayCardCallback(socketIo)
+				}
 			}
 		}
 	}
