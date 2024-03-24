@@ -197,7 +197,7 @@ export default function  PlayerCard2({ name, isInLobby, isLeft, isBidding, isMax
         {userId === currentTurnPlayerId && !disableTimer &&
           <div className='timer' style={timerPosition}>
               {/* <p style={{order:isTop?2:1}}>TIMER</p> */}
-              <p style={{order:isTop?1:2}} className='timer_value'>{playerTimeoutInStore ? GenerateTimer(playerTimeoutInStore) : "Timeout"}</p>
+              <p style={{order:isTop?1:2}} className='timer_value'>{playerTimeoutInStore ? GenerateTimer(playerTimeoutInStore) : "0"}</p>
           </div>
         }
 
