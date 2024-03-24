@@ -12,6 +12,7 @@ function BidCard() {
     const highestAuctionPoint = useSelector(state => state.socketGameListenersStore.highestAuctionPoint)
 
     function HandleBidClick (bidValue) {
+        playButton()
         setSelectedBid(bidValue);
     }
     function HandleConfirmClick () {
