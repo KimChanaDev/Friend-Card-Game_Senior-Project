@@ -5,6 +5,7 @@ import { Slider } from '@mui/material';
 import { Volume1, Volume2, VolumeX } from 'react-feather';
 import useSound from 'use-sound'
 
+import './BGM.css'
 import './MovingText.css'
 
 const BGM = () => {
@@ -14,7 +15,7 @@ const BGM = () => {
     const loop = true
     const interrupt = true
     const soundEnabled = true
-    const menuSongs = ["Honeydew Bark.mp3", "Honeydew Cabin.mp3", "Honeydew Snow.mp3"]
+    const menuSongs = ["Ox Quiz.mp3", "Honeydew Cabin.mp3", "Honeydew Snow.mp3"]
 
     const [prevVolume, setPrevVolume] = useState(0.5)
     const [displayName, setDisplayName] = useState("")
@@ -24,7 +25,7 @@ const BGM = () => {
     const [playMenu2, { stop: stopMenu2, duration: duration2 }] = useSound(menuSongs[1], { volume: BGMState.volume, interrupt, soundEnabled, onend: () => { setTimeout(() => { setDisplayName(menuSongs[2]) }, 1000) } })
     const [playMenu3, { stop: stopMenu3, duration: duration3 }] = useSound(menuSongs[2], { volume: BGMState.volume, interrupt, soundEnabled, onend: () => { setTimeout(() => { setDisplayName(menuSongs[0]) }, 1000) } })
     const [playInGameIntro, { stop: stopInGameIntro, duration: duration4 }] = useSound("Shuffling.mp3", { volume: BGMState.volume / 4, interrupt, loop })
-    const [playInGame, { stop: stopInGame, sound: soundInGame, duration: duration5 }] = useSound("Honeydew Hideaway.mp3", { volume: BGMState.volume, interrupt, loop })
+    const [playInGame, { stop: stopInGame, sound: soundInGame, duration: duration5 }] = useSound("Monochromatic Life.mp3", { volume: BGMState.volume / 4, interrupt, loop })
 
     const stopAllSong = () => {
         stopMenu1()
@@ -89,7 +90,7 @@ const BGM = () => {
     }
 
     return (
-        <div className="volume-and-text" style={{ marginLeft: '5px' }}>
+        <div className="volume-and-text">
             {BGMState.volume === 0 ? (
                 <VolumeX onClick={VolumeAdjust} />
             ) : BGMState.volume <= 0.25 ? (
@@ -97,15 +98,16 @@ const BGM = () => {
             ) : (
                 <Volume2 onClick={VolumeAdjust} />
             )}
-            <p className="moving-text">Now playing: <span className="song-title">{displayName}</span></p>
             <Slider
                 size="small"
                 value={BGMState.volume}
                 max={0.5}
                 step={0.01}
                 onChange={handleChange}
-                style={{ width: '5%', marginLeft: '5px' }}
+                style={{ width: '5%', marginLeft: '10px' }}
+                className="slider-volume"
             />
+            <p className="moving-text">Now playing: <span className="song-title">{displayName}</span></p>
         </div>
     )
 }

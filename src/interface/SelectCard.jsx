@@ -4,7 +4,10 @@ import {useDispatch, useSelector} from "react-redux";
 import {EmitSelectMainCard} from "../store/SocketGameEmittersSlice.jsx";
 import SOCKET_STATUS from "../enum/SocketStatusEnum.jsx";
 
+import Vfx from '../components/Vfx.jsx';
+
 function SelectCard() {
+    const { playButton } = Vfx()
 
     const cardValues = ['2', '3', '4', '5', '6', '7', '8', '9', 'J', 'Q', 'K', 'A'];
     const [friendCardSelected, setFriendCardSelected] = useState("")
@@ -24,12 +27,15 @@ function SelectCard() {
         ))
     }
     function HandleCardValueClicked(suit, value){
+        playButton()
         setFriendCardSelected(value+suit)
     }
     function HandleSuitClicked(suit){
+        playButton()
         setTrumpSelected(suit)
     }
     function HandleConfirm(){
+        playButton()
         dispatch(EmitSelectMainCard({
             trumpSuit: trumpSelected,
             friendCard: friendCardSelected

@@ -17,12 +17,12 @@
 
 @keyframes moveText {
     0% {
-        left: -100%;
+        right: -100%;
         /* Start off screen to the left */
     }
 
     100% {
-        left: 100%;
+        right: 100%;
         /* Move off screen to the right */
     }
 }
@@ -30,6 +30,11 @@
 .volume-and-text {
     display: flex;
     align-items: center;
+    /* margin-left: 5px; */
+    justify-content: right;
+    position: fixed;
+    width: 100%;
+    z-index: 10000;
 }
 
 .moving-text {
@@ -45,4 +50,13 @@
     font-weight: bold;
     color: #007bff;
     /* Adjust color as needed */
+}
+
+.icon-flip {
+    transform: rotate(180deg)
+}
+
+.slider-volume {
+    width: 5%;
+    margin: 0 10px 0 10px;
 }

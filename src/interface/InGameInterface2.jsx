@@ -33,7 +33,7 @@ import HowtoPlayModal from "../ModalPopup/HowToPlayModal.tsx";
 
 export default function InGameInterface2()
 {
-    const { playFlipCard, playTrick, playFriend } = Vfx();
+    const { playFlipCard, playTrick, playFriend, playInterface } = Vfx();
 
     const isJoinGuestMode = useSelector(state => state.gameStore.isJoinGuestMode);
     const userIdCookie = useSelector(state => state.userStore.userId)
@@ -245,6 +245,12 @@ export default function InGameInterface2()
     function getShadowColor (orderStyled){
         return orderStyled === 0 ? '0px 0px 1rem #67a8e4,inset 0 0 1.5rem #67a8e4' : orderStyled === 1 ? '0px 0px 1rem #7F27FF,inset 0 0 1rem #7F27FF' : orderStyled === 2 ? '0px 0px 1rem #eb9dee,inset 0 0 0.5rem #eb9dee' :orderStyled === 3 ? '0px 0px 1rem #f3e962,inset 0 0 0.5rem #f3e962' : '0 0 1rem #0000,inset 0 0 0.5rem #0000';
     }
+
+    const infoOpen = () => {
+        playInterface()
+        setHowtoPlayVisible(true)
+    }
+
     return (
         
         <div className='background-image' >
@@ -263,7 +269,12 @@ export default function InGameInterface2()
                     <LobbyInfo />
                     <FriendCard cardName={CARD_ID_FILE.cardIds[friendCard]}/>
                     <TrumpCard  cardName={CARD_ID_FILE.suitsOnly[trumpSuit]}/>
-                    <InfoSharpIcon style={{"cursor": "pointer"}} className='setting' color="primary" sx={{ fontSize: 50 }} onClick={() => setHowtoPlayVisible(true)}/>
+                    <InfoSharpIcon
+                        style={{"cursor": "pointer", zIndex: 10001, transform: 'translate3d(-20px, 30px, 0px)'}}
+                        className='setting' color="primary" sx={{ fontSize: 50 }}
+                        // onClick={() => setHowtoPlayVisible(true)}
+                        onClick={infoOpen}
+                    />
                     <HowtoPlayModal onBackdropClick={onBackdropClick} isModalVisible={isHowtoPlayVisible} ></HowtoPlayModal>
                     {
                         isSelectingCard && userId === highestAuctionPlayerId
