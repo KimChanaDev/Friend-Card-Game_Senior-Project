@@ -49,6 +49,7 @@ export default function WaitingPlayer({isOpen}){
     // }
 
     const inputBotLevelNumber = (inputBotLevelNumber)=>{
+        playButton()
         inputBotLevelNumber = parseInt(inputBotLevelNumber)
         if(inputBotLevelNumber !== BOT_LEVEL.EASY_BOT && inputBotLevelNumber !== BOT_LEVEL.MEDIUM_BOT && inputBotLevelNumber !== BOT_LEVEL.HARD_BOT){
             return
