@@ -56,14 +56,14 @@ const UpdateProfileModal: React.FC<UpdateProfileModalProps> = ({
         .then((snapshot) => {
           getDownloadURL(snapshot.ref)
             .then((url) => {
-              // console.log(url);
-              resolve(url); // ส่งค่า URL กลับด้วย resolve
+              resolve(url);
             })
             .catch((error) => {
-              reject(error); // ส่ง error กลับถ้าเกิดข้อผิดพลาดในการดึง URL
+              reject(error);
             });
         })
         .catch((error) => {
+          alert("Error : Image size must not exceed 15 MB")
           reject(error);
         });
     });
