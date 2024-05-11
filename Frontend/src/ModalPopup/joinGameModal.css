@@ -1,0 +1,55 @@
+.JoinText {
+    
+    
+    /* background-color: black; */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.JoinText span {
+    /* margin-top: 10px; */
+    color: darkblue;
+    font-size: 40px;
+    font-weight: 1000;
+}
+.JoinText p {
+    margin-top: 0px;
+    color: rgb(0, 0, 5);
+    font-size: 30px;
+    font-weight: 1000;
+}
+.JoinButton{
+    padding-top:30px;
+    display: flex;
+    width: 150%;
+    justify-content: space-evenly;
+}
+.JoinPassword{
+    margin-top: -40px;
+    width: 100%;
+}
+input[type="file"] {
+    display: none;
+}
+.profile-upload {
+    display: flex;
+    justify-content: center;
+    padding: 6px 12px;
+    cursor: pointer;
+}
+.profile-upload img {
+    /* width: 370px; */
+    width: 300px;
+    height: 300px;
+    border-radius: 100%;
+    overflow: hidden;
+    text-align: center;
+    object-fit: cover;
+    /* filter:grayscale(0.0); */
+    transition: 0.2s ease-in-out;
+    box-shadow: 0 0 1.5rem rgb(118, 185, 230);
+}
+.profile-upload img:hover {
+    box-shadow: 0 0 1rem rgb(3, 6, 8);
+    filter:opacity(0.8);
+}

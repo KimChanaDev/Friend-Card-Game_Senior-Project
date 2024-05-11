@@ -1,0 +1,67 @@
+/* section.mid>{
+    background: black;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+
+}
+section.mid>div.menu_border{
+    border: 1px solid #050357;
+    background: linear-gradient(180deg, rgba(233, 233, 233, 0.00) 0%, rgba(3, 0, 172, 0.25) 100%);
+    grid-column: 1/11; 
+    grid-row:1/9;
+    position: relative;
+     overflow: visible;
+    
+
+}
+
+section.mid>div.menu_border>button.add_bot_button{
+   
+    margin-inline-start: 13%;
+    margin-block-start: 9%;
+    height: 23%;
+    width: 23%;
+    left: 10%;
+}
+section.mid>div.menu_border>button.quit_button{
+
+    margin-inline-start: 23%;
+    height: 23%;
+    width: 23%;
+    left: 60%;
+}
+section.mid>div.menu_border>p{
+    color: #030303;
+    text-align: center;
+    margin-top: 2%;
+    font-size: 2rem;
+    font-style: normal;
+    font-weight: 900;
+    line-height: normal;
+}
+.button{
+    color: pink;
+} */
+.menu_border{
+    /* background-color: rgb(255, 255, 255) !important; */
+    background: linear-gradient(180deg, rgb(243, 243, 243) 0%, rgba(149, 186, 255, 0.712) 100%);
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%); 
+    width: 500px;
+    height: 200px;
+    border-radius: 20px;
+    background-color: rgb(31, 62, 88);
+    text-align:center;
+    font-size: 30px;
+    font-weight:700;
+    z-index: 10000;
+}
+.waiting-button{
+    /* background-color: blue; */
+    display: flex;
+    justify-content:space-evenly;
+    
+}

@@ -1,0 +1,32 @@
+.lobby_info {
+  position: fixed;
+  left: 0;
+  top: 0;
+  border-radius: 0px 0px 30px 0px;
+  border: 2px solid #162345;
+  width: 30%;
+  height: 10%;
+  min-height: 100px;
+  background-color: #162345;
+  /* color: white; */
+  padding-top: 10px;
+  overflow: hidden;
+}
+
+.lobby_info h1 {
+  /* margin-top: 10000px; */
+  /* width: 20px; */
+  color: white;
+  display: inline;
+  text-align: start;
+  margin-left: 10%;
+  font-size: 23px;
+  line-height: 40px;
+}
+
+.lobby_info p {
+  color: rgb(147, 225, 243);
+  display: inline;
+  margin-left: 10px;
+  font-size: 20px;
+}

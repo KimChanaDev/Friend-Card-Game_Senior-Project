@@ -1,0 +1,147 @@
+.Profile {
+  display: flex;
+  width: 750px;
+  height: 600px;
+  /* overflow: hidden; */
+}
+.UserInfo {
+  display: flex;
+  width: 400px;
+  justify-content: center;
+  flex-direction: column;
+  /* overflow-y:scroll; */
+}
+.History {
+  margin-top: -6%;
+  margin-right: -6%;
+  width: 600px;
+  height: 685px;
+  background-color: #081128;
+}
+.Profile-Img {
+  display: flex;
+  width: 370px;
+  height: 150px;
+  background-color: #f1ecec80;
+  border-radius: 90px;
+  margin-right: 40px;
+  box-shadow: 5px 5px 15px rgb(155, 172, 206);
+  transition: 0.3s ease-in-out;
+}
+.Profile-Img:hover {
+  filter: opacity(80%);
+}
+.Profile-Img img {
+  width: 150px;
+  height: 150px;
+  border-radius: 90px;
+  overflow: hidden;
+  text-align: center;
+  object-fit: cover;
+  
+  
+}
+.Info {
+  padding-top: 10%;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  width: 200px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  
+}
+
+.Info span {
+  padding-top: 5px;
+  margin-bottom: 10px;
+}
+.name {
+  width: 100;
+  color: #000;
+  font-family: Inter;
+  font-size: 25px;
+  font-style: normal;
+  font-weight: 700;
+  line-height: normal;
+
+
+}
+.uid {
+  color: #00000099;
+  font-family: Inter;
+  font-size: 15px;
+  font-style: normal;
+  font-weight: 700;
+  line-height: normal;
+}
+.User-Score{
+  box-shadow: 5px 5px 15px rgb(155, 172, 206);
+    margin-top: 15px;
+    display: flex;
+    width: 370px;
+    height: 380px;
+    background-color: #f1ecec80;
+    border-radius: 20px;
+    flex-direction: column;
+    text-align: center;
+    
+  }
+.ScoreBoard{
+  
+    display: inline-flex;
+    flex-direction: column;
+    text-align: start;
+    margin-top: 0px
+}
+.ScoreBoard img{
+    padding-top: 20px;
+  width:90px;
+  height: 70px;
+  overflow: hidden;
+  text-align: center;
+  object-fit: cover;
+}
+.ScoreBoard span {
+    
+ margin-left: 20px;
+ margin-right: 20px;
+ display: flex;
+ flex-direction: row;
+ align-items: center;
+}
+.ScoreBoard div{
+    padding-top: 20px;
+    display: flex;
+    width: 100%;
+    justify-content: space-between;
+}
+.ScoreBoard div p{
+    width: 50%;
+    text-align: center;
+    color: black;
+    font-weight: bolder;
+
+}
+.ScoreBoard div span {
+    display: flex;
+    color: #000;
+    font-weight: 500;
+    
+}
+.Win {
+    color: #FECE00 !important;
+
+}
+.User-Button {
+    margin-top: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.History-title{
+    margin-top: 15%;
+    color: white;
+    text-align: center;
+}
