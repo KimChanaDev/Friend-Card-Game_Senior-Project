@@ -1,0 +1,54 @@
+ol.bid_show_group li button{
+    font-size: large;
+    font-weight: bold;
+}
+
+li.bid_show_top_left{
+    grid-column: 2/4;
+    grid-row:3/5;
+    background-color: #bbb;
+    border-radius: 50%;
+    text-align: center;
+    padding-block-start: 1.2em;
+    background-color: #FFC7EA;
+}
+li.bid_show_top_right{
+    grid-column: 9/11;
+    grid-row:3/5;
+    background-color: #bbb;
+    border-radius: 50%;
+    text-align: center;
+    padding-block-start: 1.2em;
+    background-color: #FFC7EA;
+}
+
+li.bid_show_bot_right{
+    grid-column: 9/11;
+    grid-row:6/8;
+    background-color: #bbb;
+    border-radius: 50%;
+    text-align: center;
+    padding-block-start: 1.2em;
+    background-color: #FF6969;
+}
+
+li.bid_show_bot_left{
+    grid-column: 2/4;
+    grid-row:6/8;
+    background-color: #bbb;
+    border-radius: 50%;
+    text-align: center;
+    padding-block-start: 1.2em;
+    background-color:#FFC7EA;
+}
+
+ol.bid_show_group{
+    display:grid;
+    grid-template-columns: repeat(10, 10%);
+    grid-template-rows: repeat(10, 10%);
+    grid-column: 1/11;
+    grid-row:1/11;
+ 
+
+
+}

@@ -1,0 +1,86 @@
+.summary_table{
+    display: flex;
+   flex-direction: column;
+    
+}
+.popup-summary{
+  position: fixed;
+  z-index: 12000;
+  /* margin-top: 50%; */
+  /* margin-left: 50%; */
+  transform: translate(-50%, -50%); 
+  left: 50%;
+  top: 50%;
+  width: 90%;
+  height: 60%;
+  overflow: auto;
+  background: linear-gradient(0deg, #75A7E2 0%, rgba(255, 255, 255, 0.04) 50.99%, rgba(255, 255, 255, 0.00) 100%), #FFF;
+  border-radius: 10px;
+  display:flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+.table-summary{
+  width: 100%;
+  height: 100%;
+}
+.table-summary thead{
+  height: 20%;
+  background-color:#162345;
+  justify-content: center;
+  align-items: center;
+  font-size: 20px;
+}
+.table-topleft {
+  background-color: #ffffff;
+  width: 20%;
+  border: #ddc6c600;
+}
+.table-playername{
+  width: 20%;
+  color: rgb(18, 0, 177);
+  font-size: large;
+  font-weight: bold;
+  text-align: center;
+  background-color: #B7D4F6;
+}
+.table-summary-row{
+  text-align: center;
+  width: 20%;
+  font-size: large;
+  font-weight: bold;
+  text-align: center;
+}
+.summary-button-container{
+  /* background-color: black; */
+  width: 100%;
+  height: 15%;
+  display:flex;
+  justify-content:space-evenly;
+  align-items: center;
+}
+.summary-button-back{
+  width: 10%;
+  height: 60%;
+  border-radius: 8px;
+  background-color: #aa1a1a;
+  color:whitesmoke;
+  font-size: 15px;
+  font-weight: bold;
+}
+.summary-button-back:hover{
+  color: #fd9e9e;
+}
+.summary-button-close{
+  width: 10%;
+  height: 60%;
+  border-radius: 8px;
+  background-color: #162345;
+  color:whitesmoke;
+  font-size: 15px;
+  font-weight: bold;
+}
+.summary-button-close:hover{
+  color: #706ecc;
+}

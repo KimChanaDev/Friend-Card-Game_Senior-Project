@@ -1,0 +1,101 @@
+.game-menu {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+}
+.gamename {
+  /* padding-top: 10%; */
+  display: flex;
+  align-items: center;
+  flex-direction: column; /* จัดวางแนวตั้ง */
+}
+.game-name {
+  color: #2a324d;
+  text-align: center;
+  font-family: Inter;
+  font-size: 128px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+}
+
+.game-name-sub {
+  color: #2a324d;
+  text-align: center;
+  font-family: Inter;
+  font-size: 64px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+}
+
+.button-container {
+  display: flex;
+  flex-direction: column;
+  margin-top: 3vh; /* ปรับขนาดของ margin-top ตามความต้องการ */
+}
+
+.button-container button {
+  background: linear-gradient(
+    180deg,
+    #4a7ad7 99.99%,
+    rgba(100, 74, 255, 0) 100%
+  );
+  border-radius: 27px;
+  margin-bottom: 4vh; /* ปรับขนาดของ margin-bottom ตามความต้องการ */
+  min-width: 676px; /* ให้ขนาดของปุ่มมีขนาดต่ำสุดเท่ากับ 676px */
+  min-height: 93.558px; /* ให้ขนาดของปุ่มมีขนาดต่ำสุดเท่ากับ 93.558px */
+  flex-shrink: 0;
+  text-align: center;
+  font-family: Inter;
+  font-size: 32px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+  color: #ffffff;
+  cursor: pointer;
+  transition: border-color 0.25s;
+}
+.button-container button:hover {
+  border-color: #f5f5f5;
+}
+.button-container button:focus,
+.button-container button:focus-visible {
+  outline: #f5f5f5 auto 4px;
+}
+.button-container button:disabled {
+  opacity: 0.5; /* กำหนดค่า opacity เพื่อทำให้สีเป็นสีจาง */
+  cursor: not-allowed; /* เปลี่ยน cursor เมื่อปุ่มถูก disable */
+}
+
+@media (max-width: 916px) {
+  .button-container {
+    margin-top: 2vh; /* ปรับขนาดของ margin-top สำหรับขนาดหน้าจอเล็ก */
+  }
+  .game-name {
+    color: #2a324d;
+    text-align: center;
+    font-family: Inter;
+    font-size: 128px;
+    font-style: normal;
+    font-weight: 200;
+    line-height: normal;
+  }
+  .game-name-sub {
+    color: #2a324d;
+    text-align: center;
+    font-family: Inter;
+    font-size: 64px;
+    font-style: normal;
+    font-weight: 200;
+    line-height: normal;
+  }
+  .button-container {
+    display: flex;
+    flex-direction: column;
+    margin-top: 3vh; /* ปรับขนาดของ margin-top ตามความต้องการ */
+    /* height: 50px; */
+  }
+}
