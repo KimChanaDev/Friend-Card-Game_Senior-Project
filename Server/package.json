@@ -1,0 +1,42 @@
+{
+  "name": "friend-card-game-server",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "tsc": "tsc",
+    "build": "npm-run-all tsc copy:extras",
+    "copy:extras": "copyfiles -u 1 \"src/**/*.py\" \"src/**/*.pth\" dist",
+    "start": "node dist/server.js",
+    "gen-keys": "node dist/Configuration/Keys/GenerateKeyPair.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/express": "^4.17.17",
+    "@types/jsonwebtoken": "^9.0.2",
+    "@types/node": "^20.5.7",
+    "@types/uuid": "^9.0.8",
+    "nodemon": "^3.0.1",
+    "npm-run-all": "^4.1.5",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.2.2"
+  },
+  "dependencies": {
+    "axios": "^1.6.2",
+    "class-transformer": "^0.5.1",
+    "class-validator": "^0.14.0",
+    "copyfiles": "^2.4.1",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "firebase-admin": "^12.0.0",
+    "guid-typescript": "^1.0.9",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^7.5.0",
+    "socket.io": "^4.7.2"
+  }
+}
